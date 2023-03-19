@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FFmpeg Streaming Status</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    #status-indicator {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>FFmpeg Streaming Status</h1>
+  <div id="status-indicator"></div>
+  <div id="process-info"></div>
+  
+  <script>
+    const statusIndicator = document.getElementById('status-indicator');
+    const processInfo = document.getElementById('process-info');
+    const socket = io();
+    
+    socket.on('status', (isRunning) => {
+      if (isRunning) {
+        statusIndicator.style.backgroundColor = 'green';
+      } else {
+        statusIndicator.style.backgroundColor = 'red';
+      }
+    });
+    
+    socket.on('process-info', (info) => {
+      processInfo.textContent = info;
+    });
+  </script>
+
+</body>
+
+</html>
