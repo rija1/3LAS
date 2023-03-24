@@ -4,6 +4,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
+const pm2 = require('pm2')
 
 // const server = http.createServer(app);
 
@@ -27,6 +28,7 @@ function checkPm2ProcessStatus() {
     const processStatus = {};
 
     for (const processName of processNames) {
+
       // Check if process is present in list
       const isPresent = processList.some(line => line.includes(processName));
 
@@ -43,6 +45,9 @@ function checkPm2ProcessStatus() {
           isRunning = processInfo.includes('online');
           processStatus[processName] = isRunning;
           io.emit(`${processName}-status`, isRunning);
+
+          updateElapsedTime(processName);
+
         });
       } else {
         processStatus[processName] = false;
@@ -52,22 +57,46 @@ function checkPm2ProcessStatus() {
   });
 }
 
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/index.html');
-// });
+function updateElapsedTime(processName) {
+  
+  const startTimeCommand = `pm2 jlist | jq '.[] | select(.name == "${processName}") | .pm2_env.pm_uptime'`;
+  io.emit(`${processName}-time`, startTimeCommand); return;
+  exec(startTimeCommand, (err, stdout, stderr) => {
+    if (err) {
+      console.error(`Error: ${err}`);
+      return;
+    }
 
-// server.listen(PORT, () => {
-//   console.log(`Server listening on port ${PORT}`);
-// });
+    const startTime = parseFloat(stdout.trim()) * 1000;
+    const elapsed = Date.now() - startTime;
+    
+    io.emit(`${processName}-time`, formatTime("elapsed"));
+    
+  });
+}
+
+function formatTime(milliseconds) {
+  const totalSeconds = Math.floor(milliseconds / 1000);
+  const seconds = totalSeconds % 60;
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function processChecks() {
+  checkPm2ProcessStatus();
+  
+}
+
 
 http.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
   
   // Send initial status to clients
-  for (const processName of processNames) {
-    io.emit(`${processName}-status`, false);
-  }
+  // for (const processName of processNames) {
+  //   io.emit(`${processName}-status`, false);
+  // }
   
   // Send status updates every 1 seconds
-  setInterval(checkPm2ProcessStatus, 1000);
+  setInterval(processChecks, 1000);
 });
