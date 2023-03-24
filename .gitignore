@@ -6,8 +6,5 @@
 
 /server/src/node_modules
 
-/example/server/**
-!/example/server/**.js
-!/example/server/test.bat
-!/example/server/test.sh
-!/example/server/settings.json
+
+*.DS_Store
