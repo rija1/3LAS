@@ -1,40 +1,113 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>FFmpeg Streaming Status</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
-    #status-indicator {
+    .status-indicator {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       background-color: red;
+      display: inline-block;
+      margin: 5px;
     }
   </style>
 </head>
+
 <body>
   <h1>FFmpeg Streaming Status</h1>
-  <div id="status-indicator"></div>
-  <div id="process-info"></div>
-  
-  <script>
-    const statusIndicator = document.getElementById('status-indicator');
-    const processInfo = document.getElementById('process-info');
-    const socket = io();
-    
-    socket.on('status', (isRunning) => {
-      if (isRunning) {
-        statusIndicator.style.backgroundColor = 'green';
-      } else {
-        statusIndicator.style.backgroundColor = 'red';
-      }
-    });
-    
-    socket.on('process-info', (info) => {
-      processInfo.textContent = info;
-    });
-  </script>
+  <div id="status-container"></div>
 
+  <script>
+    const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
+    const statusContainer = document.getElementById('status-container');
+    const socket = io();
+
+    // Create status indicators for each process
+    processNames.forEach((processName) => {
+      const table = document.createElement('table');
+      table.style.marginBottom = '10px';
+      statusContainer.appendChild(table);
+
+      // Add table headers
+      const tableHeader = table.createTHead();
+      const headerRow = tableHeader.insertRow();
+      const headers = ['', 'Process', 'Elapsed Time', ''];
+      headers.forEach((headerText) => {
+        const headerCell = headerRow.insertCell();
+        headerCell.textContent = headerText;
+        headerCell.style.fontWeight = 'bold';
+      });
+
+      // Add table rows
+      const tableBody = table.createTBody();
+      const row = tableBody.insertRow();
+
+      // Add status indicator column
+      const statusIndicatorCell = row.insertCell();
+      statusIndicatorCell.style.verticalAlign = 'middle';
+      statusIndicatorCell.style.textAlign = 'center';
+      const statusIndicator = document.createElement('div');
+      statusIndicator.className = 'status-indicator';
+      statusIndicatorCell.appendChild(statusIndicator);
+
+      // Add process name column
+      const processInfoCell = row.insertCell();
+      processInfoCell.style.verticalAlign = 'middle';
+      processInfoCell.textContent = processName;
+
+      // Add elapsed time column
+      const elapsedTimeCell = row.insertCell();
+      elapsedTimeCell.style.verticalAlign = 'middle';
+
+      // Add start/stop buttons column
+      const buttonsCell = row.insertCell();
+      buttonsCell.style.verticalAlign = 'middle';
+      buttonsCell.style.textAlign = 'center';
+      const startButton = document.createElement('button');
+      startButton.textContent = 'Start';
+      startButton.onclick = () => {
+        exec(`pm2 start ${processName}`, (err, stdout, stderr) => {
+          if (err) {
+            console.error(`Error starting process ${processName}: ${err}`);
+            return;
+          }
+          console.log(`Started process ${processName}`);
+        });
+      };
+      const stopButton = document.createElement('button');
+      stopButton.textContent = 'Stop';
+      stopButton.onclick = () => {
+        exec(`pm2 stop ${processName}`, (err, stdout, stderr) => {
+          if (err) {
+            console.error(`Error stopping process ${processName}: ${err}`);
+            return;
+          }
+          console.log(`Stopped process ${processName}`);
+        });
+      };
+      buttonsCell.appendChild(startButton);
+      buttonsCell.appendChild(stopButton);
+
+      // Listen for status updates from server
+      socket.on(`${processName}-status`, (isRunning) => {
+        if (isRunning) {
+          statusIndicator.style.backgroundColor = 'green';
+          startButton.disabled = true;
+          stopButton.disabled = false;
+          updateElapsedTime(processName, elapsedTimeCell);
+        } else {
+          statusIndicator.style.backgroundColor = 'red';
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          elapsedTimeCell.textContent = '';
+        }
+      });
+    });
+
+  </script>
 </body>
 
 </html>
