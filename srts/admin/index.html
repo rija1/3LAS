@@ -5,119 +5,251 @@
   <title>FFmpeg Streaming Status</title>
   <script src="/socket.io/socket.io.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .container {
+      width: 750px;
+      background: #eeeeee;
+      padding: 10px 20px 20px 20px;
+      margin: auto;
+      text-align: center;
+      border-radius: 7px;
+    }
+
+    h1 {
+      padding: 0 0 0px 0;
+      background: -webkit-linear-gradient(#b03e3e, #333);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      padding: 0 0 20px 0;
+      background: -webkit-linear-gradient(#b03e3e, #333);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+
     .status-indicator {
-      width: 50px;
-      height: 50px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background-color: red;
       display: inline-block;
       margin: 5px;
     }
+
+    .greenIndicator {
+      border: solid 3px #808080dd;
+      /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#cdeb8e+0,a5c956+100;Green+3D+%232 */
+      background: #cdeb8e;
+      /* Old browsers */
+      background: -moz-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
+      /* FF3.6-15 */
+      background: -webkit-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
+      /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to bottom, #cdeb8e 0%, #a5c956 100%);
+      /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cdeb8e', endColorstr='#a5c956', GradientType=0);
+      /* IE6-9 */
+    }
+
+    .redIndicator {
+      border: solid 3px #808080dd;
+      /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ef7540+1,ed6436+100 */
+      background: #ef7540;
+      /* Old browsers */
+      background: -moz-linear-gradient(top, #ef7540 1%, #ed6436 100%);
+      /* FF3.6-15 */
+      background: -webkit-linear-gradient(top, #ef7540 1%, #ed6436 100%);
+      /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to bottom, #ef7540 1%, #ed6436 100%);
+      /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ef7540', endColorstr='#ed6436', GradientType=0);
+      /* IE6-9 */
+
+    }
+
+    .status-container {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(150px, 1fr));
+      grid-gap: 20px;
+
+    }
+
+    .status-item,
+    .status-header {
+      display: grid;
+      grid-template-columns: 100px 140px 170px 100px;
+      grid-gap: 20px;
+      align-items: center;
+      /* Center items vertically */
+
+    }
+
+    .status-header {
+      background-color: #a5c956;
+      padding: 0 8px 0 8px;
+    }
+
+    .status-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      column-gap: 10px;
+    }
+
+    .status-indicator-container {
+      /* margin-bottom: 10px; */
+    }
+
+    .elapsed-time {
+      font-style: italic;
+    }
+
+    .buttons-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 10px;
+      justify-content: center;
+    }
   </style>
 </head>
 
 <body>
-  <h1>FFmpeg Streaming Status</h1>
-  <div id="status-container"></div>
+  <div class="container">
+    <h1>Thrangu Sekhar Translation Services</h1>
+    <h2>Administration Panel</h2>
+    <div class="status-container" id="status-container">
 
-  <script>
-    const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
-    const statusContainer = document.getElementById('status-container');
-    const socket = io();
+      <div class="status-actions">
+        <button onclick="javascript:startAll();">Start All</button>
+        <button onclick="javascript:stopAll()">Stop All</button>
+        <button onclick="javascript:restartAll()">Restart All</button>
+      </div>
 
-    // Create status indicators for each process
-    processNames.forEach((processName) => {
-      const table = document.createElement('table');
-      table.style.marginBottom = '10px';
-      statusContainer.appendChild(table);
+      <div class="status-header">
+        <div>Status</div>
+        <div>Process Name</div>
+        <div>Uptime</div>
+        <div>Management</div>
+      </div>
+    </div>
 
-      // Add table headers
-      const tableHeader = table.createTHead();
-      const headerRow = tableHeader.insertRow();
-      const headers = ['', 'Process', 'Elapsed Time', ''];
-      headers.forEach((headerText) => {
-        const headerCell = headerRow.insertCell();
-        headerCell.textContent = headerText;
-        headerCell.style.fontWeight = 'bold';
-      });
+    <script>
 
-      // Add table rows
-      const tableBody = table.createTBody();
-      const row = tableBody.insertRow();
+      // Function to start a PM2 process
+      function startPM2(processName) {
+        socket.emit('start-process', processName);
+      }
 
-      // Add status indicator column
-      const statusIndicatorCell = row.insertCell();
-      statusIndicatorCell.style.verticalAlign = 'middle';
-      statusIndicatorCell.style.textAlign = 'center';
-      const statusIndicator = document.createElement('div');
-      statusIndicator.className = 'status-indicator';
-      statusIndicatorCell.appendChild(statusIndicator);
+      // Function to stop a PM2 process
+      function stopPM2(processName) {
+        socket.emit('stop-process', processName);
+      }
 
-      // Add process name column
-      const processInfoCell = row.insertCell();
-      processInfoCell.style.verticalAlign = 'middle';
-      processInfoCell.textContent = processName;
+      // Function to stop a PM2 process
+      function restartPM2(processName) {
+        socket.emit('restart-process', processName);
+      }
 
-      // Add elapsed time column
-      const elapsedTimeCell = row.insertCell();
-      elapsedTimeCell.style.verticalAlign = 'middle';
-      const timeIndicator = document.createElement('div');
-      timeIndicator.className = 'time-indicator';
-      elapsedTimeCell.appendChild(timeIndicator);
 
-      // Add start/stop buttons column
-      const buttonsCell = row.insertCell();
-      buttonsCell.style.verticalAlign = 'middle';
-      buttonsCell.style.textAlign = 'center';
-      const startButton = document.createElement('button');
-      startButton.textContent = 'Start';
-      startButton.onclick = () => {
-        exec(`pm2 start ${processName}`, (err, stdout, stderr) => {
-          if (err) {
-            console.error(`Error starting process ${processName}: ${err}`);
-            return;
-          }
-          console.log(`Started process ${processName}`);
+      function startAll() {
+        processNames.forEach((processName) => {
+          startPM2(processName);
         });
-      };
-      const stopButton = document.createElement('button');
-      stopButton.textContent = 'Stop';
-      stopButton.onclick = () => {
-        exec(`pm2 stop ${processName}`, (err, stdout, stderr) => {
-          if (err) {
-            console.error(`Error stopping process ${processName}: ${err}`);
-            return;
-          }
-          console.log(`Stopped process ${processName}`);
+      }
+
+      function stopAll() {
+        processNames.forEach((processName) => {
+          stopPM2(processName);
         });
-      };
-      buttonsCell.appendChild(startButton);
-      buttonsCell.appendChild(stopButton);
+      }
 
-      // Listen for status updates from server
-      socket.on(`${processName}-status`, (isRunning) => {
-        if (isRunning) {
-          statusIndicator.style.backgroundColor = 'green';
-          startButton.disabled = true;
-          stopButton.disabled = false;
-        } else {
-          statusIndicator.style.backgroundColor = 'red';
-          startButton.disabled = false;
-          stopButton.disabled = true;
-          elapsedTimeCell.textContent = '';
-        }
+      function restartAll() {
+        processNames.forEach((processName) => {
+          restartPM2(processName);
+        });
+      }
+
+      const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
+      const statusContainer = document.getElementById('status-container');
+      const socket = io();
+
+      // Create status indicators for each process
+      processNames.forEach((processName) => {
+        const statusItem = document.createElement('div');
+        statusItem.className = 'status-item';
+        statusContainer.appendChild(statusItem);
+
+        // Add status indicator column
+        const statusIndicatorContainer = document.createElement('div');
+        statusIndicatorContainer.className = 'status-indicator-container';
+        statusItem.appendChild(statusIndicatorContainer);
+        const statusIndicator = document.createElement('div');
+        statusIndicator.className = 'status-indicator';
+        statusIndicatorContainer.appendChild(statusIndicator);
+
+        // Add process name column
+        const processInfo = document.createElement('div');
+        processInfo.style.verticalAlign = 'middle';
+        processInfo.textContent = processName;
+        statusItem.appendChild(processInfo);
+
+        // Add elapsed time column
+        const elapsedTimeDiv = document.createElement('div');
+        elapsedTimeDiv.className = 'elapsed-time';
+        statusItem.appendChild(elapsedTimeDiv);
+
+        // Add start/stop buttons column
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'buttons-container';
+        statusItem.appendChild(buttonsContainer);
+        const startButton = document.createElement('button');
+        startButton.textContent = 'Start';
+        startButton.onclick = () => {
+          startPM2(processName);
+        };
+        const stopButton = document.createElement('button');
+        stopButton.textContent = 'Stop';
+        stopButton.onclick = () => {
+          stopPM2(processName);
+        };
+        buttonsContainer.appendChild(startButton);
+        buttonsContainer.appendChild(stopButton);
+
+        // Listen for status updates from server
+        socket.on(`${processName}-status`, (isRunning) => {
+          if (isRunning) {
+            statusIndicator.classList.add('greenIndicator');
+            statusIndicator.classList.remove('redIndicator');
+            startButton.disabled = true;
+            stopButton.disabled = false;
+          } else {
+            statusIndicator.classList.add('redIndicator');
+            statusIndicator.classList.remove('greenIndicator');
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            elapsedTime.textContent = '';
+          }
+        });
+
+        // Listen for elapsed time updates from server
+        socket.on(`${processName}-time`, (elapsedTime) => {
+          if (elapsedTime) {
+            elapsedTimeDiv.innerHTML = elapsedTime;
+          }
+        });
+
       });
 
-      // Listen for elapsed time updates from server
-      socket.on(`${processName}-time`, (elapsedTime) => {
-        if (elapsedTime) {
-          timeIndicator.innerHTML = elapsedTime;
-        }
-      });
+    </script>
 
-    });
-
-  </script>
 </body>
+</div>
 
 </html>
