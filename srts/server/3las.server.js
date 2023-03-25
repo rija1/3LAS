@@ -36,7 +36,14 @@ const fs_1 = require("fs");
 const child_process_1 = require("child_process");
 const ws = __importStar(require("ws"));
 const wrtc = require('wrtc');
-const Settings = JSON.parse((0, fs_1.readFileSync)('settings.json', 'utf-8'));
+
+// Settings.json path fix so script can be called from anywhere
+const path = require('path');
+const fs = require('fs');
+const settingsPath = path.join(__dirname, 'settings.json');
+const Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+// const Settings = JSON.parse((0, fs_1.readFileSync)('settings.json', 'utf-8'));ß
+
 const FFmpeg_command = (() => {
     if (process.platform === 'win32')
         return Settings.FallbackFFmpegPath;
