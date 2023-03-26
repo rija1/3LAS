@@ -124,6 +124,7 @@
   <div class="container">
     <h1>Thrangu Sekhar Translation Services</h1>
     <h2>Administration Panel</h2>
+
     <div class="status-container" id="status-container">
 
       <div class="status-actions">
@@ -234,7 +235,7 @@
             statusIndicator.classList.remove('greenIndicator');
             startButton.disabled = false;
             stopButton.disabled = true;
-            elapsedTime.textContent = '';
+            elapsedTimeDiv.textContent = '';
           }
         });
 
@@ -245,6 +246,17 @@
           }
         });
 
+      });
+
+      // DEBUG
+      // Create a new div
+      const reedzDebug = document.createElement('div');
+
+      // Add the new div inside the existing div
+      document.querySelector('.status-actions').appendChild(reedzDebug);
+      // Listen for status updates from server
+      socket.on(`reedzdebug`, (debug) => {
+        reedzDebug.textContent = debug;
       });
 
     </script>
