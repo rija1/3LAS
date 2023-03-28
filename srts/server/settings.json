@@ -1,9 +1,0 @@
-{
-    "RtcConfig" : null,
-	"FallbackFFmpegPath": "/usr/local/bin/ffmpeg",
-    "FallbackUseMp3": true,
-    "FallbackUseWav": true,
-    "FallbackMp3Bitrate": 128,
-    "FallbackWavSampleRate": 16000,
-    "AdminKey": ""
-}

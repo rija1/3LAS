@@ -4,120 +4,7 @@
 <head>
     <title>FFmpeg Streaming Status</title>
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
-
-        body {
-            font-family: 'IBM Plex Mono', monospace;
-        }
-
-        .container {
-            width: 750px;
-            background: #eeeeee;
-            padding: 10px 20px 20px 20px;
-            margin: auto;
-            text-align: center;
-            border-radius: 7px;
-        }
-
-        h1 {
-            padding: 0 0 0px 0;
-            background: -webkit-linear-gradient(#b03e3e, #333);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        h2 {
-            padding: 0 0 20px 0;
-            background: -webkit-linear-gradient(#b03e3e, #333);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-
-        .status-indicator {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: red;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .greenIndicator {
-            border: solid 3px #808080dd;
-            /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#cdeb8e+0,a5c956+100;Green+3D+%232 */
-            background: #cdeb8e;
-            /* Old browsers */
-            background: -moz-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
-            /* FF3.6-15 */
-            background: -webkit-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
-            /* Chrome10-25,Safari5.1-6 */
-            background: linear-gradient(to bottom, #cdeb8e 0%, #a5c956 100%);
-            /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cdeb8e', endColorstr='#a5c956', GradientType=0);
-            /* IE6-9 */
-        }
-
-        .redIndicator {
-            border: solid 3px #808080dd;
-            /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ef7540+1,ed6436+100 */
-            background: #ef7540;
-            /* Old browsers */
-            background: -moz-linear-gradient(top, #ef7540 1%, #ed6436 100%);
-            /* FF3.6-15 */
-            background: -webkit-linear-gradient(top, #ef7540 1%, #ed6436 100%);
-            /* Chrome10-25,Safari5.1-6 */
-            background: linear-gradient(to bottom, #ef7540 1%, #ed6436 100%);
-            /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ef7540', endColorstr='#ed6436', GradientType=0);
-            /* IE6-9 */
-
-        }
-
-        .status-container {
-            display: grid;
-            grid-template-columns: repeat(1, minmax(150px, 1fr));
-            grid-gap: 20px;
-
-        }
-
-        .status-item,
-        .status-header {
-            display: grid;
-            grid-template-columns: 100px 140px 170px 100px;
-            grid-gap: 20px;
-            align-items: center;
-            /* Center items vertically */
-
-        }
-
-        .status-header {
-            background-color: #a5c956;
-            padding: 0 8px 0 8px;
-        }
-
-        .status-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            column-gap: 10px;
-        }
-
-        .status-indicator-container {
-            /* margin-bottom: 10px; */
-        }
-
-        .elapsed-time {
-            font-style: italic;
-        }
-
-        .buttons-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            column-gap: 10px;
-            justify-content: center;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -125,13 +12,13 @@
         <h1>Thrangu Sekhar Translation Services</h1>
         <h2>Administration Panel</h2>
 
-        <div class="status-container" id="status-container">
+        <div class="status-actions">
+            <button id="start-all-button">Start All</button>
+            <button id="stop-all-button">Stop All</button>
+            <button id="restart-all-button">Restart All</button>
+        </div>
 
-            <div class="status-actions">
-                <button onclick="javascript:startAll();">Start All</button>
-                <button onclick="javascript:stopAll()">Stop All</button>
-                <button onclick="javascript:restartAll()">Restart All</button>
-            </div>
+        <div class="status-container" id="status-container">
 
             <div class="status-header">
                 <div>Status</div>
@@ -158,29 +45,31 @@
                 socket.emit('restart-process', processName);
             }
 
-            function startAll() {
-                processNames.forEach((processName) => {
-                    startPM2(processName);
-                });
+            function startAll(settingsInfo) {
+                for (const channelId in settingsInfo.channels) {
+                    startPM2(channelId);
+                }
             }
 
-            function stopAll() {
-                processNames.forEach((processName) => {
-                    stopPM2(processName);
-                });
+            function stopAll(settingsInfo) {
+                for (const channelId in settingsInfo.channels) {
+                    stopPM2(channelId);
+                }
             }
 
-            function restartAll() {
-                processNames.forEach((processName) => {
-                    restartPM2(processName);
-                });
+            function restartAll(settingsInfo) {
+                for (const channelId in settingsInfo.channels) {
+                    restartPM2(channelId);
+                }
             }
 
-            function updateChannels(channelsInfo) {
-                for (const channelId in channelsInfo) {
-                    const channel = channelsInfo[channelId];
+            function createChannelsInfo(settingsInfo) {
+                for (const channelId in settingsInfo.channels) {
+
+                    const channel = settingsInfo.channels[channelId];
                     const statusItem = document.createElement('div');
                     statusItem.className = 'status-item';
+                    statusItem.setAttribute('id', channelId);
                     statusContainer.appendChild(statusItem);
 
                     // Add status indicator column
@@ -194,6 +83,7 @@
                     // Add process name column
                     const processInfo = document.createElement('div');
                     processInfo.style.verticalAlign = 'middle';
+                    processInfo.className = 'channel-name';
                     processInfo.textContent = channel.name;
                     statusItem.appendChild(processInfo);
 
@@ -218,6 +108,34 @@
                     };
                     buttonsContainer.appendChild(startButton);
                     buttonsContainer.appendChild(stopButton);
+
+                    // Add Channel Options block
+                    const channelOptions = document.createElement('div');
+                    channelOptions.className = 'channel-options';
+                    statusItem.appendChild(channelOptions);
+
+                    // Add language name column
+                    const languageSelect = document.createElement('select');
+                    languageSelect.className = 'language-select';
+
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.text = 'Select Language';
+                    languageSelect.appendChild(option);
+
+                    // Loop through the object keys and values and create options
+                    for (const [code, language] of Object.entries(settingsInfo.languages)) {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.text = language.name;
+                    languageSelect.appendChild(option);
+                    }
+
+                    const languageLabel = document.createElement('label');
+                    languageLabel.textContent = "Language";
+                    
+                    channelOptions.appendChild(languageLabel);
+                    channelOptions.appendChild(languageSelect);
 
                     // Listen for status updates from server
                     socket.on(`${channelId}-status`, (isRunning) => {
@@ -246,18 +164,39 @@
 
             }
 
+            // TODO : finish this : get elapsedTime, green or red status and other things like dropdown language etc
+            function updatesettingsInfo(settingsInfo) {
+                for (const channelId in settingsInfo.channels) {
+                    const channel = settingsInfo[channelId];
+                    channelStatusItem = document.querySelector("#"+channelId);
+                    channelStatusItem.querySelector('.channel-name').textContent = channel.name;
 
-            const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
+                }
+            }
+
+
             const statusContainer = document.getElementById('status-container');
             const socket = io();
 
+            // TODO create socket in server etc
             // Add an event listener for the 'return-value' event on the socket
-            socket.on('channels-info-value', (channelsInfo) => {
-                updateChannels(channelsInfo);
+            socket.on('settings-info-update', (settingsInfo) => {
+                updateChannelsInfo(settingsInfo);
             });
 
-            // Emit a 'channels-info-value' event to the server to trigger the function call
-            socket.emit('channels-info');
+            // Add an event listener for the 'return-value' event on the socket
+            socket.on('settings-info-value', (settingsInfo) => {
+                createChannelsInfo(settingsInfo);
+                
+                document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
+                // alert(document.querySelector("#start-all-button").onclick);
+                document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
+                document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
+
+            });
+
+            // Emit a 'settings-info-value' event to the server to trigger the function call
+            socket.emit('settings-info');
 
 
             // DEBUG

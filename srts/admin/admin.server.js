@@ -17,6 +17,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.use(express.static(__dirname));
+
+
 const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
 
 function processExists(processName) {
@@ -29,13 +32,13 @@ function processExists(processName) {
     });
 }
 
-function getChannelsSettings() {
+function getSettings() {
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
         return;
     }
 
-    return Settings["channels"];
+    return Settings;
 }
 
 function createProcess(processName) {
@@ -189,9 +192,9 @@ io.on('connection', (socket) => {
     // Emit the process status when a client connects
     checkPm2ProcessStatus();
 
-    socket.on('channels-info', () => {
-        // Send the response back to the client with the 'channels-info-value' event
-        socket.emit('channels-info-value', getChannelsSettings());
+    socket.on('settings-info', () => {
+        // Send the response back to the client with the 'settings-info-value' event
+        socket.emit('settings-info-value', getSettings());
       });
 
     // Listen for start/stop events from clients

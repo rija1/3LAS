@@ -10,7 +10,19 @@
 /// <reference path="../../../client/src/util/3las.websocketclient.ts" />
 var Stream;
 var DefaultVolume = 0.5;
-function Init(_ev) {
+
+const path = require('path');
+const fs = require('fs');
+
+const settingsPath = path.join(__dirname, 'settings.json');
+const streamServerPath = path.join(__dirname, '3las.server.js');
+const jsonSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+
+function Init(_ev,customSettings) {
+
+    
+// alert(jsonSettings);
+
     document.getElementById("logwindowbutton").onclick = OnLogWindowButtonClick;
     var logger = new Logging(document.getElementById("logwindow"), "li");
     // Load default settings
@@ -22,10 +34,10 @@ function Init(_ev) {
         settings.SocketPort = SocketPort;
     if (typeof SocketPath != 'undefined')
         settings.SocketPath = SocketPath;
-    if (typeof AudioTagId == 'undefined')
+    if (typeof customSettings == 'undefined')
         settings.WebRTC.AudioTag = null;
     else
-        settings.WebRTC.AudioTag = document.getElementById(AudioTagId);
+        settings.WebRTC.AudioTag = document.getElementById(customSettings);
     try {
         Stream = new _3LAS(logger, settings);
     }

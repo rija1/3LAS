@@ -9,7 +9,7 @@
 		<meta name="format-detection" content="telephone=no">
 
 		<title>3LAS (Low Latency Live Audio Streaming)</title>
-		
+		<script src="/socket.io/socket.io.js"></script>
 		<script src="script/util/3las.helpers.js"></script>
 		<script src="script/util/3las.logging.js"></script>
 
@@ -43,7 +43,40 @@
 			var AudioTagId = "audioTag";
 
 			// Bind init to page load see code in main.ts/main.js
-			window.addEventListener('load', Init, false);
+			// window.addEventListener('load', Init, false);
+
+            let channelSettings = {
+                "channels": {
+        "channel_1": {
+          "name": "Channel 1",
+          "outputFile": "",
+          "language": "Chinese",
+          "port": "3101"
+        },
+        "channel_2": {
+          "name": "Channel 2",
+          "outputFile": "",
+          "language": "English",
+          "port": "3102"
+        },
+        "channel_3": {
+          "name": "Channel 3",
+          "outputFile": "",
+          "language": "French",
+          "port": "3103"
+        },
+        "channel_4": {
+          "name": "Channel 4",
+          "outputFile": "",
+          "language": "Lama",
+          "port": "3104"
+        }
+      }
+}
+          
+            window.addEventListener('load', function(_ev) { Init(_ev, "audioTag") }, false);
+            window.addEventListener('load', function(_ev) { Init(_ev, "audioTag2") }, false);
+
 			document.ontouchmove  = function(e){ 
 				e.preventDefault(); 
 			}
@@ -56,6 +89,7 @@
 	</head>
 	<body style="background:#000000;">
 		<audio id="audioTag"></audio>
+        <audio id="audioTag2"></audio>
 		<div id="viewcontainer">
 			<div id="audioplayer">
 				<div id="playbuttonoverlay">

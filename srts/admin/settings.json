@@ -1,0 +1,64 @@
+{
+    "RtcConfig": null,
+    "FallbackFFmpegPath": "/usr/local/bin/ffmpeg",
+    "FallbackUseMp3": true,
+    "FallbackUseWav": true,
+    "FallbackMp3Bitrate": 128,
+    "FallbackWavSampleRate": 16000,
+    "AdminKey": "",
+    "languages": {
+        "bo": {
+            "name": "Tibetan"
+        },
+        "en": {
+            "name": "English"
+        },
+        "zh": {
+            "name": "Chinese"
+        },
+        "de": {
+            "name": "German"
+        },
+        "fr": {
+            "name": "French"
+        },
+        "sw": {
+            "name": "Swahili"
+        },
+        "hk": {
+            "name": "Hong Kong"
+        },
+        "no": {
+            "name": "Norwegian"
+        },
+        "es": {
+            "name": "Spanish"
+        }
+    },
+    "channels": {
+        "channel_1": {
+            "name": "Channel 1",
+            "outputFile": "",
+            "language": "Chinese",
+            "port": "3101"
+        },
+        "channel_2": {
+            "name": "Channel 2",
+            "outputFile": "",
+            "language": "English",
+            "port": "3102"
+        },
+        "channel_3": {
+            "name": "Channel 3",
+            "outputFile": "",
+            "language": "French",
+            "port": "3103"
+        },
+        "channel_4": {
+            "name": "Channel 4",
+            "outputFile": "",
+            "language": "Lama",
+            "port": "3104"
+        }
+    }
+}
