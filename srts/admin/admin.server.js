@@ -9,6 +9,7 @@ const fs = require('fs');
 const settingsPath = path.join(__dirname, 'settings.json');
 const streamServerPath = path.join(__dirname, '3las.server.js');
 const Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+// const exportPath = path.join(__dirname, 'settings.json');
 
 const PORT = process.env.PORT || 3000;
 
@@ -50,16 +51,12 @@ function createProcess(processName) {
 
     let channelSettings = Settings["channels"][processName];
       
-    // io.emit(`reedzdebug`, Settings["channels"]["channel_1"]);
-    // io.emit(`reedzdebug`, JSON.stringify(Settings["channels"][processName]));
-    // return;
-
-    // To finish
-    // let outputFile = '/Users/reedz/Desktop/output.mp3';
-    // let outputFile = channelSettings.outputFile;
-    let outputFile = '-f mp3 /tmp/ok.mp3';
+    let outputFile = channelSettings.outputFile; 
+    // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
+    let inputDevice = channelSettings.ffmpegInputDevice;
     let port = channelSettings.port;
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize 64 -probesize 64 -y -f avfoundation -i :3 -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960 pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    
+    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize 64 -probesize 64 -y '+ inputDevice +' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960 pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     pm2.start({
         name: processName,
@@ -122,7 +119,7 @@ function checkPm2ProcessStatus() {
 
         const processStatus = {};
 
-        for (const processName of processNames) {
+        for (const processName in Settings.channels) {
 
             // Check if process is present in list
             const processInfo = processList.find(info => info.name === processName);

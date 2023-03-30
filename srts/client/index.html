@@ -1,142 +1,136 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
-		<meta name="apple-mobile-web-app-title" content="3LAS (Low Latency Live Audio Streaming)">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black">
-		<meta name="format-detection" content="telephone=no">
 
-		<title>3LAS (Low Latency Live Audio Streaming)</title>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="script/util/3las.helpers.js"></script>
-		<script src="script/util/3las.logging.js"></script>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-title" content="3LAS (Low Latency Live Audio Streaming)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
 
-        <link rel="stylesheet" href="style/main.css">
-        <link rel="stylesheet" href="style/log_window.css">
-		<link rel="stylesheet" href="style/player_controls.css">
-		
-		<script src="script/fallback/3las.liveaudioplayer.js"></script>
-		<script src="script/fallback/3las.formatreader.js"></script>
-		<script src="script/fallback/formats/3las.formatreader.mpeg.js"></script>
-		<script src="script/fallback/formats/3las.formatreader.wav.js"></script>
-		<script src="script/util/3las.websocketclient.js"></script>
-		<script src="script/fallback/3las.fallback.js"></script>
-		<script src="script/3las.webrtc.js"></script>
-		<script src="script/3las.js"></script>
-		<script src="script/main.js"></script>
-		<script>
-			var RtcConfig = {
-				/*
-				iceServers: [
-					{
-						urls: "turns:turnserver.example.org",
-					},
-					{
-						urls: "stun:stunserver.example.org"
-					}
-				]
-				*/
-			};
+    <title>3LAS (Low Latency Live Audio Streaming)</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script/util/3las.helpers.js"></script>
+    <script src="script/util/3las.logging.js"></script>
 
-			var AudioTagId = "audioTag";
+    <link rel="stylesheet" href="style/main.css">
+    <link rel="stylesheet" href="style/log_window.css">
+    <link rel="stylesheet" href="style/player_controls.css">
 
-			// Bind init to page load see code in main.ts/main.js
-			// window.addEventListener('load', Init, false);
+    <script src="script/fallback/3las.liveaudioplayer.js"></script>
+    <script src="script/fallback/3las.formatreader.js"></script>
+    <script src="script/fallback/formats/3las.formatreader.mpeg.js"></script>
+    <script src="script/fallback/formats/3las.formatreader.wav.js"></script>
+    <script src="script/util/3las.websocketclient.js"></script>
+    <script src="script/fallback/3las.fallback.js"></script>
+    <script src="script/3las.webrtc.js"></script>
+    <script src="script/3las.js"></script>
+    <script src="script/main.js"></script>
+    <script>
+        const socket = io();
+        var RtcConfig = {};
+        var AudioTagId = "audioTag";
 
-            let channelSettings = {
-                "channels": {
-        "channel_1": {
-          "name": "Channel 1",
-          "outputFile": "",
-          "language": "Chinese",
-          "port": "3101"
-        },
-        "channel_2": {
-          "name": "Channel 2",
-          "outputFile": "",
-          "language": "English",
-          "port": "3102"
-        },
-        "channel_3": {
-          "name": "Channel 3",
-          "outputFile": "",
-          "language": "French",
-          "port": "3103"
-        },
-        "channel_4": {
-          "name": "Channel 4",
-          "outputFile": "",
-          "language": "Lama",
-          "port": "3104"
+        function createChannelsBlocks(settingsInfo) {
+            for (const channelId in settingsInfo.channels) {
+
+                const channelsDiv = document.querySelector("#channels");
+                const channel = settingsInfo.channels[channelId];
+                const channelButton = document.createElement('button');
+                channelButton.className = 'channel_button';
+                channelButton.id = channelId;
+                channelButton.textContent = settingsInfo.channels[channelId].name;
+                channelButton.onclick = function () {                     // Set the onclick function of the button
+                    Init(settingsInfo.channels[channelId]);
+                    //    window.addEventListener('load', function(_ev) { Init(_ev, settingsInfo.channels[channelId]) }, false);
+                };
+
+                channelsDiv.appendChild(channelButton);
+            }
         }
-      }
-}
-          
-            window.addEventListener('load', function(_ev) { Init(_ev, "audioTag") }, false);
-            window.addEventListener('load', function(_ev) { Init(_ev, "audioTag2") }, false);
 
-			document.ontouchmove  = function(e){ 
-				e.preventDefault(); 
-			}
-			
-			function hideChromeBanner ()
-			{
-				document.getElementById("chromesuggestion").style.display = "none";
-			}
-		</script> 
-	</head>
-	<body style="background:#000000;">
-		<audio id="audioTag"></audio>
-        <audio id="audioTag2"></audio>
-		<div id="viewcontainer">
-			<div id="audioplayer">
-				<div id="playbuttonoverlay">
-					<div id="playbutton"></div>
-				</div>
-				<div id="activityindicator">
-					<div id="redlighton"></div>
-					<div id="redlightoff"></div>
-				</div>
-				<div id="controlbar">
-					<div id="mutebutton"></div>
-					<div id="unmutebutton"></div>
-				</div>
-				<div id="volumebar">
-					<div id="totalvolume"></div>
-					<div id="currentvolume"></div>
-					<div id="volumeknob"></div>
-				</div>
-			</div>
-				<p id="logwindowbutton">Show/Hide event log</p>
-				<ul id="logwindow"></ul>
-		</div>
-		<div id="lightbutton" style="display: none;"></div>
-		<noscript>
-			<div class="errormessage">
-				<p>JavaScript not supported!</p>
-				<p>Please enable JavaScript.</p>
-				<p>Or try another browser.</p>
-			</div>
-		</noscript>
-		<div id="chromesuggestion">
-			<p>We recommend viewing this page with Google Chrome.</p>
-			<p><a href="http://itunes.apple.com/app/id535886823">Download Google Chrome</a></p>
-			<p><span onclick="hideChromeBanner();">Ignore and continue</span></p>
-		</div>
-		<div class="errormessage" id="typesunsupported" style="display: none;">
-			<p>None of the used datatypes are supported by your browser!</p>
-			<p>Please try another browser.</p>
-		</div>
-		<div class="errormessage" id="socketsunsupported" style="display: none;">
-			<p>Websockets are not supported by your browser!</p>
-			<p>Please try another browser.</p>
-		</div>
-		<div class="errormessage" id="webaudiounsupported" style="display: none;">
-			<p>The WebAudio API is not supported by your browser!</p>
-			<p>Please try another browser.</p>
-		</div>
-		<div id="lightoff" style="display: none;"></div>
-	</body>
+        // Add an event listener for the 'return-value' event on the socket
+        socket.on('settings-info-value', (settingsInfo) => {
+            createChannelsBlocks(settingsInfo);
+        });
+
+        // Emit a 'settings-info-value' event to the server to trigger the function call
+        socket.emit('settings-info');
+
+        // Bind init to page load see code in main.ts/main.js
+        // window.addEventListener('load', Init, false);
+
+        // window.addEventListener('load', function(_ev) { Init(_ev, "") }, false);
+        // window.addEventListener('load', function(_ev) { Init(_ev, "audioTag2") }, false);
+
+        document.ontouchmove = function (e) {
+            e.preventDefault();
+        }
+
+        function hideChromeBanner() {
+            document.getElementById("chromesuggestion").style.display = "none";
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="channels"></div>
+
+        <div id="currentChannel"></div>
+        <audio id="audioTag"></audio>
+        <!-- <audio id="audioTag2"></audio> -->
+        <div id="viewcontainer">
+            <div id="audioplayer">
+                <div id="playbuttonoverlay">
+                    <div id="playbutton"></div>
+                </div>
+                <div id="activityindicator">
+                    <div id="redlighton"></div>
+                    <div id="redlightoff"></div>
+                </div>
+                <div id="controlbar">
+                    <div id="mutebutton"></div>
+                    <div id="unmutebutton"></div>
+                </div>
+                <div id="volumebar">
+                    <div id="totalvolume"></div>
+                    <div id="currentvolume"></div>
+                    <div id="volumeknob"></div>
+                </div>
+            </div>
+            <p id="logwindowbutton">Show/Hide event log</p>
+            <ul id="logwindow"></ul>
+        </div>
+        <div id="lightbutton" style="display: none;"></div>
+        <noscript>
+            <div class="errormessage">
+                <p>JavaScript not supported!</p>
+                <p>Please enable JavaScript.</p>
+                <p>Or try another browser.</p>
+            </div>
+        </noscript>
+        <div id="chromesuggestion">
+            <p>We recommend viewing this page with Google Chrome.</p>
+            <p><a href="http://itunes.apple.com/app/id535886823">Download Google Chrome</a></p>
+            <p><span onclick="hideChromeBanner();">Ignore and continue</span></p>
+        </div>
+        <div class="errormessage" id="typesunsupported" style="display: none;">
+            <p>None of the used datatypes are supported by your browser!</p>
+            <p>Please try another browser.</p>
+        </div>
+        <div class="errormessage" id="socketsunsupported" style="display: none;">
+            <p>Websockets are not supported by your browser!</p>
+            <p>Please try another browser.</p>
+        </div>
+        <div class="errormessage" id="webaudiounsupported" style="display: none;">
+            <p>The WebAudio API is not supported by your browser!</p>
+            <p>Please try another browser.</p>
+        </div>
+        <div id="lightoff" style="display: none;"></div>
+    </div>
+</body>
+
 </html>

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>FFmpeg Streaming Status</title>
+    <title>Thrangu Sekhar Translation</title>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,7 +24,8 @@
                 <div>Status</div>
                 <div>Process Name</div>
                 <div>Uptime</div>
-                <div>Management</div>
+                <div>Process Management</div>
+                <div>Settings</div>
             </div>
         </div>
 
@@ -125,17 +126,36 @@
 
                     // Loop through the object keys and values and create options
                     for (const [code, language] of Object.entries(settingsInfo.languages)) {
-                    const option = document.createElement('option');
-                    option.value = code;
-                    option.text = language.name;
-                    languageSelect.appendChild(option);
+                        const option = document.createElement('option');
+                        option.value = code;
+                        option.text = language.name;
+                        languageSelect.appendChild(option);
                     }
 
                     const languageLabel = document.createElement('label');
                     languageLabel.textContent = "Language";
-                    
-                    channelOptions.appendChild(languageLabel);
-                    channelOptions.appendChild(languageSelect);
+                    const languageBlock = document.createElement('div');
+                    languageBlock.className = 'language-block';
+
+                    languageBlock.appendChild(languageLabel);
+                    languageBlock.appendChild(languageSelect);
+                    channelOptions.appendChild(languageBlock);
+
+                    const cpServerCheckbox = document.createElement('input');
+                    cpServerCheckbox.type = 'checkbox';
+                    cpServerCheckbox.id = 'copy_to_server';
+
+                    const cpServerLabel = document.createElement('label');
+                    cpServerLabel.htmlFor = 'copy_to_server';
+                    cpServerLabel.appendChild(document.createTextNode('Copy to Server'));
+
+                    const cpServerBlock = document.createElement('div');
+                    cpServerBlock.className = 'cp-server-block';
+
+                    cpServerBlock.appendChild(cpServerCheckbox);
+                    cpServerBlock.appendChild(cpServerLabel);
+                    channelOptions.appendChild(cpServerBlock);
+
 
                     // Listen for status updates from server
                     socket.on(`${channelId}-status`, (isRunning) => {
@@ -168,7 +188,7 @@
             function updatesettingsInfo(settingsInfo) {
                 for (const channelId in settingsInfo.channels) {
                     const channel = settingsInfo[channelId];
-                    channelStatusItem = document.querySelector("#"+channelId);
+                    channelStatusItem = document.querySelector("#" + channelId);
                     channelStatusItem.querySelector('.channel-name').textContent = channel.name;
 
                 }
@@ -187,7 +207,7 @@
             // Add an event listener for the 'return-value' event on the socket
             socket.on('settings-info-value', (settingsInfo) => {
                 createChannelsInfo(settingsInfo);
-                
+
                 document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
                 // alert(document.querySelector("#start-all-button").onclick);
                 document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };

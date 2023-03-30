@@ -37,28 +37,36 @@
     },
     "channels": {
         "channel_1": {
+            "id":"channel_1",
             "name": "Channel 1",
-            "outputFile": "",
             "language": "Chinese",
-            "port": "3101"
+            "port": "3101",
+            "ffmpegInputDevice":"-f avfoundation -i :3",
+            "outputFile":""
         },
         "channel_2": {
+            "id":"channel_2",
             "name": "Channel 2",
-            "outputFile": "",
             "language": "English",
-            "port": "3102"
+            "port": "3102",
+            "ffmpegInputDevice":"-f avfoundation -i :3",
+            "outputFile":"/tmp/test2.mp3"
         },
         "channel_3": {
+            "id":"channel_3",
             "name": "Channel 3",
-            "outputFile": "",
             "language": "French",
-            "port": "3103"
+            "port": "3103",
+            "ffmpegInputDevice":"-f avfoundation -i :3",
+            "outputFile":""
         },
         "channel_4": {
+            "id":"channel_4",
             "name": "Channel 4",
-            "outputFile": "",
             "language": "Lama",
-            "port": "3104"
+            "port": "3104",
+            "ffmpegInputDevice":"-f avfoundation -i :3",
+            "outputFile":""
         }
     }
 }

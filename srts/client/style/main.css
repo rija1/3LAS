@@ -1,69 +1,136 @@
-div#viewcontainer
-{
-	display: none;
+.container {
+    /* max-width: 1300px; */
+    background: #fffeea;
+    padding:20px;
+    /* padding: 10px 20px 20px 20px;
+    margin: auto;
+    text-align: center; */
+    border-radius: 7px;
+    box-shadow: 6px 9px 30px 0px rgba(0, 0, 0, 0.93);
+    -webkit-box-shadow: 6px 9px 30px 0px rgba(0, 0, 0, 0.93);
+    -moz-box-shadow: 6px 9px 30px 0px rgba(0, 0, 0, 0.93);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-div.errormessage
-{
-	position: absolute;
-	display: none;
-	width: 200pt;
-	height: 150pt;
-	left: 0pt;
-	top: 0pt;
-	font-family: sans-serif;
-	font-size: 20pt;
-	font-weight: 200;
-	color: #EE0000;
-	background-color: #000000;	
+#channels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    column-gap: 10px;
+    padding-bottom: 20px;
 }
 
-div#chromesuggestion
-{
-	position: absolute;
-	display: none;
-	width: 200pt;
-	height: 150pt;
-	left: 0pt;
-	top: 0pt;
-	font-family: sans-serif;
-	font-size: 15pt;
-	font-weight: 200;
-	color: #EEEEEE;
-	background-color: #000000;	
+#currentChannel {
+    font: 24px Verdana; 
+    font-weight: 400;
+    padding-bottom: 20px;
 }
 
-div#chromesuggestion a,span
-{
-	text-decoration: none;
-	color: #888888;
+.channel_button {
+    display: block;
+    font: 17px Verdana;
+    font-weight: 400;
+    padding: 10px;
+    border: solid 2px #333;
 }
 
-div#lightoff
-{
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	left: 0pt;
-	top: 0pt;
-	z-index: 9999999;
-	background: black;
-	opacity: 0.9;
-	cursor: not-allowed;
+#viewcontainer .channel_1 {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cc7669), color-stop(100%,#b03a3a));
 }
 
-div#lightbutton
-{
-	background-image: url(../img/light.svg);
-	-webkit-background-size: 100% 100%;
-	   -moz-background-size: 100% 100%;
-	     -o-background-size: 100% 100%;
-		    background-size: 100% 100%;
-	position: absolute;
-	width: 50pt;
-	height: 50pt;
-	right: 0;
-	top: 0;
-	z-index: 99999999;
-	cursor: pointer;
+#viewcontainer .channel_2 {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#5c94cc), color-stop(100%,#1b3e66));}
+
+#viewcontainer .channel_3 {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e6e3b0), color-stop(100%,#cec308));
+}
+
+#viewcontainer .channel_4 {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#b8c79e), color-stop(100%,#5d834c));
+}
+
+#channels #channel_1 {
+    background-color: #d09191;
+    color: #EE0000;
+}
+
+#channels #channel_2 {
+    background-color: #5d93cc;
+    color: #1b3e66;
+}
+#channels #channel_3 {
+    background-color: #ddd7a8;
+    color: #f0ed24;
+}
+#channels #channel_4 {
+    background-color: #b8c89e;
+    color: #517b3f;
+}
+
+div#viewcontainer {
+    display: none;
+}
+
+div.errormessage {
+    position: absolute;
+    display: none;
+    width: 200pt;
+    height: 150pt;
+    left: 0pt;
+    top: 0pt;
+    font-family: sans-serif;
+    font-size: 20pt;
+    font-weight: 200;
+    color: #EE0000;
+    background-color: #000000;
+}
+
+div#chromesuggestion {
+    position: absolute;
+    display: none;
+    width: 200pt;
+    height: 150pt;
+    left: 0pt;
+    top: 0pt;
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-weight: 200;
+    color: #EEEEEE;
+    background-color: #000000;
+}
+
+div#chromesuggestion a,
+span {
+    text-decoration: none;
+    color: #888888;
+}
+
+div#lightoff {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0pt;
+    top: 0pt;
+    z-index: 9999999;
+    background: black;
+    opacity: 0.9;
+    cursor: not-allowed;
+}
+
+div#lightbutton {
+    background-image: url(../img/light.svg);
+    -webkit-background-size: 100% 100%;
+    -moz-background-size: 100% 100%;
+    -o-background-size: 100% 100%;
+    background-size: 100% 100%;
+    position: absolute;
+    width: 50pt;
+    height: 50pt;
+    right: 0;
+    top: 0;
+    z-index: 99999999;
+    cursor: pointer;
 }

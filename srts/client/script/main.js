@@ -10,23 +10,12 @@
 /// <reference path="../../../client/src/util/3las.websocketclient.ts" />
 var Stream;
 var DefaultVolume = 0.5;
-
-const path = require('path');
-const fs = require('fs');
-
-const settingsPath = path.join(__dirname, 'settings.json');
-const streamServerPath = path.join(__dirname, '3las.server.js');
-const jsonSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-
-function Init(_ev,customSettings) {
-
-    
-// alert(jsonSettings);
-
+function Init(channelSettings="") {
+    // alert("PARLA");
     document.getElementById("logwindowbutton").onclick = OnLogWindowButtonClick;
     var logger = new Logging(document.getElementById("logwindow"), "li");
     // Load default settings
-    var settings = new _3LAS_Settings();
+    var settings = new _3LAS_Settings(channelSettings);
     if (typeof RtcConfig == 'undefined')
         RtcConfig = {};
     settings.WebRTC.RtcConfig = RtcConfig;
@@ -34,10 +23,10 @@ function Init(_ev,customSettings) {
         settings.SocketPort = SocketPort;
     if (typeof SocketPath != 'undefined')
         settings.SocketPath = SocketPath;
-    if (typeof customSettings == 'undefined')
+    if (typeof AudioTagId == 'undefined')
         settings.WebRTC.AudioTag = null;
     else
-        settings.WebRTC.AudioTag = document.getElementById(customSettings);
+        settings.WebRTC.AudioTag = document.getElementById(AudioTagId);
     try {
         Stream = new _3LAS(logger, settings);
     }
@@ -45,6 +34,7 @@ function Init(_ev,customSettings) {
         document.getElementById("webaudiounsupported").style.display = "block";
         return;
     }
+
     Stream.ConnectivityCallback = OnConnectivityCallback;
     Stream.ActivityCallback = OnActivityCallback;
     document.getElementById("unmutebutton").onclick = OnUnmuteButtonClick;
@@ -60,6 +50,11 @@ function Init(_ev,customSettings) {
         lightoff.addEventListener("mousedown", OnLightOffClick, true);
     }
     document.getElementById("viewcontainer").style.display = "block";
+    
+    // Update Channel name
+    document.querySelector("#currentChannel").textContent = channelSettings.name;
+    document.querySelector("#audioplayer").className = channelSettings.id;
+    
 }
 function OnLogWindowButtonClick(_ev) {
     var logwindow = document.getElementById("logwindow");
@@ -124,6 +119,7 @@ function OnUnmuteButtonClick(_ev) {
     UpdateVolumeBar(OldVolume * document.getElementById("volumebar").getBoundingClientRect().width);
 }
 function OnPlayButtonClick(_ev) {
+
     try {
         Stream.Start();
     }
