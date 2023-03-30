@@ -3,39 +3,6 @@ div#audioplayer
 	position: relative;
 	width: 180pt;
 	height: 100pt;
-	
-	background: #4c4e5a;
-	background: -moz-linear-gradient(top,  #4c4e5a 0%, #2c2d33 100%);
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4e5a), color-stop(100%,#2c2d33));
-	background: -webkit-linear-gradient(top,  #4c4e5a 0%,#2c2d33 100%);
-	background: -o-linear-gradient(top,  #4c4e5a 0%,#2c2d33 100%);
-	background: -ms-linear-gradient(top,  #4c4e5a 0%,#2c2d33 100%);
-	background: linear-gradient(to bottom,  #4c4e5a 0%,#2c2d33 100%);
-	
-	-webkit-border-top-left-radius: 2pt;
-	    -moz-border-radius-topleft: 2pt;
-	      -o-border-radius-topleft: 2pt;
-	        border-top-left-radius: 2pt;
-	
-	-webkit-border-top-right-radius: 2pt;
-	    -moz-border-radius-topright: 2pt;
-	      -o-border-radius-topright: 2pt;
-	        border-top-right-radius: 2pt;
-
-	-webkit-border-bottom-right-radius: 2pt;
-	    -moz-border-radius-bottomright: 2pt;
-	      -o-border-radius-bottomright: 2pt;
-	        border-bottom-right-radius: 2pt;
-
-	-webkit-border-bottom-left-radius: 2pt;
-	    -moz-border-radius-bottomleft: 2pt;
-	      -o-border-radius-bottomleft: 2pt;
-			border-bottom-left-radius: 2pt;
-			
-	-webkit-user-select: none;
-	   -moz-user-select: none;
-	    -ms-user-select: none;
-		    user-select: none;
 }
 
 div#audioplayer div#volumebar

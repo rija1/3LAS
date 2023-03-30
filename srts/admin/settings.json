@@ -49,8 +49,8 @@
             "name": "Channel 2",
             "language": "English",
             "port": "3102",
-            "ffmpegInputDevice":"-f avfoundation -i :3",
-            "outputFile":"/tmp/test2.mp3"
+            "ffmpegInputDevice":"-f avfoundation -i :5",
+            "outputFile":""
         },
         "channel_3": {
             "id":"channel_3",

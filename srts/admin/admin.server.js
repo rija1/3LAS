@@ -5,6 +5,7 @@ const io = require('socket.io')(http);
 const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
+const { start } = require('repl');
 
 const settingsPath = path.join(__dirname, 'settings.json');
 const streamServerPath = path.join(__dirname, '3las.server.js');
@@ -55,8 +56,16 @@ function createProcess(processName) {
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
     let inputDevice = channelSettings.ffmpegInputDevice;
     let port = channelSettings.port;
+    let bufSize = 2048;
+    // let bufSize = 960;
+
+    // let rtbufsize = 64;
+    let rtbufsize = 64;
+
+    // let probesize = 64;
+    let probesize = 64;
     
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize 64 -probesize 64 -y '+ inputDevice +' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960 pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize '+ rtbufsize +' -probesize '+ probesize +' -y '+ inputDevice +' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     pm2.start({
         name: processName,
@@ -87,6 +96,18 @@ function startProcess(processName) {
     }
 }
 
+function deleteProcess(processName) {
+    if (processExists(processName)) {
+        pm2.delete(processName, (err, proc) => {
+            if (err) {
+                console.error(`Error deleting process ${processName}: ${err}`);
+                return;
+            }
+            console.log(`Deleted process ${processName}`);
+        });
+    }
+}
+
 // Stop a process
 function stopProcess(processName) {
     pm2.stop(processName, (err, proc) => {
@@ -100,13 +121,15 @@ function stopProcess(processName) {
 
 // Restart a process
 function restartProcess(processName) {
-    pm2.restart(processName, (err, proc) => {
-        if (err) {
-            console.error(`Error restarting process ${processName}: ${err}`);
-            return;
-        }
-        console.log(`Restarted process ${processName}`);
-    });
+    deleteProcess(processName);
+    createProcess(processName);
+    // pm2.restart(processName, (err, proc) => {
+    //     if (err) {
+    //         console.error(`Error restarting process ${processName}: ${err}`);
+    //         return;
+    //     }
+    //     console.log(`Restarted process ${processName}`);
+    // });
 }
 
 

@@ -44,6 +44,11 @@
                 channelButton.textContent = settingsInfo.channels[channelId].name;
                 channelButton.onclick = function () {                     // Set the onclick function of the button
                     Init(settingsInfo.channels[channelId]);
+                    try {
+                        Stream.Start();
+                    }
+                    catch (_ex) {
+                    }
                     //    window.addEventListener('load', function(_ev) { Init(_ev, settingsInfo.channels[channelId]) }, false);
                 };
 
@@ -77,6 +82,10 @@
 
 <body>
     <div class="container">
+        <div class="topTitleCtn">
+            <div class="topTitle">Thrangu Sekhar</div>
+            <div class="topTitle">Translation Services</div>
+        </div>
         <div id="channels"></div>
 
         <div id="currentChannel"></div>

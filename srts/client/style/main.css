@@ -1,3 +1,23 @@
+@font-face {
+    font-family: 'SecularOne';
+    src: url('SecularOne-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Lexend';
+    src: url('Lexend-VariableFont_wght.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Lexend';
+    padding: 0;
+    margin: 0;
+}
+
 .container {
     /* max-width: 1300px; */
     background: #fffeea;
@@ -16,25 +36,57 @@
     justify-content: center;
 }
 
-#channels {
+.topTitleCtn {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    column-gap: 10px;
+    grid-template-columns: 1fr;
     padding-bottom: 20px;
 }
 
+.topTitle:nth-child(1) {
+    font-size: 30px;
+    text-align: center;
+  }
+
+  .topTitle:nth-child(2) {
+    font-size: 23px;
+    text-align: center;
+  }
+
+#channels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    column-gap: 17px;
+    padding-bottom: 20px;
+}
+
+@media (max-width: 500px) {
+    #channels {
+    grid-template-columns:  1fr 1fr;
+    row-gap: 17px;
+    column-gap: 17px;
+    }
+  }
+  
+
 #currentChannel {
-    font: 24px Verdana; 
+    font-size: 24px; 
     font-weight: 400;
     padding-bottom: 20px;
 }
 
 .channel_button {
     display: block;
-    font: 17px Verdana;
+    font-family: 'Lexend';
+    font-size: 17px;
     font-weight: 400;
-    padding: 10px;
-    border: solid 2px #333;
+    padding: 17px;
+    border: solid 1px #333;
+    color:#333333;
+    border-radius: 6px;
+}
+
+#audioplayer {
+    border-radius: 16px;
 }
 
 #viewcontainer .channel_1 {
@@ -54,20 +106,16 @@
 
 #channels #channel_1 {
     background-color: #d09191;
-    color: #EE0000;
 }
 
 #channels #channel_2 {
     background-color: #5d93cc;
-    color: #1b3e66;
 }
 #channels #channel_3 {
     background-color: #ddd7a8;
-    color: #f0ed24;
 }
 #channels #channel_4 {
     background-color: #b8c89e;
-    color: #517b3f;
 }
 
 div#viewcontainer {
@@ -81,7 +129,6 @@ div.errormessage {
     height: 150pt;
     left: 0pt;
     top: 0pt;
-    font-family: sans-serif;
     font-size: 20pt;
     font-weight: 200;
     color: #EE0000;
@@ -95,7 +142,6 @@ div#chromesuggestion {
     height: 150pt;
     left: 0pt;
     top: 0pt;
-    font-family: sans-serif;
     font-size: 15pt;
     font-weight: 200;
     color: #EEEEEE;
