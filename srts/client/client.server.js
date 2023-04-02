@@ -40,3 +40,22 @@ io.on('connection', (socket) => {
         socket.emit('settings-info-value', getSettings());
       });
 });
+
+io.on("submit-comment", (comment) => {
+    const dateTime = new Date().toISOString().replace(/:/g, "-");
+    const fileName = `${dateTime}.txt`;
+    const folderName = "comments";
+    const filePath = path.join(__dirname, folderName, fileName);
+
+    socket.emit('submit-comment-return', filePath);
+  
+    fs.writeFile(filePath, comment, (err) => {
+      if (err) {
+        console.error(`Error writing file ${filePath}: ${err}`);
+        return;
+      }
+  
+      console.log(`Comment written to file ${filePath}`);
+    });
+  });
+

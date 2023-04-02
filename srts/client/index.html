@@ -64,6 +64,23 @@
         // Emit a 'settings-info-value' event to the server to trigger the function call
         socket.emit('settings-info');
 
+        // Handle comment submit
+        window.onload = function() {
+
+        const submitCommentButton = document.querySelector("#submit-comment");
+        const commentTextArea = document.querySelector("#comment");
+
+        submitCommentButton.onclick = function () {
+            const comment = commentTextArea.value;
+            socket.emit("submit-comment", comment);
+            commentTextArea.value = "";
+        };
+
+        socket.on('submit-comment-return', (message) => {
+            alert(message);
+        });
+
+    };
         // Bind init to page load see code in main.ts/main.js
         // window.addEventListener('load', Init, false);
 
@@ -139,6 +156,11 @@
             <p>Please try another browser.</p>
         </div>
         <div id="lightoff" style="display: none;"></div>
+
+        <div class="disclaimer">Please note that this audio streaming page is a work in progress. If you encounter any
+            issues or have suggestions, please let me know in the box below and press send. Thank you.</div>
+        <textarea id="comment"></textarea>
+        <button id="submit-comment">Send</button>
     </div>
 </body>
 

@@ -12,6 +12,14 @@
     font-style: normal;
 }
 
+.disclaimer {
+    padding-bottom: 15px;
+}
+
+#comment {
+    padding-bottom: 15px;
+}
+
 body {
     font-family: 'Lexend';
     padding: 0;

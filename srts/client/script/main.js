@@ -11,7 +11,7 @@
 var Stream;
 var DefaultVolume = 0.5;
 function Init(channelSettings="") {
-    // alert("PARLA");
+
     document.getElementById("logwindowbutton").onclick = OnLogWindowButtonClick;
     var logger = new Logging(document.getElementById("logwindow"), "li");
     // Load default settings
