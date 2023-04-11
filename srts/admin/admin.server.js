@@ -21,8 +21,14 @@ app.get('/', (req, res) => {
 
 app.use(express.static(__dirname));
 
-
-const processNames = ['channel_1', 'channel_2', 'channel_3', 'channel_4'];
+function saveSettings() {
+    try {
+        fs.writeFileSync(settingsPath, JSON.stringify(Settings));
+        console.log('Settings saved successfully.');
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 function processExists(processName) {
     pm2.describe(processName, (err, processDescription) => {
@@ -51,8 +57,8 @@ function createProcess(processName) {
     }
 
     let channelSettings = Settings["channels"][processName];
-      
-    let outputFile = channelSettings.outputFile; 
+
+    let outputFile = channelSettings.outputFile;
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
     let inputDevice = channelSettings.ffmpegInputDevice;
     let port = channelSettings.port;
@@ -64,21 +70,21 @@ function createProcess(processName) {
 
     // let probesize = 64;
     let probesize = 64;
-    
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize '+ rtbufsize +' -probesize '+ probesize +' -y '+ inputDevice +' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+
+    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     pm2.start({
         name: processName,
         script: 'sh',
         args: ['-c', processCommand],
         cwd: path.dirname(__filename),
-      }, function(err) {
+    }, function (err) {
         if (err) {
-          console.error(err);
-          process.exit(1);
+            console.error(err);
+            process.exit(1);
         }
         console.log('Process started successfully');
-      });
+    });
 }
 
 // Start a process
@@ -168,31 +174,12 @@ function checkPm2ProcessStatus() {
 function getElapsedTimeFromTimestamp(timestamp) {
     const startDate = new Date(timestamp);
     const elapsed = Date.now() - startDate.getTime();
-    const seconds = Math.floor(elapsed / 1000) % 60;
     const minutes = Math.floor(elapsed / 1000 / 60) % 60;
     const hours = Math.floor(elapsed / 1000 / 60 / 60);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-
-function updateElapsedTime(processName) {
-
-    const startTimeCommand = `pm2 jlist | jq '.[] | select(.name == "${processName}") | .pm2_env.pm_uptime'`;
-    io.emit(`${processName}-time`, startTimeCommand); return;
-
-    pm2.describe(processName, (err, processInfo) => {
-        if (err) {
-            console.error(`Error: ${err}`);
-            return;
-        }
-
-        const startTime = processInfo.pm2_env.pm_uptime;
-        const elapsed = Date.now() - startTime;
-
-        io.emit(`${processName}-time`, formatTime(elapsed));
-
-    });
-}
+    const hoursString = hours > 0 ? `${hours}h ` : '';
+    const minutesString = `${minutes}m`;
+    return `${hoursString}${minutesString}`;
+  }  
 
 function formatTime(milliseconds) {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -215,7 +202,7 @@ io.on('connection', (socket) => {
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
         socket.emit('settings-info-value', getSettings());
-      });
+    });
 
     // Listen for start/stop events from clients
     socket.on('start-process', (processName) => {
@@ -230,10 +217,19 @@ io.on('connection', (socket) => {
         restartProcess(processName);
     });
 
+    socket.on('update-info', (infoArray) => {
+        console.log("Youp1");
+        console.log(JSON.stringify(infoArray));
+        console.log(infoArray.field);
+        Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
+        saveSettings();
+    });
+
+
 });
 
 http.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    //console.log(`Server listening on port ${PORT}`);
 
     // Send initial status to clients
     // for (const processName of processNames) {
@@ -242,10 +238,12 @@ http.listen(PORT, () => {
 
     // Send status updates every 1 seconds
 
-    // Send status updates every 1 seconds
+    // Send status updates every 60 seconds
     function updateStatus() {
-        processChecks();
-        setTimeout(updateStatus, 1500);
+        setInterval(function() {
+            processChecks();
+        }, 60000);
+
     }
     updateStatus();
 

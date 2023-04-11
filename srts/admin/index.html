@@ -64,6 +64,22 @@
                 }
             }
 
+            function emitUpdateInfo(infoArray) {
+                // Check if infoArray has the expected properties
+                if (
+                    typeof infoArray === 'object' && // Check if infoArray is an object
+                    infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
+                    infoArray.field === 'language' && // Check if the value of the 'field' property is 'language'
+                    infoArray.hasOwnProperty('channel_id') && // Check if infoArray has the 'channel_id' property
+                    typeof infoArray.channel_id === 'string' && // Check if the value of the 'channel_id' property is a string
+                    infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
+                ) {
+                    socket.emit('update-info', infoArray);
+                } else {
+                    console.log('Invalid infoArray format');
+                }
+            }
+
             function createChannelsInfo(settingsInfo) {
                 for (const channelId in settingsInfo.channels) {
 
@@ -118,11 +134,22 @@
                     // Add language name column
                     const languageSelect = document.createElement('select');
                     languageSelect.className = 'language-select';
+                    languageSelect.setAttribute('channel-id', channelId);
 
                     const option = document.createElement('option');
                     option.value = '';
                     option.text = 'Select Language';
                     languageSelect.appendChild(option);
+                    languageSelect.onchange = (event) => {
+                        // TODO get select value and
+                        const curLanguage = event.target.value;
+                        const infoArray = {
+                            field: 'language',
+                            channel_id: channelId,
+                            value: curLanguage
+                        };
+                        emitUpdateInfo(infoArray);
+                    };
 
                     // Loop through the object keys and values and create options
                     for (const [code, language] of Object.entries(settingsInfo.languages)) {

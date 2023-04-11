@@ -33,16 +33,36 @@
         var RtcConfig = {};
         var AudioTagId = "audioTag";
 
+        function updateChannelsInfo(settingsInfo) {
+
+
+            for (const channelId in settingsInfo.channels) {
+                const languageCode = settingsInfo.channels[channelId].language
+                const languageName = settingsInfo.languages[languageCode].name;
+
+                const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
+ 
+                if (channelLangDiv.innerHTML != languageName) {
+                    channelLangDiv.innerHTML = languageName;
+                }
+            }
+
+
+        
+        }
+
         function createChannelsBlocks(settingsInfo) {
             for (const channelId in settingsInfo.channels) {
 
                 const channelsDiv = document.querySelector("#channels");
                 const channel = settingsInfo.channels[channelId];
-                const channelButton = document.createElement('button');
+                const channelButton = document.createElement('div');
+                const languageName = settingsInfo.languages[settingsInfo.channels[channelId].language].name;
                 channelButton.className = 'channel_button';
                 channelButton.id = channelId;
-                channelButton.textContent = settingsInfo.channels[channelId].name;
-                channelButton.onclick = function () {                     // Set the onclick function of the button
+                channelButton.innerHTML = '<div class="channel_name">' + settingsInfo.channels[channelId].name + '</div>';
+                channelButton.insertAdjacentHTML('beforeend', '<div class="channel_lang">' + languageName + '</div>');
+                channelButton.onclick = function () {
                     Init(settingsInfo.channels[channelId]);
                     try {
                         Stream.Start();
@@ -57,7 +77,13 @@
         }
 
         // Add an event listener for the 'return-value' event on the socket
+        socket.on('update-channels-info', (channelsInfo) => {
+            updateChannelsInfo(channelsInfo);
+        });
+
+        // Add an event listener for the 'return-value' event on the socket
         socket.on('settings-info-value', (settingsInfo) => {
+
             createChannelsBlocks(settingsInfo);
         });
 
@@ -65,22 +91,23 @@
         socket.emit('settings-info');
 
         // Handle comment submit
-        window.onload = function() {
+        window.onload = function () {
 
-        const submitCommentButton = document.querySelector("#submit-comment");
-        const commentTextArea = document.querySelector("#comment");
+            const submitCommentButton = document.querySelector("#submit-comment");
+            const commentTextArea = document.querySelector("#comment");
 
-        submitCommentButton.onclick = function () {
-            const comment = commentTextArea.value;
-            socket.emit("submit-comment", comment);
-            commentTextArea.value = "";
+            submitCommentButton.onclick = function () {
+                const comment = commentTextArea.value;
+                socket.emit("submit-comment", comment);
+                commentTextArea.value = "";
+            };
+
+            // TODO Finish that!
+            socket.on('submit-comment-return', (message) => {
+                alert(message);
+            });
+
         };
-
-        socket.on('submit-comment-return', (message) => {
-            alert(message);
-        });
-
-    };
         // Bind init to page load see code in main.ts/main.js
         // window.addEventListener('load', Init, false);
 
