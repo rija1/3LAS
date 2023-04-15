@@ -12,7 +12,19 @@
         <h1>Thrangu Sekhar Translation Services</h1>
         <h2>Administration Panel</h2>
 
+        <div class="teaching-info">
+            <div class="status-header">Teaching Info</div>
+            <label for="teaching_lama">Lama / Teacher</label>
+            <select id="teaching_lama"></select>
+            <label for="teaching_name">Teaching</label>
+            <select id="teaching_name"></select>
+            <label for="teaching_name">Server Copy Folder</label>
+            <select id="copy_folder"></select>
+
+        </div>
+
         <div class="status-actions">
+            <div class="status-header">Actions</div>
             <button id="start-all-button">Start All</button>
             <button id="stop-all-button">Stop All</button>
             <button id="restart-all-button">Restart All</button>
@@ -64,20 +76,92 @@
                 }
             }
 
-            function emitUpdateInfo(infoArray) {
+            function emitUpdateTeachingInfo(infoArray) {
                 // Check if infoArray has the expected properties
                 if (
                     typeof infoArray === 'object' && // Check if infoArray is an object
                     infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
-                    infoArray.field === 'language' && // Check if the value of the 'field' property is 'language'
+                    infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
+                ) {
+                    socket.emit('update-teaching-info', infoArray);
+                } else {
+                    console.log('Invalid infoArray format');
+                }
+            }
+
+            function emitUpdateChannelInfo(infoArray) {
+                // Check if infoArray has the expected properties
+                if (
+                    typeof infoArray === 'object' && // Check if infoArray is an object
+                    infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
                     infoArray.hasOwnProperty('channel_id') && // Check if infoArray has the 'channel_id' property
                     typeof infoArray.channel_id === 'string' && // Check if the value of the 'channel_id' property is a string
                     infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
                 ) {
-                    socket.emit('update-info', infoArray);
+                    socket.emit('update-channel-info', infoArray);
                 } else {
                     console.log('Invalid infoArray format');
                 }
+            }
+
+            function createTeachingInfo(settingsInfo) {
+
+                // Lama Select
+
+                teachingLamaSelect = document.querySelector("#teaching_lama");
+
+                const teachingLamaOption = document.createElement('option');
+                teachingLamaOption.value = '';
+                teachingLamaOption.text = 'Select Lama';
+                teachingLamaSelect.appendChild(teachingLamaOption);
+                teachingLamaSelect.onchange = (event) => {
+                    const curTeachingLama = event.target.value;
+                    const infoArray = {
+                        field: 'lama',
+                        value: curTeachingLama
+                    };
+                    emitUpdateTeachingInfo(infoArray);
+                };
+
+                const settingTeachingLama = settingsInfo.teaching_info.lama;
+                for (const [lamaCode, lamaName] of Object.entries(settingsInfo.lamas)) {
+                    const option = document.createElement('option');
+                    option.value = lamaCode;
+                    option.text = lamaName;
+                    if (lamaCode === settingTeachingLama) {
+                        option.selected = true;
+                    }
+                    teachingLamaSelect.appendChild(option);
+                }
+
+                // Teaching Select
+
+                teachingNameSelect = document.querySelector("#teaching_name");
+
+                const teachingNameOption = document.createElement('option');
+                teachingNameOption.value = '';
+                teachingNameOption.text = 'Select Teaching';
+                teachingNameSelect.appendChild(teachingNameOption);
+                teachingNameSelect.onchange = (event) => {
+                    const curTeachingName = event.target.value;
+                    const infoArray = {
+                        field: 'teaching',
+                        value: curTeachingName
+                    };
+                    emitUpdateTeachingInfo(infoArray);
+                };
+
+                const settingTeachingName = settingsInfo.teaching_info.teaching;
+                for (const [teachingCode, teachingName] of Object.entries(settingsInfo.teachings)) {
+                    const option = document.createElement('option');
+                    option.value = teachingCode;
+                    option.text = teachingName;
+                    if (teachingCode === settingTeachingName) {
+                        option.selected = true;
+                    }
+                    teachingNameSelect.appendChild(option);
+                }
+
             }
 
             function createChannelsInfo(settingsInfo) {
@@ -141,21 +225,24 @@
                     option.text = 'Select Language';
                     languageSelect.appendChild(option);
                     languageSelect.onchange = (event) => {
-                        // TODO get select value and
                         const curLanguage = event.target.value;
                         const infoArray = {
                             field: 'language',
                             channel_id: channelId,
                             value: curLanguage
                         };
-                        emitUpdateInfo(infoArray);
+                        emitUpdateChannelInfo(infoArray);
                     };
 
                     // Loop through the object keys and values and create options
+                    const channelLanguage = settingsInfo.channels[channelId].language;
                     for (const [code, language] of Object.entries(settingsInfo.languages)) {
                         const option = document.createElement('option');
                         option.value = code;
                         option.text = language.name;
+                        if (code === channelLanguage) {
+                            option.selected = true;
+                        }
                         languageSelect.appendChild(option);
                     }
 
@@ -167,6 +254,48 @@
                     languageBlock.appendChild(languageLabel);
                     languageBlock.appendChild(languageSelect);
                     channelOptions.appendChild(languageBlock);
+
+                    // Add input column
+                    const deviceSelect = document.createElement('select');
+                    deviceSelect.className = 'device-select';
+                    deviceSelect.setAttribute('channel-id', channelId);
+
+                    const deviceOption = document.createElement('option');
+                    deviceOption.value = '';
+                    deviceOption.text = 'Select Device';
+                    deviceSelect.appendChild(deviceOption);
+                    deviceSelect.onchange = (event) => {
+                        const curDevice = event.target.value;
+                        const infoArray = {
+                            field: 'device',
+                            channel_id: channelId,
+                            value: curDevice
+                        };
+                        emitUpdateChannelInfo(infoArray);
+                    };
+
+                    // Loop through the object keys and values and create options
+                    const channelDevice = settingsInfo.channels[channelId].device;
+                    for (const [code, device] of Object.entries(settingsInfo.avfoundationDevices)) {
+                        const option = document.createElement('option');
+                        option.value = code;
+                        option.text = device.name;
+                        if (code === channelDevice) {
+                            option.selected = true;
+                        }
+                        deviceSelect.appendChild(option);
+                    }
+
+                    const deviceLabel = document.createElement('label');
+                    deviceLabel.textContent = "Device";
+                    const deviceBlock = document.createElement('div');
+                    deviceBlock.className = 'device-block';
+
+                    deviceBlock.appendChild(deviceLabel);
+                    deviceBlock.appendChild(deviceSelect);
+                    channelOptions.appendChild(deviceBlock);
+
+                    // Create copy checkbox
 
                     const cpServerCheckbox = document.createElement('input');
                     cpServerCheckbox.type = 'checkbox';
@@ -233,6 +362,9 @@
 
             // Add an event listener for the 'return-value' event on the socket
             socket.on('settings-info-value', (settingsInfo) => {
+
+                createTeachingInfo(settingsInfo);
+
                 createChannelsInfo(settingsInfo);
 
                 document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };

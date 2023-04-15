@@ -93,6 +93,15 @@ body {
     border-radius: 6px;
 }
 
+.channel_button div {
+    text-align: center;
+}
+
+.channel_button .channel_lang {
+    font-style: italic;
+    font-size: 14px;
+}
+
 #audioplayer {
     border-radius: 16px;
 }

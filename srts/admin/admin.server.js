@@ -22,12 +22,10 @@ app.get('/', (req, res) => {
 app.use(express.static(__dirname));
 
 function saveSettings() {
-    try {
-        fs.writeFileSync(settingsPath, JSON.stringify(Settings));
-        console.log('Settings saved successfully.');
-    } catch (err) {
-        console.error(err);
-    }
+    fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
+        if (err) throw err;
+        console.log('File written successfully!');
+    });
 }
 
 function processExists(processName) {
@@ -60,7 +58,11 @@ function createProcess(processName) {
 
     let outputFile = channelSettings.outputFile;
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
-    let inputDevice = channelSettings.ffmpegInputDevice;
+    // let inputDevice = channelSettings.ffmpegInputDevice;
+
+    let inputDevice = "-f avfoundation -i :" + channelSettings.device;
+
+
     let port = channelSettings.port;
     let bufSize = 2048;
     // let bufSize = 960;
@@ -129,13 +131,54 @@ function stopProcess(processName) {
 function restartProcess(processName) {
     deleteProcess(processName);
     createProcess(processName);
-    // pm2.restart(processName, (err, proc) => {
-    //     if (err) {
-    //         console.error(`Error restarting process ${processName}: ${err}`);
-    //         return;
-    //     }
-    //     console.log(`Restarted process ${processName}`);
-    // });
+    console.log(`Restarted process ${processName}`);
+
+}
+
+function getAvfoundationDevices() {
+    const { exec } = require('child_process');
+
+    // Get AVFoundation devices
+    exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
+
+        const audioDevices = {};
+        parseDevices = false;
+
+        // Parse the output to extract device information
+        const lines = stderr.trim().split('\n');
+
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (line.includes('AVFoundation audio devices:')) {
+                parseDevices = true;
+            }
+
+            if (parseDevices) {
+                if (line.startsWith('[AVFoundation')) {
+
+                    const regex = /\[(\d+)\] (.+)/;
+                    const matches = line.match(regex);
+
+                    if (matches) {
+                        const deviceId = matches[1];
+                        const deviceName = matches[2];
+
+                        audioDevices[deviceId] = {
+                            id: deviceId.toString(),
+                            name: deviceName
+                        };
+
+                    }
+                }
+            }
+        }
+
+        Settings.avfoundationDevices = audioDevices;
+        // Save the settings.json file 
+        saveSettings(); 
+    });
 }
 
 
@@ -179,7 +222,7 @@ function getElapsedTimeFromTimestamp(timestamp) {
     const hoursString = hours > 0 ? `${hours}h ` : '';
     const minutesString = `${minutes}m`;
     return `${hoursString}${minutesString}`;
-  }  
+}
 
 function formatTime(milliseconds) {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -217,11 +260,13 @@ io.on('connection', (socket) => {
         restartProcess(processName);
     });
 
-    socket.on('update-info', (infoArray) => {
-        console.log("Youp1");
-        console.log(JSON.stringify(infoArray));
-        console.log(infoArray.field);
+    socket.on('update-channel-info', (infoArray) => {
         Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
+        saveSettings();
+    });
+
+    socket.on('update-teaching-info', (infoArray) => {
+        Settings.teaching_info[infoArray.field] = infoArray.value;
         saveSettings();
     });
 
@@ -229,7 +274,7 @@ io.on('connection', (socket) => {
 });
 
 http.listen(PORT, () => {
-    //console.log(`Server listening on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 
     // Send initial status to clients
     // for (const processName of processNames) {
@@ -240,11 +285,15 @@ http.listen(PORT, () => {
 
     // Send status updates every 60 seconds
     function updateStatus() {
-        setInterval(function() {
+        setInterval(function () {
             processChecks();
         }, 60000);
 
     }
     updateStatus();
+
+    // Update current AVFoundation devices in settings file
+    getAvfoundationDevices();
+
 
 });

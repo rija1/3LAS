@@ -96,7 +96,7 @@ h2 {
 
 .channel-options {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-gap: 20px;
     align-items: center;
 }
@@ -110,6 +110,11 @@ h2 {
     grid-template-columns: 1fr 1fr 1fr;
     column-gap: 10px;
     padding-bottom: 30px;
+}
+
+.status-actions .status-header {
+    padding :10px;
+    grid-column: 1/4;
 }
 
 .status-indicator-container {
