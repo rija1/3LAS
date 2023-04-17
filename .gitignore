@@ -11,4 +11,4 @@ srts/server/node_modules/.DS_Store
 srts/server/.DS_Store
 srts/server/.DS_Store
 
-profiles/*
+admin/profiles/*
