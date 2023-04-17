@@ -7,8 +7,4 @@
 /server/src/node_modules
 
 .DS_Store
-srts/server/node_modules/.DS_Store
-srts/server/.DS_Store
-srts/server/.DS_Store
-
 admin/profiles/*
