@@ -101,6 +101,8 @@ var WebRTC = /** @class */ (function () {
         this.ActivityTimer = setInterval(this.OnActivityTimerTick.bind(this), 1000);
     };
     WebRTC.prototype.OnActivityTimerTick = function () {
+        // DEBUT ALERT REEDZ
+        // alert(this.RtcPeer.iceConnectionState);
         if ((this.RtcPeer.iceConnectionState == "connected" || this.RtcPeer.iceConnectionState == "completed") && this.ActivityCallback)
             this.ActivityCallback();
     };

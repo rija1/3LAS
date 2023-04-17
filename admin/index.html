@@ -12,22 +12,50 @@
         <h1>Thrangu Sekhar Translation Services</h1>
         <h2>Administration Panel</h2>
 
-        <div class="teaching-info">
-            <div class="status-header">Teaching Info</div>
-            <label for="teaching_lama">Lama / Teacher</label>
-            <select id="teaching_lama"></select>
-            <label for="teaching_name">Teaching</label>
-            <select id="teaching_name"></select>
-            <label for="teaching_name">Server Copy Folder</label>
-            <select id="copy_folder"></select>
+
+        <div class="wide-block">
+            <div class="wide-header">Settings</div>
+            <div class="wide-content">
+                <label for="profile">Profile</label>
+                <select id="profile"></select>
+                <button id="load_profile_btn">Load Profile</button>
+                <button id="save_profile_btn">Save Profile</button>
+                <button id="save_new_profile_btn">Save As New Profile</button>
+                <button id="del_profile_btn">Delete Profile</button>
+
+                <!-- Popup -->
+                <div id="profile_popup" style="display:none">
+                    <label for="profile_name">Profile Name:</label>
+                    <input type="text" id="profile_name" name="profile_name">
+                    <button id="save_popup_btn">Save</button>
+                </div>
+                <div id="profile_popup_result" style="display:none"></div>
+            </div>
 
         </div>
 
-        <div class="status-actions">
-            <div class="status-header">Actions</div>
-            <button id="start-all-button">Start All</button>
-            <button id="stop-all-button">Stop All</button>
-            <button id="restart-all-button">Restart All</button>
+
+
+        <div class="wide-block">
+            <div class="wide-header">Teaching Info</div>
+            <div class="wide-content">
+                <label for="teaching_lama">Lama / Teacher</label>
+                <select id="teaching_lama"></select>
+                <label for="teaching_name">Teaching</label>
+                <select id="teaching_name"></select>
+                <label for="teaching_name">Server Copy Folder</label>
+                <select id="teaching_copy_folder"></select>
+            </div>
+
+        </div>
+
+        <div class="wide-block">
+            <div class="wide-header">Actions</div>
+            <div class="wide-content">
+                <button id="start-all-button">Start All</button>
+                <button id="stop-all-button">Stop All</button>
+                <button id="restart-all-button">Restart All</button>
+            </div>
         </div>
 
         <div class="status-container" id="status-container">
@@ -42,6 +70,26 @@
         </div>
 
         <script>
+            ////
+            const saveProfileBtn = document.querySelector("#save_new_profile_btn");
+            const profilePopup = document.querySelector("#profile_popup");
+            const profileNameInput = document.querySelector("#profile_name");
+
+            // Show the profile popup when the save profile button is clicked
+            saveProfileBtn.addEventListener("click", () => {
+                profilePopup.style.display = "block";
+            });
+
+            // Save the profile when the save button in the popup is clicked
+            const savePopupBtn = document.querySelector("#save_popup_btn");
+            savePopupBtn.addEventListener("click", () => {
+
+                socket.emit('profile-new', profileNameInput.value);
+
+                // Hide the profile popup
+                profilePopup.style.display = "none";
+            });
+            ////
 
             // Function to start a PM2 process
             function startPM2(processName) {
@@ -162,6 +210,54 @@
                     teachingNameSelect.appendChild(option);
                 }
 
+                // Folder Select
+
+                teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
+
+                const teachingCopyFolderSelectOption = document.createElement('option');
+                teachingCopyFolderSelectOption.value = '';
+                teachingCopyFolderSelectOption.text = 'Select Folder';
+                teachingCopyFolderSelect.appendChild(teachingCopyFolderSelectOption);
+                teachingCopyFolderSelect.onchange = (event) => {
+                    const curTeachingCopyFolder = event.target.value;
+                    const infoArray = {
+                        field: 'copy_folder',
+                        value: curTeachingCopyFolder
+                    };
+                    emitUpdateTeachingInfo(infoArray);
+                };
+
+                const settingCopyFolder = settingsInfo.teaching_info.copy_folder;
+                for (const [copyFolderCode, teachingCopyFolder] of Object.entries(settingsInfo.copy_folders)) {
+                    const option = document.createElement('option');
+                    option.value = copyFolderCode;
+                    option.text = teachingCopyFolder.name;
+                    if (copyFolderCode === settingCopyFolder) {
+                        option.selected = true;
+                    }
+                    teachingCopyFolderSelect.appendChild(option);
+                }
+
+            }
+
+            function updateProfilesInfo(profiles,current_profile) {
+                profileSelect = document.querySelector("#profile");
+
+                const profileSelectOption = document.createElement('option');
+                profileSelectOption.value = '';
+                profileSelectOption.text = 'None';
+                profileSelect.appendChild(profileSelectOption);
+
+                for (const filename in profiles) {
+
+                    const option = document.createElement('option');
+                    option.value = filename;
+                    option.text = profiles[filename];
+                    if (current_profile === filename) {
+                        option.selected = true;
+                    }
+                    profileSelect.appendChild(option);
+                }
             }
 
             function createChannelsInfo(settingsInfo) {
@@ -354,10 +450,8 @@
             const statusContainer = document.getElementById('status-container');
             const socket = io();
 
-            // TODO create socket in server etc
-            // Add an event listener for the 'return-value' event on the socket
-            socket.on('settings-info-update', (settingsInfo) => {
-                updateChannelsInfo(settingsInfo);
+            socket.on('profiles-update', (profiles,current_profile) => {
+                updateProfilesInfo(profiles,current_profile);
             });
 
             // Add an event listener for the 'return-value' event on the socket
@@ -374,22 +468,17 @@
 
             });
 
+            socket.on('profile-new-result', (profileNewResult) => {
+                const profilePopupResult = document.querySelector("#profile_popup_result");
+                profilePopupResult.textContent = profileNewResult;
+                profilePopupResult.style.display = "block";
+
+            });
+
             // Emit a 'settings-info-value' event to the server to trigger the function call
             socket.emit('settings-info');
-
-
-            // DEBUG
-            // Create a new div
-            const reedzDebug = document.createElement('div');
-
-
-
-            // Add the new div inside the existing div
-            document.querySelector('.status-actions').appendChild(reedzDebug);
-            // Listen for status updates from server
-            socket.on(`reedzdebug`, (debug) => {
-                reedzDebug.textContent = debug;
-            });
+            // Update profiles
+            socket.emit('get-profiles');
 
         </script>
 

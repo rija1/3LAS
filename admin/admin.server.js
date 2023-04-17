@@ -10,6 +10,7 @@ const { start } = require('repl');
 const settingsPath = path.join(__dirname, 'settings.json');
 const streamServerPath = path.join(__dirname, '3las.server.js');
 const Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+const profilesPath = path.join(__dirname, 'profiles');
 // const exportPath = path.join(__dirname, 'settings.json');
 
 const PORT = process.env.PORT || 3000;
@@ -175,9 +176,13 @@ function getAvfoundationDevices() {
             }
         }
 
-        Settings.avfoundationDevices = audioDevices;
-        // Save the settings.json file 
-        saveSettings(); 
+        // TODO check why it always saves it below
+        if(Settings.avfoundationDevices != audioDevices) {
+            Settings.avfoundationDevices = audioDevices;
+            saveSettings(); 
+            // console.log('AVFoundation devices updated.'); 
+        }
+        
     });
 }
 
@@ -236,6 +241,52 @@ function processChecks() {
     checkPm2ProcessStatus();
 }
 
+
+function sendProfiles()
+{
+    const profiles = {};
+
+    fs.readdir(profilesPath, (err, files) => {
+      if (err) {
+        console.error(`Error reading directory: ${err}`);
+        return;
+      }
+      const jsonFiles = files.filter(file => file.endsWith('.json'));
+      
+      jsonFiles.forEach(file => {
+        const filePath = `${profilesPath}/${file}`;
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const profile = JSON.parse(fileContent).profile_name;
+        profiles[file] = profile;
+      });
+      
+      io.emit('profiles-update', profiles, Settings.current_profile);
+    });
+}
+
+function createProfile(profileName) {
+    
+    const profileFilename = profileName.toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '_')
+        + ".json";
+
+    const newProfileJsonPath = path.join(profilesPath, profileFilename);
+
+    const newProfileSettings = {
+        "profile_name":profileName,
+        "teaching_info": Settings.teaching_info,
+        "channels": Settings.channels,
+        "avfoundationDevices": Settings.avfoundationDevices
+    };
+
+    
+    fs.writeFile(newProfileJsonPath, JSON.stringify(newProfileSettings), { flag: 'w' }, (err) => {
+        if (err) throw err;
+        io.emit('profile-new-result','New profile created successfully. Please reload the page to see it.');
+    });
+}
+
 // Listen for socket.io connections
 io.on('connection', (socket) => {
 
@@ -268,6 +319,14 @@ io.on('connection', (socket) => {
     socket.on('update-teaching-info', (infoArray) => {
         Settings.teaching_info[infoArray.field] = infoArray.value;
         saveSettings();
+    });
+
+    socket.on('get-profiles', () => {
+        sendProfiles();
+    });
+
+    socket.on('profile-new', (profileName) => {
+        createProfile(profileName);
     });
 
 

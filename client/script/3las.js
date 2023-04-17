@@ -1,5 +1,6 @@
 var _3LAS_Settings = /** @class */ (function () {
     function _3LAS_Settings(channelSettings) {
+        // this.SocketHost = "localhost";
         this.SocketHost = document.location.hostname ? document.location.hostname : "127.0.0.1";
         this.SocketPort = channelSettings.port;
         this.SocketPath = "/";

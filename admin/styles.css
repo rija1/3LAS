@@ -36,7 +36,7 @@ h2 {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: red;
+    /* background-color: red; */
     display: inline-block;
     margin: 5px;
 }
@@ -101,15 +101,27 @@ h2 {
     align-items: center;
 }
 
-.status-header {
-    background-color: #a5c956;
+#profile_popup {
+    padding-top: 20px;
 }
 
-.status-actions {
+.wide-block {
+    /* padding-bottom: 10px; */
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
     column-gap: 10px;
-    padding-bottom: 30px;
+}
+
+.wide-header {
+    padding:11px;
+}
+
+.wide-content {
+    padding:16px;
+}
+
+.status-header, .wide-header {
+    background-color: #a5c956;
 }
 
 .status-actions .status-header {
@@ -130,4 +142,7 @@ h2 {
     grid-template-columns: 1fr 1fr;
     column-gap: 10px;
     justify-content: center;
+}
+label, input[type=checkbox] {
+    margin-right: 10px;
 }
