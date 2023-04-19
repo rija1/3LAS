@@ -41,14 +41,14 @@
                 const languageName = settingsInfo.languages[languageCode].name;
 
                 const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
- 
+
                 if (channelLangDiv.innerHTML != languageName) {
                     channelLangDiv.innerHTML = languageName;
                 }
             }
 
 
-        
+
         }
 
         function createChannelsBlocks(settingsInfo) {
@@ -127,67 +127,73 @@
 <body>
     <div class="container">
         <div class="topTitleCtn">
-            <div class="topTitle">Thrangu Sekhar</div>
-            <div class="topTitle">Translation Services</div>
+            <!-- <span class="logowheel">☸</span> -->
+            <img class="logomarpa" src="style/marpa-live-high-resolution-color-logo.png" />
+            <!-- <div class="topTitle">Marpa Live</div> -->
+            <!-- <div class="topTitle">Translation Services</div> -->
         </div>
-        <div id="channels"></div>
 
-        <div id="currentChannel"></div>
-        <audio id="audioTag"></audio>
-        <!-- <audio id="audioTag2"></audio> -->
-        <div id="viewcontainer">
-            <div id="audioplayer">
-                <div id="playbuttonoverlay">
-                    <div id="playbutton"></div>
-                </div>
-                <div id="activityindicator">
-                    <div id="redlighton"></div>
-                    <div id="redlightoff"></div>
-                </div>
-                <div id="controlbar">
-                    <div id="mutebutton"></div>
-                    <div id="unmutebutton"></div>
-                </div>
-                <div id="volumebar">
-                    <div id="totalvolume"></div>
-                    <div id="currentvolume"></div>
-                    <div id="volumeknob"></div>
-                </div>
-            </div>
-            <p id="logwindowbutton">Show/Hide event log</p>
-            <ul id="logwindow"></ul>
-        </div>
-        <div id="lightbutton" style="display: none;"></div>
-        <noscript>
-            <div class="errormessage">
-                <p>JavaScript not supported!</p>
-                <p>Please enable JavaScript.</p>
-                <p>Or try another browser.</p>
-            </div>
-        </noscript>
-        <div id="chromesuggestion">
-            <p>We recommend viewing this page with Google Chrome.</p>
-            <p><a href="http://itunes.apple.com/app/id535886823">Download Google Chrome</a></p>
-            <p><span onclick="hideChromeBanner();">Ignore and continue</span></p>
-        </div>
-        <div class="errormessage" id="typesunsupported" style="display: none;">
-            <p>None of the used datatypes are supported by your browser!</p>
-            <p>Please try another browser.</p>
-        </div>
-        <div class="errormessage" id="socketsunsupported" style="display: none;">
-            <p>Websockets are not supported by your browser!</p>
-            <p>Please try another browser.</p>
-        </div>
-        <div class="errormessage" id="webaudiounsupported" style="display: none;">
-            <p>The WebAudio API is not supported by your browser!</p>
-            <p>Please try another browser.</p>
-        </div>
-        <div id="lightoff" style="display: none;"></div>
+        <div class="content">
+            <div id="channels"></div>
 
-        <div class="disclaimer">Please note that this audio streaming page is a work in progress. If you encounter any
-            issues or have suggestions, please let me know in the box below and press send. Thank you.</div>
-        <textarea id="comment"></textarea>
-        <button id="submit-comment">Send</button>
+            <div id="currentChannel"></div>
+            <audio id="audioTag"></audio>
+            <!-- <audio id="audioTag2"></audio> -->
+            <div id="viewcontainer">
+                <div id="audioplayer">
+                    <div id="playbuttonoverlay">
+                        <div id="playbutton"></div>
+                    </div>
+                    <div id="activityindicator">
+                        <div id="redlighton"></div>
+                        <div id="redlightoff"></div>
+                    </div>
+                    <div id="controlbar">
+                        <div id="mutebutton"></div>
+                        <div id="unmutebutton"></div>
+                    </div>
+                    <div id="volumebar">
+                        <div id="totalvolume"></div>
+                        <div id="currentvolume"></div>
+                        <div id="volumeknob"></div>
+                    </div>
+                </div>
+                <p id="logwindowbutton">Show/Hide event log</p>
+                <ul id="logwindow"></ul>
+            </div>
+            <div id="lightbutton" style="display: none;"></div>
+            <noscript>
+                <div class="errormessage">
+                    <p>JavaScript not supported!</p>
+                    <p>Please enable JavaScript.</p>
+                    <p>Or try another browser.</p>
+                </div>
+            </noscript>
+            <div id="chromesuggestion">
+                <p>We recommend viewing this page with Google Chrome.</p>
+                <p><a href="http://itunes.apple.com/app/id535886823">Download Google Chrome</a></p>
+                <p><span onclick="hideChromeBanner();">Ignore and continue</span></p>
+            </div>
+            <div class="errormessage" id="typesunsupported" style="display: none;">
+                <p>None of the used datatypes are supported by your browser!</p>
+                <p>Please try another browser.</p>
+            </div>
+            <div class="errormessage" id="socketsunsupported" style="display: none;">
+                <p>Websockets are not supported by your browser!</p>
+                <p>Please try another browser.</p>
+            </div>
+            <div class="errormessage" id="webaudiounsupported" style="display: none;">
+                <p>The WebAudio API is not supported by your browser!</p>
+                <p>Please try another browser.</p>
+            </div>
+            <div id="lightoff" style="display: none;"></div>
+
+            <div class="disclaimer">Please note that this audio streaming page is a work in progress. If you encounter
+                any
+                issues or have suggestions, please let me know in the box below and press send. Thank you.</div>
+            <textarea id="comment"></textarea>
+            <button id="submit-comment">Send</button>
+        </div>
     </div>
 </body>
 

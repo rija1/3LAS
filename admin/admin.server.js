@@ -40,6 +40,9 @@ function processExists(processName) {
 }
 
 function getSettings() {
+
+    getAvfoundationDevices();
+
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
         return;
@@ -61,8 +64,15 @@ function createProcess(processName) {
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
     // let inputDevice = channelSettings.ffmpegInputDevice;
 
-    let inputDevice = "-f avfoundation -i :" + channelSettings.device;
+    let audioPan = '';
+    if (channelSettings.pan == "left") {
+        audioPan = ' -af "pan=mono|c0=c0" ';
+    }
+    if (channelSettings.pan == "right") {
+        audioPan = ' -af "pan=mono|c0=c1" ';
+    }
 
+    let inputDevice = "-f avfoundation -i :" + channelSettings.device;
 
     let port = channelSettings.port;
     let bufSize = 2048;
@@ -74,7 +84,7 @@ function createProcess(processName) {
     // let probesize = 64;
     let probesize = 64;
 
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
     console.log(processCommand);
     pm2.start({
         name: processName,
@@ -148,7 +158,6 @@ function getAvfoundationDevices() {
         // Parse the output to extract device information
         const lines = stderr.trim().split('\n');
 
-
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
 
@@ -175,14 +184,14 @@ function getAvfoundationDevices() {
                 }
             }
         }
-
+        
         // TODO check why it always saves it below
-        if(Settings.avfoundationDevices != audioDevices) {
+        if (Settings.avfoundationDevices != audioDevices) {
             Settings.avfoundationDevices = audioDevices;
-            saveSettings(); 
+            saveSettings();
             // console.log('AVFoundation devices updated.'); 
         }
-        
+
     });
 }
 
@@ -242,30 +251,29 @@ function processChecks() {
 }
 
 
-function sendProfiles()
-{
+function sendProfiles() {
     const profiles = {};
 
     fs.readdir(profilesPath, (err, files) => {
-      if (err) {
-        console.error(`Error reading directory: ${err}`);
-        return;
-      }
-      const jsonFiles = files.filter(file => file.endsWith('.json'));
-      
-      jsonFiles.forEach(file => {
-        const filePath = `${profilesPath}/${file}`;
-        const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const profile = JSON.parse(fileContent).profile_name;
-        profiles[file] = profile;
-      });
-      
-      io.emit('profiles-update', profiles, Settings.current_profile);
+        if (err) {
+            console.error(`Error reading directory: ${err}`);
+            return;
+        }
+        const jsonFiles = files.filter(file => file.endsWith('.json'));
+
+        jsonFiles.forEach(file => {
+            const filePath = `${profilesPath}/${file}`;
+            const fileContent = fs.readFileSync(filePath, 'utf-8');
+            const profile = JSON.parse(fileContent).profile_name;
+            profiles[file] = profile;
+        });
+
+        io.emit('profiles-update', profiles, Settings.current_profile);
     });
 }
 
 function createProfile(profileName) {
-    
+
     const profileFilename = profileName.toLowerCase()
         .replace(/[^\w\s]/gi, '')
         .replace(/\s+/g, '_')
@@ -274,16 +282,16 @@ function createProfile(profileName) {
     const newProfileJsonPath = path.join(profilesPath, profileFilename);
 
     const newProfileSettings = {
-        "profile_name":profileName,
+        "profile_name": profileName,
         "teaching_info": Settings.teaching_info,
         "channels": Settings.channels,
         "avfoundationDevices": Settings.avfoundationDevices
     };
 
-    
+
     fs.writeFile(newProfileJsonPath, JSON.stringify(newProfileSettings), { flag: 'w' }, (err) => {
         if (err) throw err;
-        io.emit('profile-new-result','New profile created successfully. Please reload the page to see it.');
+        io.emit('profile-new-result', 'New profile created successfully. Please reload the page to see it.');
     });
 }
 
@@ -312,6 +320,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('update-channel-info', (infoArray) => {
+        console.log(infoArray);
         Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
         saveSettings();
     });

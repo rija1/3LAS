@@ -72,6 +72,22 @@ h2 {
 
 }
 
+.language-block, .device-block, .pan-block {
+    display: grid;
+    grid-template-columns: 100px;
+    text-align: left;
+    row-gap: 10px;
+    padding-bottom: 18px;
+}
+
+.cp-export-block {
+    text-align: left;
+}
+
+label.greyedout {
+    color:#aaa;
+}
+
 .status-container {
     display: grid;
     grid-template-columns: repeat(1, minmax(150px, 1fr));
@@ -81,7 +97,7 @@ h2 {
 .status-item,
 .status-header {
     display: grid;
-    grid-template-columns: 80px 120px 120px 100px 1fr;
+    grid-template-columns: 60px 90px 80px 100px 1fr;
     /* grid-template-columns: repeat(auto-fit, minmax(10px, 1fr)); */
     grid-gap: 20px;
     align-items: center;
@@ -96,7 +112,7 @@ h2 {
 
 .channel-options {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, auto);
     grid-gap: 20px;
     align-items: center;
 }

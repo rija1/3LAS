@@ -12,6 +12,20 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Silkscreen';
+    src: url('Silkscreen-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Aboreto';
+    src: url('Aboreto/Aboreto-Regular.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
 .disclaimer {
     padding-bottom: 15px;
 }
@@ -28,7 +42,7 @@ body {
 
 .container {
     /* max-width: 1300px; */
-    background: #fffeea;
+    background: #fff2d8;
     padding:20px;
     /* padding: 10px 20px 20px 20px;
     margin: auto;
@@ -44,6 +58,14 @@ body {
     justify-content: center;
 }
 
+.channel_button {
+    background-color: #ffe4ad;
+}
+
+.content {
+    padding: 20px;
+}
+
 .topTitleCtn {
     display: grid;
     grid-template-columns: 1fr;
@@ -51,13 +73,14 @@ body {
 }
 
 .topTitle:nth-child(1) {
-    font-size: 30px;
-    text-align: center;
+    font-family: 'Aboreto';
+    font-size: 24px;
+    /* text-align: center; */
   }
 
   .topTitle:nth-child(2) {
     font-size: 23px;
-    text-align: center;
+    /* text-align: center; */
   }
 
 #channels {
@@ -68,12 +91,37 @@ body {
 }
 
 @media (max-width: 500px) {
+
+    .container {
+        padding: 0;
+    }
+
+    .topTitleCtn {
+        display: grid;
+        /* grid-template-columns: 55px 1fr; */
+        width: 100%;
+        padding: 7px 22px 7px 39px;
+        color: #656050;
+        background: #f5ba42;
+    }
+
+    .logomarpa {
+        width: 157px;
+    }
+
+    .topTitle {
+        font-family: 'Aboreto';
+        /* padding:10px; */
+    }
+
+
+
     #channels {
     grid-template-columns:  1fr 1fr;
     row-gap: 17px;
     column-gap: 17px;
     }
-  }
+}
   
 
 #currentChannel {
@@ -104,6 +152,12 @@ body {
 
 #audioplayer {
     border-radius: 16px;
+    
+        position: absolute;
+        top: 85px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
 }
 
 #viewcontainer .channel_1 {
@@ -121,7 +175,7 @@ body {
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#b8c79e), color-stop(100%,#5d834c));
 }
 
-#channels #channel_1 {
+/* #channels #channel_1 {
     background-color: #d09191;
 }
 
@@ -133,7 +187,7 @@ body {
 }
 #channels #channel_4 {
     background-color: #b8c89e;
-}
+} */
 
 div#viewcontainer {
     display: none;

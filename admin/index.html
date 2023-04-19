@@ -43,6 +43,8 @@
                 <select id="teaching_lama"></select>
                 <label for="teaching_name">Teaching</label>
                 <select id="teaching_name"></select>
+                <label for="teaching_extra_info">Extra Info (added to filename)</label>
+                <input type="text" id="teaching_extra_info"></select>
                 <label for="teaching_name">Server Copy Folder</label>
                 <select id="teaching_copy_folder"></select>
             </div>
@@ -210,6 +212,23 @@
                     teachingNameSelect.appendChild(option);
                 }
 
+                // Teaching Extra Info
+
+                teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
+
+                const teachingExtraInfoOption = document.createElement('option');
+                teachingExtraInfoOption.value = '';
+                teachingExtraInfoOption.text = 'Extra Info (added to mp3 filename)';
+                teachingExtraInfoInput.appendChild(teachingExtraInfoOption);
+                teachingExtraInfoInput.onkeyup = (event) => {
+                    const curTeachingExtraInfo = event.target.value;
+                    const infoArray = {
+                        field: 'extra_info',
+                        value: curTeachingExtraInfo
+                    };
+                    emitUpdateTeachingInfo(infoArray);
+                };
+
                 // Folder Select
 
                 teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
@@ -240,7 +259,7 @@
 
             }
 
-            function updateProfilesInfo(profiles,current_profile) {
+            function updateProfilesInfo(profiles, current_profile) {
                 profileSelect = document.querySelector("#profile");
 
                 const profileSelectOption = document.createElement('option');
@@ -391,8 +410,95 @@
                     deviceBlock.appendChild(deviceSelect);
                     channelOptions.appendChild(deviceBlock);
 
+                    // Add side column
+
+                    const channelPan = settingsInfo.channels[channelId].pan;
+
+                    const panSelect = document.createElement('select');
+                    panSelect.className = 'pan-select';
+                    panSelect.setAttribute('channel-id', channelId);
+
+                    const panOptions = [
+                        { value: '', text: 'Both' },
+                        { value: 'left', text: 'Left' },
+                        { value: 'right', text: 'Right' }
+                    ];
+
+                    panOptions.forEach(option => {
+                        const newOption = document.createElement('option');
+                        newOption.value = option.value;
+                        newOption.textContent = option.text;
+                        if (newOption.value === channelPan) {
+                            newOption.selected = true;
+                        }
+                        panSelect.appendChild(newOption);
+                    });
+
+                    panSelect.onchange = (event) => {
+                        const curPan = event.target.value;
+                        const infoArray = {
+                            field: 'pan',
+                            channel_id: channelId,
+                            value: curPan
+                        };
+                        emitUpdateChannelInfo(infoArray);
+                    };
+
+                    const panLabel = document.createElement('label');
+                    panLabel.textContent = "Side";
+                    const panBlock = document.createElement('div');
+                    panBlock.className = 'pan-block';
+
+                    panBlock.appendChild(panLabel);
+                    panBlock.appendChild(panSelect);
+                    channelOptions.appendChild(panBlock);
+
+                    // Create export checkbox
+
+                    const channelExport = settingsInfo.channels[channelId].copy_to_server;
+                    const exportCheckbox = document.createElement('input');
+                    exportCheckbox.type = 'checkbox';
+                    exportCheckbox.id = 'export';
+
+                    const exportLabel = document.createElement('label');
+                    exportLabel.htmlFor = 'export';
+                    exportLabel.appendChild(document.createTextNode('Export MP3'));
+
+
+                    exportCheckbox.onchange = (event) => {
+                        const curExport = event.target.checked;
+                        chanCopyField = document.querySelector('#' + channelId + ' .cp-server-block');
+                        chanCopyBox = document.querySelector('#' + channelId + ' .cp-server-block input');
+                        chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
+                        if (curExport) {
+                            chanCopyBox.disabled = false;
+                            chanCopyLabel.classList.remove('greyedout');
+
+                        } else {
+                            chanCopyBox.disabled = true;
+                            chanCopyLabel.classList.add('greyedout');
+                        }
+                        const infoArray = {
+                            field: 'export',
+                            channel_id: channelId,
+                            value: curExport
+                        };
+                        emitUpdateChannelInfo(infoArray);
+                    };
+
+                    if (channelExport) {
+                        exportCheckbox.checked = true;
+                    }
+
+                    const exportBlock = document.createElement('div');
+                    exportBlock.className = 'export-block';
+
+                    exportBlock.appendChild(exportCheckbox);
+                    exportBlock.appendChild(exportLabel);
+
                     // Create copy checkbox
 
+                    const channelCpServer = settingsInfo.channels[channelId].copy_to_server;
                     const cpServerCheckbox = document.createElement('input');
                     cpServerCheckbox.type = 'checkbox';
                     cpServerCheckbox.id = 'copy_to_server';
@@ -401,13 +507,38 @@
                     cpServerLabel.htmlFor = 'copy_to_server';
                     cpServerLabel.appendChild(document.createTextNode('Copy to Server'));
 
+                    cpServerCheckbox.onchange = (event) => {
+                        const curCopyToServer = event.target.checked;
+                        const infoArray = {
+                            field: 'copy_to_server',
+                            channel_id: channelId,
+                            value: curCopyToServer
+                        };
+                        emitUpdateChannelInfo(infoArray);
+                    };
+
+                    if (channelCpServer) {
+                        cpServerCheckbox.checked = true;
+                    }
+
                     const cpServerBlock = document.createElement('div');
                     cpServerBlock.className = 'cp-server-block';
 
                     cpServerBlock.appendChild(cpServerCheckbox);
                     cpServerBlock.appendChild(cpServerLabel);
-                    channelOptions.appendChild(cpServerBlock);
 
+                    const cpExportBlock = document.createElement('div');
+                    cpExportBlock.className = 'cp-export-block';
+                    cpExportBlock.appendChild(exportBlock);
+                    cpExportBlock.appendChild(cpServerBlock);
+                    channelOptions.appendChild(cpExportBlock);
+
+                    // We grey out the copy field if the current channel's export is disabled
+                    if (!channelExport) {
+                        cpServerCheckbox.disabled = true;
+                        chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
+                        chanCopyLabel.classList.add('greyedout');
+                    }
 
                     // Listen for status updates from server
                     socket.on(`${channelId}-status`, (isRunning) => {
@@ -450,8 +581,8 @@
             const statusContainer = document.getElementById('status-container');
             const socket = io();
 
-            socket.on('profiles-update', (profiles,current_profile) => {
-                updateProfilesInfo(profiles,current_profile);
+            socket.on('profiles-update', (profiles, current_profile) => {
+                updateProfilesInfo(profiles, current_profile);
             });
 
             // Add an event listener for the 'return-value' event on the socket
