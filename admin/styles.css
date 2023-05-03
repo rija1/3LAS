@@ -84,6 +84,12 @@ h2 {
     text-align: left;
 }
 
+.export-path-block {
+    grid-row: 2;
+    grid-column: 1/5;
+
+}
+
 label.greyedout {
     color:#aaa;
 }
@@ -97,13 +103,12 @@ label.greyedout {
 .status-item,
 .status-header {
     display: grid;
-    grid-template-columns: 60px 90px 80px 100px 1fr;
+    grid-template-columns: 64px 123px 77px 180px auto;
     /* grid-template-columns: repeat(auto-fit, minmax(10px, 1fr)); */
     grid-gap: 20px;
     align-items: center;
     margin-bottom: 10px;
     /* Center items vertically */
-
 }
 
 .status-item {
@@ -115,6 +120,7 @@ label.greyedout {
     grid-template-columns: repeat(5, auto);
     grid-gap: 20px;
     align-items: center;
+    padding-bottom: 15px;
 }
 
 #profile_popup {
@@ -155,7 +161,7 @@ label.greyedout {
 
 .buttons-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     column-gap: 10px;
     justify-content: center;
 }

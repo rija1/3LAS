@@ -1,0 +1,143 @@
+{
+    "RtcConfig": null,
+    "FallbackFFmpegPath": "/usr/local/bin/ffmpeg",
+    "FallbackUseMp3": true,
+    "FallbackUseWav": true,
+    "FallbackMp3Bitrate": 128,
+    "FallbackWavSampleRate": 16000,
+    "AdminKey": "",
+    "languages": {
+        "TIB": {
+            "name": "Tibetan"
+        },
+        "EN": {
+            "name": "English"
+        },
+        "CHI": {
+            "name": "Chinese"
+        },
+        "GER": {
+            "name": "German"
+        },
+        "FR": {
+            "name": "French"
+        },
+        "SW": {
+            "name": "Swahili"
+        },
+        "HK": {
+            "name": "Hong Kong"
+        },
+        "NOR": {
+            "name": "Norwegian"
+        },
+        "SPA": {
+            "name": "Spanish"
+        }
+    },
+    "lamas": {
+        "DKR": "Drupon Khen Rinpoche",
+        "KSP": "Khenpo Sherab Phuntsok",
+        "KW": "Khenpo Wangchuk",
+        "GT": "Geshe Tsering",
+        "KT": "Khenpo Tashi"
+    },
+    "teachings": {
+        "WMPT": "Words of My Perfect Teacher",
+        "LTF": "Letter to a Friend",
+        "RIG": "Riglam",
+        "VIN": "Vinaya"
+    },
+    "copy_folders": {
+        "pub": {
+            "name": "Public",
+            "server_path": "/samba/public/"
+        },
+        "she": {
+            "name": "Shedra",
+            "server_path": "/samba/shedra/"
+        },
+        "vin": {
+            "name": "Vinaya",
+            "server_path": "/samba/vinaya/"
+        }
+    },
+    "current_profile": "",
+    "teaching_info": {
+        "lama": "GT",
+        "teaching": "LTF",
+        "copy_folder": "vin",
+        "extra_info": "Y1-S1"
+    },
+    "channels": {
+        "channel_1": {
+            "id": "channel_1",
+            "name": "Channel 1",
+            "port": "3101",
+            "ffmpegInputDevice": "-f avfoundation -i :2",
+            "outputFile": "",
+            "device": "2",
+            "pan": "",
+            "copy_to_server": true,
+            "export": true,
+            "language": "EN"
+        },
+        "channel_2": {
+            "id": "channel_2",
+            "name": "Channel 2",
+            "port": "3102",
+            "ffmpegInputDevice": "-f avfoundation -i :2",
+            "outputFile": "",
+            "device": "2",
+            "pan": "",
+            "copy_to_server": true,
+            "export": true,
+            "language": "CHI"
+        },
+        "channel_3": {
+            "id": "channel_3",
+            "name": "Channel 3",
+            "port": "3103",
+            "ffmpegInputDevice": "-f avfoundation -i :2",
+            "outputFile": "",
+            "device": "2",
+            "copy_to_server": false,
+            "export": true,
+            "language": "FR"
+        },
+        "channel_4": {
+            "id": "channel_4",
+            "name": "Channel 4",
+            "port": "3104",
+            "ffmpegInputDevice": "-f avfoundation -i :2",
+            "outputFile": "",
+            "device": "2",
+            "pan": "right",
+            "copy_to_server": false,
+            "export": true,
+            "language": "SW"
+        }
+    },
+    "avfoundationDevices": {
+        "0": {
+            "id": "0",
+            "name": "NDI Audio"
+        },
+        "1": {
+            "id": "1",
+            "name": "BlackHole 2ch"
+        },
+        "2": {
+            "id": "2",
+            "name": "MacBook Pro Microphone"
+        },
+        "3": {
+            "id": "3",
+            "name": "Loopback Audio"
+        },
+        "4": {
+            "id": "4",
+            "name": "VB-Cable"
+        }
+    }
+}

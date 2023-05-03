@@ -33,8 +33,17 @@
         var RtcConfig = {};
         var AudioTagId = "audioTag";
 
-        function updateChannelsInfo(settingsInfo) {
+        function updateTeachingInfo(settingsInfo) {
+            const teachingLamaDiv = document.querySelector('#teachingLama');
+            const teachingNameDiv = document.querySelector('#teachingName');
+            const lamaCode = settingsInfo.teaching_info.lama;
+            const teachingCode = settingsInfo.teaching_info.teaching;
 
+            // teachingLamaDiv.textContent = settingsInfo.teachings["dsdsdd"];
+            teachingNameDiv.textContent = settingsInfo.lamas[lamaCode];
+        }
+
+        function updateChannelsInfo(settingsInfo) {
 
             for (const channelId in settingsInfo.channels) {
                 const languageCode = settingsInfo.channels[channelId].language
@@ -47,8 +56,6 @@
                 }
             }
 
-
-
         }
 
         function createChannelsBlocks(settingsInfo) {
@@ -57,7 +64,16 @@
                 const channelsDiv = document.querySelector("#channels");
                 const channel = settingsInfo.channels[channelId];
                 const channelButton = document.createElement('div');
-                const languageName = settingsInfo.languages[settingsInfo.channels[channelId].language].name;
+
+                let languageName = "";
+                if (settingsInfo.channels[channelId].language != "") {
+                    languageName = settingsInfo.languages[settingsInfo.channels[channelId].language].name;
+                }
+                
+                if ((channelId=='channel_1') || (channelId=='channel_3') || (channelId=='channel_4')) {
+                    channelButton.style.display = 'none';
+                }
+
                 channelButton.className = 'channel_button';
                 channelButton.id = channelId;
                 channelButton.innerHTML = '<div class="channel_name">' + settingsInfo.channels[channelId].name + '</div>';
@@ -74,6 +90,9 @@
 
                 channelsDiv.appendChild(channelButton);
             }
+            document.querySelector("#channel1").style.display = 'none';
+            document.querySelector("#channel3").style.display = 'none';
+            document.querySelector("#channel4").style.display = 'none';
         }
 
         // Add an event listener for the 'return-value' event on the socket
@@ -83,7 +102,7 @@
 
         // Add an event listener for the 'return-value' event on the socket
         socket.on('settings-info-value', (settingsInfo) => {
-
+            updateTeachingInfo(settingsInfo);
             createChannelsBlocks(settingsInfo);
         });
 
@@ -93,19 +112,19 @@
         // Handle comment submit
         window.onload = function () {
 
-            const submitCommentButton = document.querySelector("#submit-comment");
-            const commentTextArea = document.querySelector("#comment");
+            // const submitCommentButton = document.querySelector("#submit-comment");
+            // const commentTextArea = document.querySelector("#comment");
 
-            submitCommentButton.onclick = function () {
-                const comment = commentTextArea.value;
-                socket.emit("submit-comment", comment);
-                commentTextArea.value = "";
-            };
+            // submitCommentButton.onclick = function () {
+            //     const comment = commentTextArea.value;
+            //     socket.emit("submit-comment", comment);
+            //     commentTextArea.value = "";
+            // };
 
             // TODO Finish that!
-            socket.on('submit-comment-return', (message) => {
-                alert(message);
-            });
+            // socket.on('submit-comment-return', (message) => {
+            //     alert(message);
+            // });
 
         };
         // Bind init to page load see code in main.ts/main.js
@@ -134,6 +153,12 @@
         </div>
 
         <div class="content">
+
+            <div class="teachingInfo">
+                <div id="teachingLama"></div>
+                <div id="teachingName"></div>
+            </div>
+
             <div id="channels"></div>
 
             <div id="currentChannel"></div>
@@ -188,11 +213,11 @@
             </div>
             <div id="lightoff" style="display: none;"></div>
 
-            <div class="disclaimer">Please note that this audio streaming page is a work in progress. If you encounter
+            <!-- <div class="disclaimer">Please note that this audio streaming page is a work in progress. If you encounter
                 any
                 issues or have suggestions, please let me know in the box below and press send. Thank you.</div>
             <textarea id="comment"></textarea>
-            <button id="submit-comment">Send</button>
+            <button id="submit-comment">Send</button> -->
         </div>
     </div>
 </body>

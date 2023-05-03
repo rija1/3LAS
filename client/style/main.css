@@ -26,6 +26,11 @@
     font-style: normal;
 }
 
+.logomarpa {
+    height: 50px;
+    margin-left: 23px;
+}
+
 .disclaimer {
     padding-bottom: 15px;
 }
@@ -43,7 +48,6 @@ body {
 .container {
     /* max-width: 1300px; */
     background: #fff2d8;
-    padding:20px;
     /* padding: 10px 20px 20px 20px;
     margin: auto;
     text-align: center; */
@@ -64,30 +68,19 @@ body {
 
 .content {
     padding: 20px;
+    width: 100%;
 }
 
 .topTitleCtn {
-    display: grid;
-    grid-template-columns: 1fr;
-    padding-bottom: 20px;
+    width:100%;
+    background-color: #f5ba42;
 }
-
-.topTitle:nth-child(1) {
-    font-family: 'Aboreto';
-    font-size: 24px;
-    /* text-align: center; */
-  }
-
-  .topTitle:nth-child(2) {
-    font-size: 23px;
-    /* text-align: center; */
-  }
 
 #channels {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     column-gap: 17px;
-    padding-bottom: 20px;
+    padding: 20px;
 }
 
 @media (max-width: 500px) {
@@ -106,7 +99,8 @@ body {
     }
 
     .logomarpa {
-        width: 157px;
+        height: 42px;
+        margin-left: 7px;
     }
 
     .topTitle {
@@ -120,6 +114,7 @@ body {
     grid-template-columns:  1fr 1fr;
     row-gap: 17px;
     column-gap: 17px;
+    padding: 20px;
     }
 }
   

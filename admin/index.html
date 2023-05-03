@@ -57,6 +57,7 @@
                 <button id="start-all-button">Start All</button>
                 <button id="stop-all-button">Stop All</button>
                 <button id="restart-all-button">Restart All</button>
+                <button id="refresh-info">Refresh Information</button>
             </div>
         </div>
 
@@ -76,6 +77,8 @@
             const saveProfileBtn = document.querySelector("#save_new_profile_btn");
             const profilePopup = document.querySelector("#profile_popup");
             const profileNameInput = document.querySelector("#profile_name");
+
+            let currentSettings;
 
             // Show the profile popup when the save profile button is clicked
             saveProfileBtn.addEventListener("click", () => {
@@ -105,6 +108,7 @@
 
             // Function to stop a PM2 process
             function restartPM2(processName) {
+                updateStatusIndicator(processName,false);
                 socket.emit('restart-process', processName);
             }
 
@@ -124,6 +128,10 @@
                 for (const channelId in settingsInfo.channels) {
                     restartPM2(channelId);
                 }
+            }
+
+            function refreshInfo() {
+                socket.emit('settings-info-req');
             }
 
             function emitUpdateTeachingInfo(infoArray) {
@@ -154,11 +162,38 @@
                 }
             }
 
-            function createTeachingInfo(settingsInfo) {
+            function updateTeachingBlock(settingsInfo) {
+
+                // Pre-select Lama 
+                teachingLamaSelect = document.querySelector("#teaching_lama");
+                var optionElementLama = teachingLamaSelect.querySelector("option[value='" + settingsInfo.teaching_info.lama + "']");
+                if (optionElementLama) {
+                    optionElementLama.selected = true;
+                }
+
+                // Pre-select Teaching 
+                teachingNameSelect = document.querySelector("#teaching_name");
+                var optionElementTeaching = teachingNameSelect.querySelector("option[value='" + settingsInfo.teaching_info.teaching + "']");
+                if (optionElementTeaching) {
+                    optionElementTeaching.selected = true;
+                }
+
+                // Pre-select Copy Folder 
+                teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
+                var optionElementCpFolder = teachingCopyFolderSelect.querySelector("option[value='" + settingsInfo.teaching_info.copy_folder + "']");
+                if (optionElementCpFolder) {
+                    optionElementCpFolder.selected = true;
+                }
+
+                // Pre-fill Extra Info
+                teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
+                teachingExtraInfoInput.value = settingsInfo.teaching_info.extra_info;
+            }
+
+            function createTeachingBlock(settingsInfo) {
 
                 // Lama Select
-
-                teachingLamaSelect = document.querySelector("#teaching_lama");
+                const teachingLamaSelect = document.querySelector("#teaching_lama");
 
                 const teachingLamaOption = document.createElement('option');
                 teachingLamaOption.value = '';
@@ -173,20 +208,18 @@
                     emitUpdateTeachingInfo(infoArray);
                 };
 
-                const settingTeachingLama = settingsInfo.teaching_info.lama;
+
+                // Create options
                 for (const [lamaCode, lamaName] of Object.entries(settingsInfo.lamas)) {
                     const option = document.createElement('option');
                     option.value = lamaCode;
                     option.text = lamaName;
-                    if (lamaCode === settingTeachingLama) {
-                        option.selected = true;
-                    }
                     teachingLamaSelect.appendChild(option);
                 }
 
                 // Teaching Select
 
-                teachingNameSelect = document.querySelector("#teaching_name");
+                const teachingNameSelect = document.querySelector("#teaching_name");
 
                 const teachingNameOption = document.createElement('option');
                 teachingNameOption.value = '';
@@ -201,20 +234,16 @@
                     emitUpdateTeachingInfo(infoArray);
                 };
 
-                const settingTeachingName = settingsInfo.teaching_info.teaching;
                 for (const [teachingCode, teachingName] of Object.entries(settingsInfo.teachings)) {
                     const option = document.createElement('option');
                     option.value = teachingCode;
                     option.text = teachingName;
-                    if (teachingCode === settingTeachingName) {
-                        option.selected = true;
-                    }
                     teachingNameSelect.appendChild(option);
                 }
 
                 // Teaching Extra Info
 
-                teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
+                const teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
 
                 const teachingExtraInfoOption = document.createElement('option');
                 teachingExtraInfoOption.value = '';
@@ -231,7 +260,7 @@
 
                 // Folder Select
 
-                teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
+                const teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
 
                 const teachingCopyFolderSelectOption = document.createElement('option');
                 teachingCopyFolderSelectOption.value = '';
@@ -246,21 +275,39 @@
                     emitUpdateTeachingInfo(infoArray);
                 };
 
-                const settingCopyFolder = settingsInfo.teaching_info.copy_folder;
                 for (const [copyFolderCode, teachingCopyFolder] of Object.entries(settingsInfo.copy_folders)) {
                     const option = document.createElement('option');
                     option.value = copyFolderCode;
                     option.text = teachingCopyFolder.name;
-                    if (copyFolderCode === settingCopyFolder) {
-                        option.selected = true;
-                    }
                     teachingCopyFolderSelect.appendChild(option);
                 }
 
+                // Pre-fill and pre-select teaching info based on current settings
+                updateTeachingBlock(settingsInfo);
+
+            }
+
+            function updateStatusIndicator(channelId,isRunning) {
+                const statusIndicator = document.querySelector('#'+channelId+' .status-indicator');
+                const startButton = document.querySelector('#'+channelId+' button.start-button');
+                const stopButton = document.querySelector('#'+channelId+' button.stop-button');
+                const elapsedTimeDiv = document.querySelector('#'+channelId+' .elapsed-time');
+                if (isRunning) {
+                    statusIndicator.classList.add('greenIndicator');
+                    statusIndicator.classList.remove('redIndicator');
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                } else {
+                    statusIndicator.classList.add('redIndicator');
+                    statusIndicator.classList.remove('greenIndicator');
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    elapsedTimeDiv.textContent = '';
+                }
             }
 
             function updateProfilesInfo(profiles, current_profile) {
-                profileSelect = document.querySelector("#profile");
+                const profileSelect = document.querySelector("#profile");
 
                 const profileSelectOption = document.createElement('option');
                 profileSelectOption.value = '';
@@ -279,7 +326,7 @@
                 }
             }
 
-            function createChannelsInfo(settingsInfo) {
+            function createChannelsBlock(settingsInfo) {
                 for (const channelId in settingsInfo.channels) {
 
                     const channel = settingsInfo.channels[channelId];
@@ -300,7 +347,7 @@
                     const processInfo = document.createElement('div');
                     processInfo.style.verticalAlign = 'middle';
                     processInfo.className = 'channel-name';
-                    processInfo.textContent = channel.name;
+                    // processInfo.textContent = channel.name;
                     statusItem.appendChild(processInfo);
 
                     // Add elapsed time column
@@ -308,22 +355,31 @@
                     elapsedTimeDiv.className = 'elapsed-time';
                     statusItem.appendChild(elapsedTimeDiv);
 
-                    // Add start/stop buttons column
+                    // Add start/stop/restart buttons column
                     const buttonsContainer = document.createElement('div');
                     buttonsContainer.className = 'buttons-container';
                     statusItem.appendChild(buttonsContainer);
                     const startButton = document.createElement('button');
+                    startButton.className = 'start-button';
                     startButton.textContent = 'Start';
                     startButton.onclick = () => {
                         startPM2(channelId);
                     };
                     const stopButton = document.createElement('button');
+                    stopButton.className = 'stop-button';
                     stopButton.textContent = 'Stop';
                     stopButton.onclick = () => {
                         stopPM2(channelId);
                     };
+                    const restartButton = document.createElement('button');
+                    restartButton.className = 'restart-button';
+                    restartButton.textContent = 'Restart';
+                    restartButton.onclick = () => {
+                        restartPM2(channelId);
+                    };
                     buttonsContainer.appendChild(startButton);
                     buttonsContainer.appendChild(stopButton);
+                    buttonsContainer.appendChild(restartButton);
 
                     // Add Channel Options block
                     const channelOptions = document.createElement('div');
@@ -350,14 +406,10 @@
                     };
 
                     // Loop through the object keys and values and create options
-                    const channelLanguage = settingsInfo.channels[channelId].language;
                     for (const [code, language] of Object.entries(settingsInfo.languages)) {
                         const option = document.createElement('option');
                         option.value = code;
                         option.text = language.name;
-                        if (code === channelLanguage) {
-                            option.selected = true;
-                        }
                         languageSelect.appendChild(option);
                     }
 
@@ -390,14 +442,10 @@
                     };
 
                     // Loop through the object keys and values and create options
-                    const channelDevice = settingsInfo.channels[channelId].device;
                     for (const [code, device] of Object.entries(settingsInfo.avfoundationDevices)) {
                         const option = document.createElement('option');
                         option.value = code;
                         option.text = device.name;
-                        if (code === channelDevice) {
-                            option.selected = true;
-                        }
                         deviceSelect.appendChild(option);
                     }
 
@@ -411,8 +459,6 @@
                     channelOptions.appendChild(deviceBlock);
 
                     // Add side column
-
-                    const channelPan = settingsInfo.channels[channelId].pan;
 
                     const panSelect = document.createElement('select');
                     panSelect.className = 'pan-select';
@@ -428,9 +474,6 @@
                         const newOption = document.createElement('option');
                         newOption.value = option.value;
                         newOption.textContent = option.text;
-                        if (newOption.value === channelPan) {
-                            newOption.selected = true;
-                        }
                         panSelect.appendChild(newOption);
                     });
 
@@ -455,7 +498,6 @@
 
                     // Create export checkbox
 
-                    const channelExport = settingsInfo.channels[channelId].copy_to_server;
                     const exportCheckbox = document.createElement('input');
                     exportCheckbox.type = 'checkbox';
                     exportCheckbox.id = 'export';
@@ -485,10 +527,6 @@
                         };
                         emitUpdateChannelInfo(infoArray);
                     };
-
-                    if (channelExport) {
-                        exportCheckbox.checked = true;
-                    }
 
                     const exportBlock = document.createElement('div');
                     exportBlock.className = 'export-block';
@@ -533,6 +571,8 @@
                     cpExportBlock.appendChild(cpServerBlock);
                     channelOptions.appendChild(cpExportBlock);
 
+                    const channelExport = settingsInfo.channels[channelId].export;
+
                     // We grey out the copy field if the current channel's export is disabled
                     if (!channelExport) {
                         cpServerCheckbox.disabled = true;
@@ -540,20 +580,33 @@
                         chanCopyLabel.classList.add('greyedout');
                     }
 
+                    // Add export path block
+
+                    const exportPathBlock = document.createElement('div');
+                    exportPathBlock.className = 'export-path-block';
+                    exportPathBlock.id = "exportPathBlock";
+                    channelOptions.appendChild(exportPathBlock);
+
+                    if (!channelExport) {
+                        exportPathBlock.style.display = "none";
+                    }
+
                     // Listen for status updates from server
                     socket.on(`${channelId}-status`, (isRunning) => {
-                        if (isRunning) {
-                            statusIndicator.classList.add('greenIndicator');
-                            statusIndicator.classList.remove('redIndicator');
-                            startButton.disabled = true;
-                            stopButton.disabled = false;
-                        } else {
-                            statusIndicator.classList.add('redIndicator');
-                            statusIndicator.classList.remove('greenIndicator');
-                            startButton.disabled = false;
-                            stopButton.disabled = true;
-                            elapsedTimeDiv.textContent = '';
-                        }
+                        updateStatusIndicator(channelId,isRunning);
+
+                        // if (isRunning) {
+                        //     statusIndicator.classList.add('greenIndicator');
+                        //     statusIndicator.classList.remove('redIndicator');
+                        //     startButton.disabled = true;
+                        //     stopButton.disabled = false;
+                        // } else {
+                        //     statusIndicator.classList.add('redIndicator');
+                        //     statusIndicator.classList.remove('greenIndicator');
+                        //     startButton.disabled = false;
+                        //     stopButton.disabled = true;
+                        //     elapsedTimeDiv.textContent = '';
+                        // }
                     });
 
                     // Listen for elapsed time updates from server
@@ -565,18 +618,71 @@
 
                 }
 
+                // update channel block info
+                updateChannelsBlock(settingsInfo);
+
             }
 
-            // TODO : finish this : get elapsedTime, green or red status and other things like dropdown language etc
-            function updatesettingsInfo(settingsInfo) {
+            function updateChannelsBlock(settingsInfo) {
                 for (const channelId in settingsInfo.channels) {
-                    const channel = settingsInfo[channelId];
-                    channelStatusItem = document.querySelector("#" + channelId);
-                    channelStatusItem.querySelector('.channel-name').textContent = channel.name;
 
+                    const channel = settingsInfo.channels[channelId];
+                    const channelDiv = document.querySelector("#" + channelId);
+
+                    // Channel Name
+                    channelDiv.querySelector(".channel-name").textContent = channel.name;
+                    // Pre-select Language 
+                    chanLanguageSelect = channelDiv.querySelector(".language-select");
+                    if (chanLanguageSelect) {
+                        var optionElementLanguage = chanLanguageSelect.querySelector("option[value='" + settingsInfo.channels[channelId].language + "']");
+                        if (optionElementLanguage) {
+                            optionElementLanguage.selected = true;
+                        }
+                    }
+
+                    // Pre-select Device 
+                    chanDeviceSelect = channelDiv.querySelector(".device-select");
+                    if (chanDeviceSelect) {
+                        var optionElementDevice = chanDeviceSelect.querySelector("option[value='" + settingsInfo.channels[channelId].device + "']");
+                        if (optionElementDevice) {
+                            optionElementDevice.selected = true;
+                        }
+                    }
+
+                    // Pre-select Side 
+                    chanSideSelect = channelDiv.querySelector(".pan-select");
+                    if (chanSideSelect) {
+                        var optionElementSide = chanSideSelect.querySelector("option[value='" + settingsInfo.channels[channelId].pan + "']");
+                        if (optionElementSide) {
+                            optionElementSide.selected = true;
+                        }
+                    }
+
+                    // Pre tick export
+                    const channelExport = settingsInfo.channels[channelId].export;
+                    chanExportCb = channelDiv.querySelector("#export");
+                    if (chanExportCb && channelExport) {
+                        chanExportCb.checked = true;
+                    }
+
+                    // Pre tick copy to server
+                    const channelCpServer = settingsInfo.channels[channelId].copy_to_server;
+                    chanCpServerCb = channelDiv.querySelector("#copy_to_server");
+                    if (chanCpServerCb && channelCpServer) {
+                        chanCpServerCb.checked = true;
+                    }
                 }
             }
 
+            function loadProfile(profileName) {
+                if (!confirm('Do you confirm loading this profile? The currents settings will be replaced.')) {
+                    return false;
+                }
+                if(!profileName||(profileName='')) {
+                    return false;
+                }
+                io.emit('profile-load',profileName);
+            }
 
             const statusContainer = document.getElementById('status-container');
             const socket = io();
@@ -586,17 +692,29 @@
             });
 
             // Add an event listener for the 'return-value' event on the socket
-            socket.on('settings-info-value', (settingsInfo) => {
+            socket.on('settings-info-init', (settingsInfo) => {
 
-                createTeachingInfo(settingsInfo);
-
-                createChannelsInfo(settingsInfo);
+                createTeachingBlock(settingsInfo);
+                createChannelsBlock(settingsInfo);
 
                 document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
-                // alert(document.querySelector("#start-all-button").onclick);
                 document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
                 document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
+                document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
 
+                document.querySelector("#load_profile_btn").onclick = function () { 
+                    const profileSelect = document.querySelector("#profile");
+                    if(profileSelect) {
+                        loadProfile(profileSelect.value);
+                    }
+                };
+
+
+            });
+
+            socket.on('settings-info-update', (settingsInfo) => {
+                updateTeachingBlock(settingsInfo);
+                updateChannelsBlock(settingsInfo);
             });
 
             socket.on('profile-new-result', (profileNewResult) => {
@@ -604,6 +722,11 @@
                 profilePopupResult.textContent = profileNewResult;
                 profilePopupResult.style.display = "block";
 
+            });
+
+            socket.on('update-export-filename', (channelId, filename) => {
+                const exportPathDiv = document.querySelector("#" + channelId + " #exportPathBlock");
+                exportPathDiv.textContent = "MP3 Filename :" + filename;
             });
 
             // Emit a 'settings-info-value' event to the server to trigger the function call

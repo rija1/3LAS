@@ -8,10 +8,21 @@ const fs = require('fs');
 const { start } = require('repl');
 
 const settingsPath = path.join(__dirname, 'settings.json');
+let Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 const streamServerPath = path.join(__dirname, '3las.server.js');
-const Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 const profilesPath = path.join(__dirname, 'profiles');
-// const exportPath = path.join(__dirname, 'settings.json');
+const exportPath = path.join(__dirname, 'export');
+
+// Watch for changes to the settings.json file
+// fs.watch(settingsPath, (eventType, settingFilename) => {
+//     if (settingFilename) {
+//         console.log(`${settingFilename} file changed`);
+//         // Reload the settings file
+//         Settings = JSON.parse(fs.readFileSync(settingsPath)); 
+//         console.log(JSON.parse(fs.readFileSync(settingsPath)));
+//         console.log('Settings reloaded:', Settings);
+//     }
+// });
 
 const PORT = process.env.PORT || 3000;
 
@@ -20,9 +31,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); 
 
-function saveSettings() {
+function saveSettings() {    
     fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
         if (err) throw err;
         console.log('File written successfully!');
@@ -41,7 +52,7 @@ function processExists(processName) {
 
 function getSettings() {
 
-    getAvfoundationDevices();
+    updateAvfoundationDevices();
 
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
@@ -49,6 +60,10 @@ function getSettings() {
     }
 
     return Settings;
+}
+
+function updateExportFilename(channelId,filename) {
+    io.emit('update-export-filename', channelId, filename);
 }
 
 function createProcess(processName) {
@@ -60,7 +75,52 @@ function createProcess(processName) {
 
     let channelSettings = Settings["channels"][processName];
 
-    let outputFile = channelSettings.outputFile;
+    let outputFileParam = "";
+
+    // We will determine here the mp3 file name and path
+    if (channelSettings.export) {
+
+        const today = new Date(); // create a new Date object with the current system date and time
+        const year = today.getFullYear(); // get the year value (4 digits)
+        const month = (today.getMonth() + 1).toString().padStart(2, '0'); // get the month value (1-12) and pad with leading zero if needed
+        const day = today.getDate().toString().padStart(2, '0'); // get the day value (1-31) and pad with leading zero if needed
+        const formattedDate = `${year}${month}${day}`; // concatenate the year, month, and day values into a string in the YYYYMMDD format
+
+
+        const extraInfo = Settings.teaching_info.extra_info;
+        let extraInfoText = '';
+        if (extraInfo !== '') {
+            extraInfoText = '_' + extraInfo;
+        }
+
+        const lama = Settings.teaching_info.lama;
+        let lamaText = '';
+        if (lama !== '') {
+            lamaText = '_' + lama;
+        }
+
+        const teaching = Settings.teaching_info.teaching;
+        let teachingText = '';
+        if (teaching !== '') {
+            teachingText = '_' + teaching;
+        }
+
+        const language = channelSettings.language;
+        let languageText = '';
+        if (language !== '') {
+            languageText = '_' + language;
+        }
+
+        const outputFilename = formattedDate + lamaText + extraInfoText + teachingText + languageText + '.mp3';
+
+        const outputPath = path.join(exportPath, outputFilename);
+
+        updateExportFilename(processName,outputFilename);
+
+        outputFileParam = "-f mp3 " + outputPath;
+    }
+
+
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
     // let inputDevice = channelSettings.ffmpegInputDevice;
 
@@ -79,12 +139,12 @@ function createProcess(processName) {
     // let bufSize = 960;
 
     // let rtbufsize = 64;
-    let rtbufsize = 64;
+    let rtbufsize = 512;
 
     // let probesize = 64;
-    let probesize = 64;
+    let probesize = 512;
 
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFile + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
     console.log(processCommand);
     pm2.start({
         name: processName,
@@ -113,6 +173,7 @@ function startProcess(processName) {
     } else {
         createProcess(processName);
     }
+    io.emit('settings-info-update', getSettings());
 }
 
 function deleteProcess(processName) {
@@ -125,6 +186,7 @@ function deleteProcess(processName) {
             console.log(`Deleted process ${processName}`);
         });
     }
+    io.emit('settings-info-update', getSettings());
 }
 
 // Stop a process
@@ -136,6 +198,7 @@ function stopProcess(processName) {
         }
         console.log(`Stopped process ${processName}`);
     });
+    io.emit('settings-info-update', getSettings());
 }
 
 // Restart a process
@@ -143,10 +206,10 @@ function restartProcess(processName) {
     deleteProcess(processName);
     createProcess(processName);
     console.log(`Restarted process ${processName}`);
-
+    io.emit('settings-info-update', getSettings());
 }
 
-function getAvfoundationDevices() {
+function updateAvfoundationDevices() {
     const { exec } = require('child_process');
 
     // Get AVFoundation devices
@@ -179,17 +242,15 @@ function getAvfoundationDevices() {
                             id: deviceId.toString(),
                             name: deviceName
                         };
-
                     }
                 }
             }
         }
-        
+
         // TODO check why it always saves it below
         if (Settings.avfoundationDevices != audioDevices) {
-            Settings.avfoundationDevices = audioDevices;
-            saveSettings();
-            // console.log('AVFoundation devices updated.'); 
+             Settings.avfoundationDevices = audioDevices;
+             saveSettings(); 
         }
 
     });
@@ -217,9 +278,10 @@ function checkPm2ProcessStatus() {
                 processStatus[processName] = isRunning;
                 io.emit(`${processName}-status`, isRunning);
 
-                // updateElapsedTime(processName);
-                io.emit(`${processName}-time`, getElapsedTimeFromTimestamp(processInfo.pm2_env.pm_uptime));
-
+                // Get Elapsed time
+                if(isRunning) {
+                    io.emit(`${processName}-time`, getElapsedTimeFromTimestamp(processInfo.pm2_env.pm_uptime));
+                }
             } else {
                 processStatus[processName] = false;
                 io.emit(`${processName}-status`, false);
@@ -272,6 +334,22 @@ function sendProfiles() {
     });
 }
 
+function updateChannelsExportFilenames() {
+    for (const channelId in Settings.channels) {
+        if(Settings.channels[channelId].export) {
+            
+        } else {
+            Settings.channels[channelId].export_filename = '';
+        }
+    }
+}
+
+function delayCheckPm2ProcessStatus() {
+    setTimeout(function () {
+        checkPm2ProcessStatus();
+    }, 3000);
+}
+
 function createProfile(profileName) {
 
     const profileFilename = profileName.toLowerCase()
@@ -303,31 +381,38 @@ io.on('connection', (socket) => {
 
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-value', getSettings());
+        socket.emit('settings-info-init', getSettings()); 
     });
 
     // Listen for start/stop events from clients
     socket.on('start-process', (processName) => {
         startProcess(processName);
+        delayCheckPm2ProcessStatus();
     });
 
     socket.on('stop-process', (processName) => {
         stopProcess(processName);
+        delayCheckPm2ProcessStatus();
     });
 
     socket.on('restart-process', (processName) => {
         restartProcess(processName);
+        delayCheckPm2ProcessStatus();
+    });
+
+    socket.on('settings-info-req', () => {
+        io.emit('settings-info-update', getSettings());
     });
 
     socket.on('update-channel-info', (infoArray) => {
-        console.log(infoArray);
+        updateChannelsExportFilenames();
         Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
-        saveSettings();
+        saveSettings(); 
     });
 
     socket.on('update-teaching-info', (infoArray) => {
         Settings.teaching_info[infoArray.field] = infoArray.value;
-        saveSettings();
+        saveSettings(); 
     });
 
     socket.on('get-profiles', () => {
@@ -338,10 +423,14 @@ io.on('connection', (socket) => {
         createProfile(profileName);
     });
 
+    socket.on('profile-load', (profileName) => {
+        // loadProfile(profileName);
+    });
+
 
 });
 
-http.listen(PORT, () => {
+http.listen(PORT, () => { 
     console.log(`Server listening on port ${PORT}`);
 
     // Send initial status to clients
@@ -353,15 +442,16 @@ http.listen(PORT, () => {
 
     // Send status updates every 60 seconds
     function updateStatus() {
-        setInterval(function () {
-            processChecks();
-        }, 60000);
-
+        // setInterval(function () {
+            // processChecks();
+            // io.emit('settings-info-update', getSettings()); 
+        // }, 3000);
+    // }, 60000);
     }
     updateStatus();
 
     // Update current AVFoundation devices in settings file
-    getAvfoundationDevices();
+    updateAvfoundationDevices();
 
 
 });
