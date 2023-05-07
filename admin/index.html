@@ -4,7 +4,7 @@
 <head>
     <title>Thrangu Sekhar Translation</title>
     <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 
 <body>
@@ -12,16 +12,15 @@
         <h1>Thrangu Sekhar Translation Services</h1>
         <h2>Administration Panel</h2>
 
-
         <div class="wide-block">
             <div class="wide-header">Settings</div>
             <div class="wide-content">
                 <label for="profile">Profile</label>
                 <select id="profile"></select>
-                <button id="load_profile_btn">Load Profile</button>
-                <button id="save_profile_btn">Save Profile</button>
-                <button id="save_new_profile_btn">Save As New Profile</button>
-                <button id="del_profile_btn">Delete Profile</button>
+                <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
+                <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
+                <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
+                <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
 
                 <!-- Popup -->
                 <div id="profile_popup" style="display:none">
@@ -31,10 +30,7 @@
                 </div>
                 <div id="profile_popup_result" style="display:none"></div>
             </div>
-
         </div>
-
-
 
         <div class="wide-block">
             <div class="wide-header">Teaching Info</div>
@@ -48,16 +44,15 @@
                 <label for="teaching_name">Server Copy Folder</label>
                 <select id="teaching_copy_folder"></select>
             </div>
-
         </div>
 
         <div class="wide-block">
             <div class="wide-header">Actions</div>
             <div class="wide-content">
-                <button id="start-all-button">Start All</button>
-                <button id="stop-all-button">Stop All</button>
-                <button id="restart-all-button">Restart All</button>
-                <button id="refresh-info">Refresh Information</button>
+                <button id="start-all-button"><span class="fa-start"></span>Start All</button>
+                <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
+                <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
+                <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
             </div>
         </div>
 
@@ -73,7 +68,7 @@
         </div>
 
         <script>
-            ////
+            // Save New Profile
             const saveProfileBtn = document.querySelector("#save_new_profile_btn");
             const profilePopup = document.querySelector("#profile_popup");
             const profileNameInput = document.querySelector("#profile_name");
@@ -94,7 +89,6 @@
                 // Hide the profile popup
                 profilePopup.style.display = "none";
             });
-            ////
 
             // Function to start a PM2 process
             function startPM2(processName) {
@@ -108,7 +102,7 @@
 
             // Function to stop a PM2 process
             function restartPM2(processName) {
-                updateStatusIndicator(processName,false);
+                updateStatusIndicator(processName, false);
                 socket.emit('restart-process', processName);
             }
 
@@ -287,11 +281,11 @@
 
             }
 
-            function updateStatusIndicator(channelId,isRunning) {
-                const statusIndicator = document.querySelector('#'+channelId+' .status-indicator');
-                const startButton = document.querySelector('#'+channelId+' button.start-button');
-                const stopButton = document.querySelector('#'+channelId+' button.stop-button');
-                const elapsedTimeDiv = document.querySelector('#'+channelId+' .elapsed-time');
+            function updateStatusIndicator(channelId, isRunning) {
+                const statusIndicator = document.querySelector('#' + channelId + ' .status-indicator');
+                const startButton = document.querySelector('#' + channelId + ' button.start-button');
+                const stopButton = document.querySelector('#' + channelId + ' button.stop-button');
+                const elapsedTimeDiv = document.querySelector('#' + channelId + ' .elapsed-time');
                 if (isRunning) {
                     statusIndicator.classList.add('greenIndicator');
                     statusIndicator.classList.remove('redIndicator');
@@ -308,6 +302,10 @@
 
             function updateProfilesInfo(profiles, current_profile) {
                 const profileSelect = document.querySelector("#profile");
+
+                while (profileSelect.options.length > 0) {
+                    profileSelect.options[0].remove();
+                }
 
                 const profileSelectOption = document.createElement('option');
                 profileSelectOption.value = '';
@@ -328,7 +326,6 @@
 
             function createChannelsBlock(settingsInfo) {
                 for (const channelId in settingsInfo.channels) {
-
                     const channel = settingsInfo.channels[channelId];
                     const statusItem = document.createElement('div');
                     statusItem.className = 'status-item';
@@ -581,7 +578,6 @@
                     }
 
                     // Add export path block
-
                     const exportPathBlock = document.createElement('div');
                     exportPathBlock.className = 'export-path-block';
                     exportPathBlock.id = "exportPathBlock";
@@ -593,20 +589,7 @@
 
                     // Listen for status updates from server
                     socket.on(`${channelId}-status`, (isRunning) => {
-                        updateStatusIndicator(channelId,isRunning);
-
-                        // if (isRunning) {
-                        //     statusIndicator.classList.add('greenIndicator');
-                        //     statusIndicator.classList.remove('redIndicator');
-                        //     startButton.disabled = true;
-                        //     stopButton.disabled = false;
-                        // } else {
-                        //     statusIndicator.classList.add('redIndicator');
-                        //     statusIndicator.classList.remove('greenIndicator');
-                        //     startButton.disabled = false;
-                        //     stopButton.disabled = true;
-                        //     elapsedTimeDiv.textContent = '';
-                        // }
+                        updateStatusIndicator(channelId, isRunning);
                     });
 
                     // Listen for elapsed time updates from server
@@ -615,12 +598,9 @@
                             elapsedTimeDiv.innerHTML = elapsedTime;
                         }
                     });
-
                 }
-
                 // update channel block info
                 updateChannelsBlock(settingsInfo);
-
             }
 
             function updateChannelsBlock(settingsInfo) {
@@ -674,14 +654,34 @@
                 }
             }
 
-            function loadProfile(profileName) {
+            function deleteProfile(profileFilename, profileName) {
+                if (!profileFilename || (profileFilename == '')) {
+                    alert('No profile is selected!')
+                }
+                if (!confirm('Do you confirm the deletion of profile "' + profileName + '" ?')) {
+                    return false;
+                }
+                socket.emit('profile-delete', profileFilename, profileName);
+            }
+
+            function saveProfile(profileFilename, profileName) {
+                if (!profileFilename || (profileFilename == '')) {
+                    alert('No profile is loaded!')
+                }
+                if (!confirm('Do you confirm saving current settings as "' + profileName + '" ? Previous settings will be replaced.')) {
+                    return false;
+                }
+                socket.emit('profile-save', profileFilename, profileName);
+            }
+
+            function loadProfile(profileFilename, profileName) {
+                if (!profileFilename || (profileFilename == '')) {
+                    alert('No profile is selected!')
+                }
                 if (!confirm('Do you confirm loading this profile? The currents settings will be replaced.')) {
                     return false;
                 }
-                if(!profileName||(profileName='')) {
-                    return false;
-                }
-                io.emit('profile-load',profileName);
+                socket.emit('profile-load', profileFilename, profileName);
             }
 
             const statusContainer = document.getElementById('status-container');
@@ -702,10 +702,27 @@
                 document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
                 document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
 
-                document.querySelector("#load_profile_btn").onclick = function () { 
+                document.querySelector("#save_profile_btn").onclick = function () {
                     const profileSelect = document.querySelector("#profile");
-                    if(profileSelect) {
-                        loadProfile(profileSelect.value);
+                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                    if (profileSelect) {
+                        saveProfile(profileSelect.value, profileSelectOptionText);
+                    }
+                };
+
+                document.querySelector("#load_profile_btn").onclick = function () {
+                    const profileSelect = document.querySelector("#profile");
+                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                    if (profileSelect) {
+                        loadProfile(profileSelect.value, profileSelectOptionText);
+                    }
+                };
+
+                document.querySelector("#del_profile_btn").onclick = function () {
+                    const profileSelect = document.querySelector("#profile");
+                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                    if (profileSelect) {
+                        deleteProfile(profileSelect.value, profileSelectOptionText);
                     }
                 };
 
@@ -717,9 +734,9 @@
                 updateChannelsBlock(settingsInfo);
             });
 
-            socket.on('profile-new-result', (profileNewResult) => {
+            socket.on('profile-result', (profileNewResult) => {
                 const profilePopupResult = document.querySelector("#profile_popup_result");
-                profilePopupResult.textContent = profileNewResult;
+                profilePopupResult.innerHTML = profileNewResult;
                 profilePopupResult.style.display = "block";
 
             });

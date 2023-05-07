@@ -31,9 +31,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 
-function saveSettings() {    
+function saveSettings() {
     fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
         if (err) throw err;
         console.log('File written successfully!');
@@ -62,7 +62,7 @@ function getSettings() {
     return Settings;
 }
 
-function updateExportFilename(channelId,filename) {
+function updateExportFilename(channelId, filename) {
     io.emit('update-export-filename', channelId, filename);
 }
 
@@ -85,7 +85,6 @@ function createProcess(processName) {
         const month = (today.getMonth() + 1).toString().padStart(2, '0'); // get the month value (1-12) and pad with leading zero if needed
         const day = today.getDate().toString().padStart(2, '0'); // get the day value (1-31) and pad with leading zero if needed
         const formattedDate = `${year}${month}${day}`; // concatenate the year, month, and day values into a string in the YYYYMMDD format
-
 
         const extraInfo = Settings.teaching_info.extra_info;
         let extraInfoText = '';
@@ -113,11 +112,21 @@ function createProcess(processName) {
 
         const outputFilename = formattedDate + lamaText + extraInfoText + teachingText + languageText + '.mp3';
 
-        const outputPath = path.join(exportPath, outputFilename);
+        let outputPath = path.join(exportPath, outputFilename);
 
-        updateExportFilename(processName,outputFilename);
+        let suffix = '';
+
+        while (fs.existsSync(outputPath)) {
+            suffix = `_${parseInt(suffix.split('_').pop() || '1') + 1}`;
+            outputPath = path.join(exportPath, outputFilename.replace('.mp3', `${suffix}.mp3`));
+        }
+
+
+        updateExportFilename(processName, outputFilename);
 
         outputFileParam = "-f mp3 " + outputPath;
+        // outputFileParam = "-c:a aac -b:a 96k" + outputPath;
+
     }
 
 
@@ -144,7 +153,12 @@ function createProcess(processName) {
     // let probesize = 64;
     let probesize = 512;
 
+    // 
     let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    //
+
+    // let processCommand = 'ffmpeg ' + inputDevice + audioPan + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+
     console.log(processCommand);
     pm2.start({
         name: processName,
@@ -191,13 +205,12 @@ function deleteProcess(processName) {
 
 // Stop a process
 function stopProcess(processName) {
-    pm2.stop(processName, (err, proc) => {
-        if (err) {
-            console.error(`Error stopping process ${processName}: ${err}`);
-            return;
-        }
-        console.log(`Stopped process ${processName}`);
-    });
+    const { exec } = require('child_process');
+
+    // Not using the PM2 API which doesn't do a graceful stop and so makes the MP3 file unplayable.
+    exec('pm2 stop ' + processName);
+    console.log(`Stopped process ${processName}`);
+
     io.emit('settings-info-update', getSettings());
 }
 
@@ -249,8 +262,8 @@ function updateAvfoundationDevices() {
 
         // TODO check why it always saves it below
         if (Settings.avfoundationDevices != audioDevices) {
-             Settings.avfoundationDevices = audioDevices;
-             saveSettings(); 
+            Settings.avfoundationDevices = audioDevices;
+            saveSettings();
         }
 
     });
@@ -279,7 +292,7 @@ function checkPm2ProcessStatus() {
                 io.emit(`${processName}-status`, isRunning);
 
                 // Get Elapsed time
-                if(isRunning) {
+                if (isRunning) {
                     io.emit(`${processName}-time`, getElapsedTimeFromTimestamp(processInfo.pm2_env.pm_uptime));
                 }
             } else {
@@ -312,6 +325,44 @@ function processChecks() {
     checkPm2ProcessStatus();
 }
 
+function loadProfile(profileFilename, profileName, notif = true) {
+    const loadProfilePath = path.join(profilesPath, profileFilename);
+    Settings = JSON.parse(fs.readFileSync(loadProfilePath, 'utf-8'));
+
+    saveSettings();
+    io.emit('settings-info-update', getSettings());
+    sendProfiles();
+    if (notif) {
+        io.emit('profile-result', '<span class="fa-valid"></span>The profile "' + profileName + '" has been loaded.');
+    }
+}
+
+function deleteProfile(profileFilename, profileName) {
+    const profileJsonPath = path.join(profilesPath, profileFilename);
+
+    fs.unlink(profileJsonPath, (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+
+        console.log(`The profile ${profileName} has been deleted.`);
+        io.emit('profile-result', '<span class="fa-valid"></span>The profile "' + profileName + '" has been deleted.');
+        sendProfiles();
+
+    });
+}
+
+function saveProfile(profileFilename, profileName) {
+    const profileJsonPath = path.join(profilesPath, profileFilename);
+    const profileSettings = { ...Settings, "profile_name": profileName, "profile_filename": profileFilename };
+
+    fs.writeFile(profileJsonPath, JSON.stringify(profileSettings), { flag: 'w' }, (err) => {
+        if (err) throw err;
+        io.emit('profile-result', '<span class="fa-valid"></span>Profile "' + profileName + '" saved successfully.');
+        loadProfile(profileFilename, profileName, false);
+    });
+}
 
 function sendProfiles() {
     const profiles = {};
@@ -330,14 +381,14 @@ function sendProfiles() {
             profiles[file] = profile;
         });
 
-        io.emit('profiles-update', profiles, Settings.current_profile);
+        io.emit('profiles-update', profiles, Settings.profile_filename);
     });
 }
 
-function updateChannelsExportFilenames() {
+function updateChannelsExportFilenames() { 
     for (const channelId in Settings.channels) {
-        if(Settings.channels[channelId].export) {
-            
+        if (Settings.channels[channelId].export) {
+
         } else {
             Settings.channels[channelId].export_filename = '';
         }
@@ -347,7 +398,7 @@ function updateChannelsExportFilenames() {
 function delayCheckPm2ProcessStatus() {
     setTimeout(function () {
         checkPm2ProcessStatus();
-    }, 3000);
+    }, 1500);
 }
 
 function createProfile(profileName) {
@@ -358,18 +409,12 @@ function createProfile(profileName) {
         + ".json";
 
     const newProfileJsonPath = path.join(profilesPath, profileFilename);
-
-    const newProfileSettings = {
-        "profile_name": profileName,
-        "teaching_info": Settings.teaching_info,
-        "channels": Settings.channels,
-        "avfoundationDevices": Settings.avfoundationDevices
-    };
-
+    const newProfileSettings = { ...Settings, "profile_name": profileName, "profile_filename": profileFilename };
 
     fs.writeFile(newProfileJsonPath, JSON.stringify(newProfileSettings), { flag: 'w' }, (err) => {
         if (err) throw err;
-        io.emit('profile-new-result', 'New profile created successfully. Please reload the page to see it.');
+        io.emit('profile-result', '<span class="fa-valid"></span>The profile "' + profileName + '" has been created successfully.');
+        loadProfile(profileFilename,profileName,false);
     });
 }
 
@@ -381,7 +426,7 @@ io.on('connection', (socket) => {
 
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-init', getSettings()); 
+        socket.emit('settings-info-init', getSettings());
     });
 
     // Listen for start/stop events from clients
@@ -407,46 +452,47 @@ io.on('connection', (socket) => {
     socket.on('update-channel-info', (infoArray) => {
         updateChannelsExportFilenames();
         Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
-        saveSettings(); 
+        saveSettings();
     });
 
     socket.on('update-teaching-info', (infoArray) => {
         Settings.teaching_info[infoArray.field] = infoArray.value;
-        saveSettings(); 
+        saveSettings();
     });
 
     socket.on('get-profiles', () => {
         sendProfiles();
     });
 
-    socket.on('profile-new', (profileName) => {
-        createProfile(profileName);
+    socket.on('profile-new', (profileFilename) => {
+        createProfile(profileFilename);
     });
 
-    socket.on('profile-load', (profileName) => {
-        // loadProfile(profileName);
+    socket.on('profile-load', (profileFilename, profileName) => {
+        loadProfile(profileFilename, profileName);
+    });
+
+    socket.on('profile-save', (profileFilename, profileName) => {
+        saveProfile(profileFilename, profileName);
+    });
+
+    socket.on('profile-delete', (profileFilename, profileName) => {
+        deleteProfile(profileFilename, profileName);
     });
 
 
 });
 
-http.listen(PORT, () => { 
+http.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-
-    // Send initial status to clients
-    // for (const processName of processNames) {
-    //   io.emit(`${processName}-status`, false);
-    // }
-
-    // Send status updates every 1 seconds
 
     // Send status updates every 60 seconds
     function updateStatus() {
-        // setInterval(function () {
-            // processChecks();
-            // io.emit('settings-info-update', getSettings()); 
-        // }, 3000);
-    // }, 60000);
+        setInterval(function () {
+            processChecks();
+            io.emit('settings-info-update', getSettings());
+        }, 10000);
+        // }, 60000);
     }
     updateStatus();
 

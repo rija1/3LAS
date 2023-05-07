@@ -1,8 +1,95 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap'); */
 
 body {
     font-family: 'IBM Plex Mono', monospace;
     background: #6b6a53;
+}
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('fontawesome-webfont.ttf') format('truetype');
+  }
+
+
+.fa-valid::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f00c";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#76bf1c;
+}
+
+.fa-add::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f055";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-delete::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f014";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-save::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f019";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-load::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f01a";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-restart::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f021";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-refresh::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f01e";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-stop::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f04d";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
+}
+
+.fa-start::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f04b";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
 }
 
 .container {
@@ -29,6 +116,15 @@ h2 {
     background: -webkit-linear-gradient(#b03e3e, #333);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.fa-add::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f055";
+    vertical-align: middle;
+    padding-right: 10px;
+    color:#393c35;
 }
 
 
@@ -134,15 +230,13 @@ label.greyedout {
     column-gap: 10px;
 }
 
-.wide-header {
-    padding:11px;
-}
-
 .wide-content {
     padding:16px;
 }
 
 .status-header, .wide-header {
+    padding:11px;
+    border-radius: 7px;
     background-color: #a5c956;
 }
 
@@ -167,4 +261,11 @@ label.greyedout {
 }
 label, input[type=checkbox] {
     margin-right: 10px;
+}
+
+#profile_popup_result {
+    padding: 5px;
+    margin-top: 10px;
+    background: #fff;
+    border: solid 1px #ccc;
 }

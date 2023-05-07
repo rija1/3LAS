@@ -70,8 +70,9 @@
                     languageName = settingsInfo.languages[settingsInfo.channels[channelId].language].name;
                 }
                 
+                // Hide some channels
                 if ((channelId=='channel_1') || (channelId=='channel_3') || (channelId=='channel_4')) {
-                    channelButton.style.display = 'none';
+                    // channelButton.style.display = 'none';
                 }
 
                 channelButton.className = 'channel_button';
