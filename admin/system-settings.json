@@ -1,0 +1,72 @@
+{
+    "RtcConfig": null,
+    "FallbackFFmpegPath": "/usr/local/bin/ffmpeg",
+    "FallbackUseMp3": true,
+    "FallbackUseWav": true,
+    "FallbackMp3Bitrate": 128,
+    "FallbackWavSampleRate": 16000,
+    "AdminKey": "",
+    "languages": {
+        "TIB": {
+            "name": "Tibetan"
+        },
+        "EN": {
+            "name": "English"
+        },
+        "CHI": {
+            "name": "Chinese"
+        },
+        "GER": {
+            "name": "German"
+        },
+        "FR": {
+            "name": "French"
+        },
+        "SW": {
+            "name": "Swahili"
+        },
+        "HK": {
+            "name": "Hong Kong"
+        },
+        "NOR": {
+            "name": "Norwegian"
+        },
+        "SPA": {
+            "name": "Spanish"
+        }
+    },
+    "lamas": {
+        "DKR": "Drupon Khen Rinpoche",
+        "KSP": "Khenpo Sherab Phuntsok",
+        "KW": "Khenpo Wangchuk",
+        "GT": "Geshe Tsering",
+        "KT": "Khenpo Tashi"
+    },
+    "teachings": {
+        "WMPT": "Words of My Perfect Teacher",
+        "LTF": "Letter to a Friend",
+        "RIG": "Riglam",
+        "VIN": "Vinaya"
+    },
+    "copy_folders": {
+        "pub": {
+            "name": "Public",
+            "server_path": "/samba/public/"
+        },
+        "she": {
+            "name": "Shedra",
+            "server_path": "/samba/shedra/"
+        },
+        "vin": {
+            "name": "Vinaya",
+            "server_path": "/samba/vinaya/"
+        }
+    },
+    "current_profile": "",
+    "teaching_info": {
+        "lama": "DKR",
+        "teaching": "WMPT",
+        "copy_folder": "pub",
+        "extra_info": "WMPT"
+    }
+}

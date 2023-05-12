@@ -33,21 +33,22 @@
         var RtcConfig = {};
         var AudioTagId = "audioTag";
 
-        function updateTeachingInfo(settingsInfo) {
+        function updateTeachingInfo(settingsInfo,systemSettings) {
             const teachingLamaDiv = document.querySelector('#teachingLama');
             const teachingNameDiv = document.querySelector('#teachingName');
             const lamaCode = settingsInfo.teaching_info.lama;
             const teachingCode = settingsInfo.teaching_info.teaching;
 
             // teachingLamaDiv.textContent = settingsInfo.teachings["dsdsdd"];
-            teachingNameDiv.textContent = settingsInfo.lamas[lamaCode];
+            teachingLamaDiv.textContent = systemSettings.lamas[lamaCode];
+            teachingNameDiv.textContent = systemSettings.teachings[teachingCode];
         }
 
-        function updateChannelsInfo(settingsInfo) {
+        function updateChannelsInfo(settingsInfo,systemSettings) {
 
             for (const channelId in settingsInfo.channels) {
                 const languageCode = settingsInfo.channels[channelId].language
-                const languageName = settingsInfo.languages[languageCode].name;
+                const languageName = systemSettings.languages[languageCode].name;
 
                 const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
 
@@ -58,7 +59,7 @@
 
         }
 
-        function createChannelsBlocks(settingsInfo) {
+        function createChannelsBlocks(settingsInfo,systemSettings) {
             for (const channelId in settingsInfo.channels) {
 
                 const channelsDiv = document.querySelector("#channels");
@@ -67,7 +68,7 @@
 
                 let languageName = "";
                 if (settingsInfo.channels[channelId].language != "") {
-                    languageName = settingsInfo.languages[settingsInfo.channels[channelId].language].name;
+                    languageName = systemSettings.languages[settingsInfo.channels[channelId].language].name;
                 }
                 
                 // Hide some channels
@@ -91,20 +92,20 @@
 
                 channelsDiv.appendChild(channelButton);
             }
-            document.querySelector("#channel1").style.display = 'none';
-            document.querySelector("#channel3").style.display = 'none';
-            document.querySelector("#channel4").style.display = 'none';
+            // document.querySelector("#channel1").style.display = 'none';
+            // document.querySelector("#channel3").style.display = 'none';
+            // document.querySelector("#channel4").style.display = 'none';
         }
 
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('update-channels-info', (channelsInfo) => {
-            updateChannelsInfo(channelsInfo);
+        socket.on('update-channels-info', (settingsInfo,systemSetting) => {
+            updateChannelsInfo(settingsInfo,systemSetting);
         });
 
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('settings-info-value', (settingsInfo) => {
-            updateTeachingInfo(settingsInfo);
-            createChannelsBlocks(settingsInfo);
+        socket.on('settings-info-value', (settingsInfo,systemSettings) => {
+            updateTeachingInfo(settingsInfo,systemSettings);
+            createChannelsBlocks(settingsInfo,systemSettings);
         });
 
         // Emit a 'settings-info-value' event to the server to trigger the function call
@@ -147,10 +148,7 @@
 <body>
     <div class="container">
         <div class="topTitleCtn">
-            <!-- <span class="logowheel">☸</span> -->
             <img class="logomarpa" src="style/marpa-live-high-resolution-color-logo.png" />
-            <!-- <div class="topTitle">Marpa Live</div> -->
-            <!-- <div class="topTitle">Translation Services</div> -->
         </div>
 
         <div class="content">

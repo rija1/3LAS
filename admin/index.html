@@ -5,755 +5,786 @@
     <title>Thrangu Sekhar Translation</title>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="styles/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
     <div class="container">
-        <h1>Thrangu Sekhar Translation Services</h1>
-        <h2>Administration Panel</h2>
-
-        <div class="wide-block">
-            <div class="wide-header">Settings</div>
-            <div class="wide-content">
-                <label for="profile">Profile</label>
-                <select id="profile"></select>
-                <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
-                <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
-                <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
-                <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
-
-                <!-- Popup -->
-                <div id="profile_popup" style="display:none">
-                    <label for="profile_name">Profile Name:</label>
-                    <input type="text" id="profile_name" name="profile_name">
-                    <button id="save_popup_btn">Save</button>
+        <div class="topTitleCtn">
+            <img class="logomarpa" src="styles/marpa-live-high-resolution-color-logo.png" />
+            <span>[Administration Panel]</span>
+        </div>
+        <div class="contentCtn">
+            <div class="wide-block">
+                <div class="wide-header">Profiles</div>
+                <div class="wide-content profile_form">
+                    <div class="field_block">
+                    <label for="profile">Profile</label>
+                    <select id="profile"></select>
+                    </div>
+                    <div class="profile_buttons">
+                    <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
+                    <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
+                    <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
+                    <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
                 </div>
-                <div id="profile_popup_result" style="display:none"></div>
+                    <!-- Popup -->
+                    <div id="profile_popup" style="display:none">
+                        <label for="profile_name">Profile Name:</label>
+                        <input type="text" id="profile_name" name="profile_name">
+                        <button id="save_popup_btn">Save</button>
+                    </div>
+                    <div class="notification" id="profile_popup_result"></div>
+                </div>
             </div>
-        </div>
 
-        <div class="wide-block">
-            <div class="wide-header">Teaching Info</div>
-            <div class="wide-content">
-                <label for="teaching_lama">Lama / Teacher</label>
-                <select id="teaching_lama"></select>
-                <label for="teaching_name">Teaching</label>
-                <select id="teaching_name"></select>
-                <label for="teaching_extra_info">Extra Info (added to filename)</label>
-                <input type="text" id="teaching_extra_info"></select>
-                <label for="teaching_name">Server Copy Folder</label>
-                <select id="teaching_copy_folder"></select>
+            <div class="wide-block">
+                <div class="wide-header">Teaching Info</div>
+                <div class="wide-content teaching_info_form">
+                    <div class="field_block">
+                        <label for="teaching_lama">Lama / Teacher</label>
+                        <span cass="field"><select id="teaching_lama"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_name">Teaching</label>
+                        
+                        <span cass="field"><select id="teaching_name"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_extra_info">Extra Info (added to filename)</label>
+                        <span cass="field"><input type="text" id="teaching_extra_info"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_name">Server Copy Folder</label>
+                        <span cass="field"><select id="teaching_copy_folder"></select></span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="wide-block">
-            <div class="wide-header">Actions</div>
-            <div class="wide-content">
-                <button id="start-all-button"><span class="fa-start"></span>Start All</button>
-                <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
-                <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
-                <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
+            <div class="wide-block">
+                <div class="wide-header">Actions</div>
+                <div class="wide-content">
+                    <div class="actions_buttons">
+                    <button id="start-all-button"><span class="fa-start"></span>Start All</button>
+                    <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
+                    <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
+                    <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
+                </div>
+                </div>
             </div>
-        </div>
 
-        <div class="status-container" id="status-container">
+            <div class="status-container" id="status-container">
 
-            <div class="status-header">
-                <div>Status</div>
-                <div>Process Name</div>
-                <div>Uptime</div>
-                <div>Process Management</div>
-                <div>Settings</div>
+                <div class="status-header">
+                    <div>Status</div>
+                    <div>Process Name</div>
+                    <div>Uptime</div>
+                    <div>Process Management</div>
+                    <div>Settings</div>
+                </div>
             </div>
-        </div>
 
-        <script>
-            // Save New Profile
-            const saveProfileBtn = document.querySelector("#save_new_profile_btn");
-            const profilePopup = document.querySelector("#profile_popup");
-            const profileNameInput = document.querySelector("#profile_name");
+            <script>
+                // Save New Profile
+                const saveProfileBtn = document.querySelector("#save_new_profile_btn");
+                const profilePopup = document.querySelector("#profile_popup");
+                const profileNameInput = document.querySelector("#profile_name");
 
-            let currentSettings;
+                let currentSettings;
 
-            // Show the profile popup when the save profile button is clicked
-            saveProfileBtn.addEventListener("click", () => {
-                profilePopup.style.display = "block";
-            });
+                // Show the profile popup when the save profile button is clicked
+                saveProfileBtn.addEventListener("click", () => {
+                    profilePopup.style.display = "block";
+                });
 
-            // Save the profile when the save button in the popup is clicked
-            const savePopupBtn = document.querySelector("#save_popup_btn");
-            savePopupBtn.addEventListener("click", () => {
+                // Save the profile when the save button in the popup is clicked
+                const savePopupBtn = document.querySelector("#save_popup_btn");
+                savePopupBtn.addEventListener("click", () => {
 
-                socket.emit('profile-new', profileNameInput.value);
+                    socket.emit('profile-new', profileNameInput.value);
 
-                // Hide the profile popup
-                profilePopup.style.display = "none";
-            });
+                    // Hide the profile popup
+                    profilePopup.style.display = "none";
+                });
 
-            // Function to start a PM2 process
-            function startPM2(processName) {
-                socket.emit('start-process', processName);
-            }
-
-            // Function to stop a PM2 process
-            function stopPM2(processName) {
-                socket.emit('stop-process', processName);
-            }
-
-            // Function to stop a PM2 process
-            function restartPM2(processName) {
-                updateStatusIndicator(processName, false);
-                socket.emit('restart-process', processName);
-            }
-
-            function startAll(settingsInfo) {
-                for (const channelId in settingsInfo.channels) {
-                    startPM2(channelId);
-                }
-            }
-
-            function stopAll(settingsInfo) {
-                for (const channelId in settingsInfo.channels) {
-                    stopPM2(channelId);
-                }
-            }
-
-            function restartAll(settingsInfo) {
-                for (const channelId in settingsInfo.channels) {
-                    restartPM2(channelId);
-                }
-            }
-
-            function refreshInfo() {
-                socket.emit('settings-info-req');
-            }
-
-            function emitUpdateTeachingInfo(infoArray) {
-                // Check if infoArray has the expected properties
-                if (
-                    typeof infoArray === 'object' && // Check if infoArray is an object
-                    infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
-                    infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
-                ) {
-                    socket.emit('update-teaching-info', infoArray);
-                } else {
-                    console.log('Invalid infoArray format');
-                }
-            }
-
-            function emitUpdateChannelInfo(infoArray) {
-                // Check if infoArray has the expected properties
-                if (
-                    typeof infoArray === 'object' && // Check if infoArray is an object
-                    infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
-                    infoArray.hasOwnProperty('channel_id') && // Check if infoArray has the 'channel_id' property
-                    typeof infoArray.channel_id === 'string' && // Check if the value of the 'channel_id' property is a string
-                    infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
-                ) {
-                    socket.emit('update-channel-info', infoArray);
-                } else {
-                    console.log('Invalid infoArray format');
-                }
-            }
-
-            function updateTeachingBlock(settingsInfo) {
-
-                // Pre-select Lama 
-                teachingLamaSelect = document.querySelector("#teaching_lama");
-                var optionElementLama = teachingLamaSelect.querySelector("option[value='" + settingsInfo.teaching_info.lama + "']");
-                if (optionElementLama) {
-                    optionElementLama.selected = true;
+                // Function to start a PM2 process
+                function startPM2(processName) {
+                    socket.emit('start-process', processName);
                 }
 
-                // Pre-select Teaching 
-                teachingNameSelect = document.querySelector("#teaching_name");
-                var optionElementTeaching = teachingNameSelect.querySelector("option[value='" + settingsInfo.teaching_info.teaching + "']");
-                if (optionElementTeaching) {
-                    optionElementTeaching.selected = true;
+                // Function to stop a PM2 process
+                function stopPM2(processName) {
+                    socket.emit('stop-process', processName);
                 }
 
-                // Pre-select Copy Folder 
-                teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
-                var optionElementCpFolder = teachingCopyFolderSelect.querySelector("option[value='" + settingsInfo.teaching_info.copy_folder + "']");
-                if (optionElementCpFolder) {
-                    optionElementCpFolder.selected = true;
+                // Function to stop a PM2 process
+                function restartPM2(processName) {
+                    updateStatusIndicator(processName, false);
+                    socket.emit('restart-process', processName);
                 }
 
-                // Pre-fill Extra Info
-                teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
-                teachingExtraInfoInput.value = settingsInfo.teaching_info.extra_info;
-            }
-
-            function createTeachingBlock(settingsInfo) {
-
-                // Lama Select
-                const teachingLamaSelect = document.querySelector("#teaching_lama");
-
-                const teachingLamaOption = document.createElement('option');
-                teachingLamaOption.value = '';
-                teachingLamaOption.text = 'Select Lama';
-                teachingLamaSelect.appendChild(teachingLamaOption);
-                teachingLamaSelect.onchange = (event) => {
-                    const curTeachingLama = event.target.value;
-                    const infoArray = {
-                        field: 'lama',
-                        value: curTeachingLama
-                    };
-                    emitUpdateTeachingInfo(infoArray);
-                };
-
-
-                // Create options
-                for (const [lamaCode, lamaName] of Object.entries(settingsInfo.lamas)) {
-                    const option = document.createElement('option');
-                    option.value = lamaCode;
-                    option.text = lamaName;
-                    teachingLamaSelect.appendChild(option);
-                }
-
-                // Teaching Select
-
-                const teachingNameSelect = document.querySelector("#teaching_name");
-
-                const teachingNameOption = document.createElement('option');
-                teachingNameOption.value = '';
-                teachingNameOption.text = 'Select Teaching';
-                teachingNameSelect.appendChild(teachingNameOption);
-                teachingNameSelect.onchange = (event) => {
-                    const curTeachingName = event.target.value;
-                    const infoArray = {
-                        field: 'teaching',
-                        value: curTeachingName
-                    };
-                    emitUpdateTeachingInfo(infoArray);
-                };
-
-                for (const [teachingCode, teachingName] of Object.entries(settingsInfo.teachings)) {
-                    const option = document.createElement('option');
-                    option.value = teachingCode;
-                    option.text = teachingName;
-                    teachingNameSelect.appendChild(option);
-                }
-
-                // Teaching Extra Info
-
-                const teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
-
-                const teachingExtraInfoOption = document.createElement('option');
-                teachingExtraInfoOption.value = '';
-                teachingExtraInfoOption.text = 'Extra Info (added to mp3 filename)';
-                teachingExtraInfoInput.appendChild(teachingExtraInfoOption);
-                teachingExtraInfoInput.onkeyup = (event) => {
-                    const curTeachingExtraInfo = event.target.value;
-                    const infoArray = {
-                        field: 'extra_info',
-                        value: curTeachingExtraInfo
-                    };
-                    emitUpdateTeachingInfo(infoArray);
-                };
-
-                // Folder Select
-
-                const teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
-
-                const teachingCopyFolderSelectOption = document.createElement('option');
-                teachingCopyFolderSelectOption.value = '';
-                teachingCopyFolderSelectOption.text = 'Select Folder';
-                teachingCopyFolderSelect.appendChild(teachingCopyFolderSelectOption);
-                teachingCopyFolderSelect.onchange = (event) => {
-                    const curTeachingCopyFolder = event.target.value;
-                    const infoArray = {
-                        field: 'copy_folder',
-                        value: curTeachingCopyFolder
-                    };
-                    emitUpdateTeachingInfo(infoArray);
-                };
-
-                for (const [copyFolderCode, teachingCopyFolder] of Object.entries(settingsInfo.copy_folders)) {
-                    const option = document.createElement('option');
-                    option.value = copyFolderCode;
-                    option.text = teachingCopyFolder.name;
-                    teachingCopyFolderSelect.appendChild(option);
-                }
-
-                // Pre-fill and pre-select teaching info based on current settings
-                updateTeachingBlock(settingsInfo);
-
-            }
-
-            function updateStatusIndicator(channelId, isRunning) {
-                const statusIndicator = document.querySelector('#' + channelId + ' .status-indicator');
-                const startButton = document.querySelector('#' + channelId + ' button.start-button');
-                const stopButton = document.querySelector('#' + channelId + ' button.stop-button');
-                const elapsedTimeDiv = document.querySelector('#' + channelId + ' .elapsed-time');
-                if (isRunning) {
-                    statusIndicator.classList.add('greenIndicator');
-                    statusIndicator.classList.remove('redIndicator');
-                    startButton.disabled = true;
-                    stopButton.disabled = false;
-                } else {
-                    statusIndicator.classList.add('redIndicator');
-                    statusIndicator.classList.remove('greenIndicator');
-                    startButton.disabled = false;
-                    stopButton.disabled = true;
-                    elapsedTimeDiv.textContent = '';
-                }
-            }
-
-            function updateProfilesInfo(profiles, current_profile) {
-                const profileSelect = document.querySelector("#profile");
-
-                while (profileSelect.options.length > 0) {
-                    profileSelect.options[0].remove();
-                }
-
-                const profileSelectOption = document.createElement('option');
-                profileSelectOption.value = '';
-                profileSelectOption.text = 'None';
-                profileSelect.appendChild(profileSelectOption);
-
-                for (const filename in profiles) {
-
-                    const option = document.createElement('option');
-                    option.value = filename;
-                    option.text = profiles[filename];
-                    if (current_profile === filename) {
-                        option.selected = true;
-                    }
-                    profileSelect.appendChild(option);
-                }
-            }
-
-            function createChannelsBlock(settingsInfo) {
-                for (const channelId in settingsInfo.channels) {
-                    const channel = settingsInfo.channels[channelId];
-                    const statusItem = document.createElement('div');
-                    statusItem.className = 'status-item';
-                    statusItem.setAttribute('id', channelId);
-                    statusContainer.appendChild(statusItem);
-
-                    // Add status indicator column
-                    const statusIndicatorContainer = document.createElement('div');
-                    statusIndicatorContainer.className = 'status-indicator-container';
-                    statusItem.appendChild(statusIndicatorContainer);
-                    const statusIndicator = document.createElement('div');
-                    statusIndicator.className = 'status-indicator';
-                    statusIndicatorContainer.appendChild(statusIndicator);
-
-                    // Add process name column
-                    const processInfo = document.createElement('div');
-                    processInfo.style.verticalAlign = 'middle';
-                    processInfo.className = 'channel-name';
-                    // processInfo.textContent = channel.name;
-                    statusItem.appendChild(processInfo);
-
-                    // Add elapsed time column
-                    const elapsedTimeDiv = document.createElement('div');
-                    elapsedTimeDiv.className = 'elapsed-time';
-                    statusItem.appendChild(elapsedTimeDiv);
-
-                    // Add start/stop/restart buttons column
-                    const buttonsContainer = document.createElement('div');
-                    buttonsContainer.className = 'buttons-container';
-                    statusItem.appendChild(buttonsContainer);
-                    const startButton = document.createElement('button');
-                    startButton.className = 'start-button';
-                    startButton.textContent = 'Start';
-                    startButton.onclick = () => {
+                function startAll(settingsInfo) {
+                    for (const channelId in settingsInfo.channels) {
                         startPM2(channelId);
-                    };
-                    const stopButton = document.createElement('button');
-                    stopButton.className = 'stop-button';
-                    stopButton.textContent = 'Stop';
-                    stopButton.onclick = () => {
+                    }
+                }
+
+                function stopAll(settingsInfo) {
+                    for (const channelId in settingsInfo.channels) {
                         stopPM2(channelId);
-                    };
-                    const restartButton = document.createElement('button');
-                    restartButton.className = 'restart-button';
-                    restartButton.textContent = 'Restart';
-                    restartButton.onclick = () => {
+                    }
+                }
+
+                function restartAll(settingsInfo) {
+                    for (const channelId in settingsInfo.channels) {
                         restartPM2(channelId);
-                    };
-                    buttonsContainer.appendChild(startButton);
-                    buttonsContainer.appendChild(stopButton);
-                    buttonsContainer.appendChild(restartButton);
+                    }
+                }
 
-                    // Add Channel Options block
-                    const channelOptions = document.createElement('div');
-                    channelOptions.className = 'channel-options';
-                    statusItem.appendChild(channelOptions);
+                function refreshInfo() {
+                    socket.emit('settings-info-req');
+                }
 
-                    // Add language name column
-                    const languageSelect = document.createElement('select');
-                    languageSelect.className = 'language-select';
-                    languageSelect.setAttribute('channel-id', channelId);
+                function emitUpdateTeachingInfo(infoArray) {
+                    // Check if infoArray has the expected properties
+                    if (
+                        typeof infoArray === 'object' && // Check if infoArray is an object
+                        infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
+                        infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
+                    ) {
+                        socket.emit('update-teaching-info', infoArray);
+                    } else {
+                        console.log('Invalid infoArray format');
+                    }
+                }
 
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.text = 'Select Language';
-                    languageSelect.appendChild(option);
-                    languageSelect.onchange = (event) => {
-                        const curLanguage = event.target.value;
+                function emitUpdateChannelInfo(infoArray) {
+                    // Check if infoArray has the expected properties
+                    if (
+                        typeof infoArray === 'object' && // Check if infoArray is an object
+                        infoArray.hasOwnProperty('field') && // Check if infoArray has the 'field' property
+                        infoArray.hasOwnProperty('channel_id') && // Check if infoArray has the 'channel_id' property
+                        typeof infoArray.channel_id === 'string' && // Check if the value of the 'channel_id' property is a string
+                        infoArray.hasOwnProperty('value') // Check if infoArray has the 'value' property
+                    ) {
+                        socket.emit('update-channel-info', infoArray);
+                    } else {
+                        console.log('Invalid infoArray format');
+                    }
+                }
+
+                function updateTeachingBlock(settingsInfo) {
+
+                    // Pre-select Lama 
+                    teachingLamaSelect = document.querySelector("#teaching_lama");
+                    var optionElementLama = teachingLamaSelect.querySelector("option[value='" + settingsInfo.teaching_info.lama + "']");
+                    if (optionElementLama) {
+                        optionElementLama.selected = true;
+                    }
+
+                    // Pre-select Teaching 
+                    teachingNameSelect = document.querySelector("#teaching_name");
+                    var optionElementTeaching = teachingNameSelect.querySelector("option[value='" + settingsInfo.teaching_info.teaching + "']");
+                    if (optionElementTeaching) {
+                        optionElementTeaching.selected = true;
+                    }
+
+                    // Pre-select Copy Folder 
+                    teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
+                    var optionElementCpFolder = teachingCopyFolderSelect.querySelector("option[value='" + settingsInfo.teaching_info.copy_folder + "']");
+                    if (optionElementCpFolder) {
+                        optionElementCpFolder.selected = true;
+                    }
+
+                    // Pre-fill Extra Info
+                    teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
+                    teachingExtraInfoInput.value = settingsInfo.teaching_info.extra_info;
+                }
+
+                function createTeachingBlock(settingsInfo,systemSettings) {
+
+                    // Lama Select
+                    const teachingLamaSelect = document.querySelector("#teaching_lama");
+
+                    const teachingLamaOption = document.createElement('option');
+                    teachingLamaOption.value = '';
+                    teachingLamaOption.text = 'Select Lama';
+                    teachingLamaSelect.appendChild(teachingLamaOption);
+                    teachingLamaSelect.onchange = (event) => {
+                        const curTeachingLama = event.target.value;
                         const infoArray = {
-                            field: 'language',
-                            channel_id: channelId,
-                            value: curLanguage
+                            field: 'lama',
+                            value: curTeachingLama
                         };
-                        emitUpdateChannelInfo(infoArray);
+                        emitUpdateTeachingInfo(infoArray);
                     };
 
-                    // Loop through the object keys and values and create options
-                    for (const [code, language] of Object.entries(settingsInfo.languages)) {
+
+                    // Create options
+                    for (const [lamaCode, lamaName] of Object.entries(systemSettings.lamas)) {
                         const option = document.createElement('option');
-                        option.value = code;
-                        option.text = language.name;
+                        option.value = lamaCode;
+                        option.text = lamaName;
+                        teachingLamaSelect.appendChild(option);
+                    }
+
+                    // Teaching Select
+
+                    const teachingNameSelect = document.querySelector("#teaching_name");
+
+                    const teachingNameOption = document.createElement('option');
+                    teachingNameOption.value = '';
+                    teachingNameOption.text = 'Select Teaching';
+                    teachingNameSelect.appendChild(teachingNameOption);
+                    teachingNameSelect.onchange = (event) => {
+                        const curTeachingName = event.target.value;
+                        const infoArray = {
+                            field: 'teaching',
+                            value: curTeachingName
+                        };
+                        emitUpdateTeachingInfo(infoArray);
+                    };
+
+                    for (const [teachingCode, teachingName] of Object.entries(systemSettings.teachings)) {
+                        const option = document.createElement('option');
+                        option.value = teachingCode;
+                        option.text = teachingName;
+                        teachingNameSelect.appendChild(option);
+                    }
+
+                    // Teaching Extra Info
+
+                    const teachingExtraInfoInput = document.querySelector("#teaching_extra_info");
+
+                    const teachingExtraInfoOption = document.createElement('option');
+                    teachingExtraInfoOption.value = '';
+                    teachingExtraInfoOption.text = 'Extra Info (added to mp3 filename)';
+                    teachingExtraInfoInput.appendChild(teachingExtraInfoOption);
+                    teachingExtraInfoInput.onkeyup = (event) => {
+                        const curTeachingExtraInfo = event.target.value;
+                        const infoArray = {
+                            field: 'extra_info',
+                            value: curTeachingExtraInfo
+                        };
+                        emitUpdateTeachingInfo(infoArray);
+                    };
+
+                    // Folder Select
+
+                    const teachingCopyFolderSelect = document.querySelector("#teaching_copy_folder");
+
+                    const teachingCopyFolderSelectOption = document.createElement('option');
+                    teachingCopyFolderSelectOption.value = '';
+                    teachingCopyFolderSelectOption.text = 'Select Folder';
+                    teachingCopyFolderSelect.appendChild(teachingCopyFolderSelectOption);
+                    teachingCopyFolderSelect.onchange = (event) => {
+                        const curTeachingCopyFolder = event.target.value;
+                        const infoArray = {
+                            field: 'copy_folder',
+                            value: curTeachingCopyFolder
+                        };
+                        emitUpdateTeachingInfo(infoArray);
+                    };
+
+                    for (const [copyFolderCode, teachingCopyFolder] of Object.entries(settingsInfo.copy_folders)) {
+                        const option = document.createElement('option');
+                        option.value = copyFolderCode;
+                        option.text = teachingCopyFolder.name;
+                        teachingCopyFolderSelect.appendChild(option);
+                    }
+
+                    // Pre-fill and pre-select teaching info based on current settings
+                    updateTeachingBlock(settingsInfo);
+
+                }
+
+                function updateStatusIndicator(channelId, isRunning) {
+                    const statusIndicator = document.querySelector('#' + channelId + ' .status-indicator');
+                    const startButton = document.querySelector('#' + channelId + ' button.start-button');
+                    const stopButton = document.querySelector('#' + channelId + ' button.stop-button');
+                    const elapsedTimeDiv = document.querySelector('#' + channelId + ' .elapsed-time');
+                    const exportCb = document.querySelector('#' + channelId + ' .export');
+                    if (isRunning) {
+                        statusIndicator.classList.add('greenIndicator');
+                        statusIndicator.classList.remove('redIndicator');
+                        startButton.classList.add('greyedout');
+                        stopButton.classList.remove('greyedout');
+                        startButton.disabled = true;
+                        stopButton.disabled = false;
+                    } else {
+                        statusIndicator.classList.add('redIndicator');
+                        statusIndicator.classList.remove('greenIndicator');
+                        startButton.classList.remove('greyedout');
+                        stopButton.classList.add('greyedout');
+                        startButton.disabled = false;
+                        stopButton.disabled = true;
+                        elapsedTimeDiv.textContent = '';
+                    }
+                }
+
+                function updateProfilesInfo(profiles, current_profile) {
+                    const profileSelect = document.querySelector("#profile");
+
+                    while (profileSelect.options.length > 0) {
+                        profileSelect.options[0].remove();
+                    }
+
+                    const profileSelectOption = document.createElement('option');
+                    profileSelectOption.value = '';
+                    profileSelectOption.text = 'None';
+                    profileSelect.appendChild(profileSelectOption);
+
+                    for (const filename in profiles) {
+
+                        const option = document.createElement('option');
+                        option.value = filename;
+                        option.text = profiles[filename];
+                        if (current_profile === filename) {
+                            option.selected = true;
+                        }
+                        profileSelect.appendChild(option);
+                    }
+                }
+
+                function createChannelsBlock(settingsInfo,systemSettings) {
+                    for (const channelId in settingsInfo.channels) {
+                        const channel = settingsInfo.channels[channelId];
+                        const statusItem = document.createElement('div');
+                        statusItem.className = 'status-item';
+                        statusItem.setAttribute('id', channelId);
+                        statusContainer.appendChild(statusItem);
+
+                        // Add status indicator column
+                        const statusIndicatorContainer = document.createElement('div');
+                        statusIndicatorContainer.className = 'status-indicator-container';
+                        statusItem.appendChild(statusIndicatorContainer);
+                        const statusIndicator = document.createElement('div');
+                        statusIndicator.className = 'status-indicator';
+                        statusIndicatorContainer.appendChild(statusIndicator);
+
+                        // Add process name column
+                        const processInfo = document.createElement('div');
+                        processInfo.style.verticalAlign = 'middle';
+                        processInfo.className = 'channel-name';
+                        // processInfo.textContent = channel.name;
+                        statusItem.appendChild(processInfo);
+
+                        // Add elapsed time column
+                        const elapsedTimeDiv = document.createElement('div');
+                        elapsedTimeDiv.className = 'elapsed-time';
+                        statusItem.appendChild(elapsedTimeDiv);
+
+                        // Add start/stop/restart buttons column
+                        const buttonsContainer = document.createElement('div');
+                        buttonsContainer.className = 'buttons-container';
+                        statusItem.appendChild(buttonsContainer);
+                        const startButton = document.createElement('button');
+                        startButton.className = 'start-button';
+                        startButton.innerHTML = '<span class="fa-start">Start';
+                        startButton.onclick = () => {
+                            startPM2(channelId);
+                        };
+                        const stopButton = document.createElement('button');
+                        stopButton.className = 'stop-button';
+                        stopButton.innerHTML = '<span class="fa-stop">Stop';
+                        stopButton.onclick = () => {
+                            stopPM2(channelId);
+                        };
+                        const restartButton = document.createElement('button');
+                        restartButton.className = 'restart-button';
+                        restartButton.innerHTML = '<span class="fa-restart">Restart';
+                        restartButton.onclick = () => {
+                            restartPM2(channelId);
+                        };
+                        buttonsContainer.appendChild(startButton);
+                        buttonsContainer.appendChild(stopButton);
+                        buttonsContainer.appendChild(restartButton);
+
+                        // Add Channel Options block
+                        const channelOptions = document.createElement('div');
+                        channelOptions.className = 'channel-options';
+                        statusItem.appendChild(channelOptions);
+
+                        // Add language name column
+                        const languageSelect = document.createElement('select');
+                        languageSelect.className = 'language-select';
+                        languageSelect.setAttribute('channel-id', channelId);
+
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.text = 'Select Language';
                         languageSelect.appendChild(option);
-                    }
-
-                    const languageLabel = document.createElement('label');
-                    languageLabel.textContent = "Language";
-                    const languageBlock = document.createElement('div');
-                    languageBlock.className = 'language-block';
-
-                    languageBlock.appendChild(languageLabel);
-                    languageBlock.appendChild(languageSelect);
-                    channelOptions.appendChild(languageBlock);
-
-                    // Add input column
-                    const deviceSelect = document.createElement('select');
-                    deviceSelect.className = 'device-select';
-                    deviceSelect.setAttribute('channel-id', channelId);
-
-                    const deviceOption = document.createElement('option');
-                    deviceOption.value = '';
-                    deviceOption.text = 'Select Device';
-                    deviceSelect.appendChild(deviceOption);
-                    deviceSelect.onchange = (event) => {
-                        const curDevice = event.target.value;
-                        const infoArray = {
-                            field: 'device',
-                            channel_id: channelId,
-                            value: curDevice
+                        languageSelect.onchange = (event) => {
+                            const curLanguage = event.target.value;
+                            const infoArray = {
+                                field: 'language',
+                                channel_id: channelId,
+                                value: curLanguage
+                            };
+                            emitUpdateChannelInfo(infoArray);
                         };
-                        emitUpdateChannelInfo(infoArray);
-                    };
 
-                    // Loop through the object keys and values and create options
-                    for (const [code, device] of Object.entries(settingsInfo.avfoundationDevices)) {
-                        const option = document.createElement('option');
-                        option.value = code;
-                        option.text = device.name;
-                        deviceSelect.appendChild(option);
-                    }
+                        // Loop through the object keys and values and create options
+                        for (const [code, language] of Object.entries(systemSettings.languages)) {
+                            const option = document.createElement('option');
+                            option.value = code;
+                            option.text = language.name;
+                            languageSelect.appendChild(option);
+                        }
 
-                    const deviceLabel = document.createElement('label');
-                    deviceLabel.textContent = "Device";
-                    const deviceBlock = document.createElement('div');
-                    deviceBlock.className = 'device-block';
+                        const languageLabel = document.createElement('label');
+                        languageLabel.textContent = "Language";
+                        const languageBlock = document.createElement('div');
+                        languageBlock.className = 'language-block';
 
-                    deviceBlock.appendChild(deviceLabel);
-                    deviceBlock.appendChild(deviceSelect);
-                    channelOptions.appendChild(deviceBlock);
+                        languageBlock.appendChild(languageLabel);
+                        languageBlock.appendChild(languageSelect);
+                        channelOptions.appendChild(languageBlock);
 
-                    // Add side column
+                        // Add input column
+                        const deviceSelect = document.createElement('select');
+                        deviceSelect.className = 'device-select';
+                        deviceSelect.setAttribute('channel-id', channelId);
 
-                    const panSelect = document.createElement('select');
-                    panSelect.className = 'pan-select';
-                    panSelect.setAttribute('channel-id', channelId);
-
-                    const panOptions = [
-                        { value: '', text: 'Both' },
-                        { value: 'left', text: 'Left' },
-                        { value: 'right', text: 'Right' }
-                    ];
-
-                    panOptions.forEach(option => {
-                        const newOption = document.createElement('option');
-                        newOption.value = option.value;
-                        newOption.textContent = option.text;
-                        panSelect.appendChild(newOption);
-                    });
-
-                    panSelect.onchange = (event) => {
-                        const curPan = event.target.value;
-                        const infoArray = {
-                            field: 'pan',
-                            channel_id: channelId,
-                            value: curPan
+                        const deviceOption = document.createElement('option');
+                        deviceOption.value = '';
+                        deviceOption.text = 'Select Device';
+                        deviceSelect.appendChild(deviceOption);
+                        deviceSelect.onchange = (event) => {
+                            const curDevice = event.target.value;
+                            const infoArray = {
+                                field: 'device',
+                                channel_id: channelId,
+                                value: curDevice
+                            };
+                            emitUpdateChannelInfo(infoArray);
                         };
-                        emitUpdateChannelInfo(infoArray);
-                    };
 
-                    const panLabel = document.createElement('label');
-                    panLabel.textContent = "Side";
-                    const panBlock = document.createElement('div');
-                    panBlock.className = 'pan-block';
+                        // Loop through the object keys and values and create options
+                        for (const [code, device] of Object.entries(settingsInfo.avfoundationDevices)) {
+                            const option = document.createElement('option');
+                            option.value = code;
+                            option.text = device.name;
+                            deviceSelect.appendChild(option);
+                        }
 
-                    panBlock.appendChild(panLabel);
-                    panBlock.appendChild(panSelect);
-                    channelOptions.appendChild(panBlock);
+                        const deviceLabel = document.createElement('label');
+                        deviceLabel.textContent = "Device";
+                        const deviceBlock = document.createElement('div');
+                        deviceBlock.className = 'device-block';
 
-                    // Create export checkbox
+                        deviceBlock.appendChild(deviceLabel);
+                        deviceBlock.appendChild(deviceSelect);
+                        channelOptions.appendChild(deviceBlock);
 
-                    const exportCheckbox = document.createElement('input');
-                    exportCheckbox.type = 'checkbox';
-                    exportCheckbox.id = 'export';
+                        // Add side column
 
-                    const exportLabel = document.createElement('label');
-                    exportLabel.htmlFor = 'export';
-                    exportLabel.appendChild(document.createTextNode('Export MP3'));
+                        const panSelect = document.createElement('select');
+                        panSelect.className = 'pan-select';
+                        panSelect.setAttribute('channel-id', channelId);
+
+                        const panOptions = [
+                            { value: '', text: 'Both' },
+                            { value: 'left', text: 'Left' },
+                            { value: 'right', text: 'Right' }
+                        ];
+
+                        panOptions.forEach(option => {
+                            const newOption = document.createElement('option');
+                            newOption.value = option.value;
+                            newOption.textContent = option.text;
+                            panSelect.appendChild(newOption);
+                        });
+
+                        panSelect.onchange = (event) => {
+                            const curPan = event.target.value;
+                            const infoArray = {
+                                field: 'pan',
+                                channel_id: channelId,
+                                value: curPan
+                            };
+                            emitUpdateChannelInfo(infoArray);
+                        };
+
+                        const panLabel = document.createElement('label');
+                        panLabel.textContent = "Side";
+                        const panBlock = document.createElement('div');
+                        panBlock.className = 'pan-block';
+
+                        panBlock.appendChild(panLabel);
+                        panBlock.appendChild(panSelect);
+                        channelOptions.appendChild(panBlock);
+
+                        // Create export checkbox
+
+                        const exportCheckbox = document.createElement('input');
+                        exportCheckbox.type = 'checkbox';
+                        exportCheckbox.className = 'export';
+
+                        const exportLabel = document.createElement('label');
+                        exportLabel.htmlFor = 'export';
+                        exportLabel.appendChild(document.createTextNode('Export MP3'));
 
 
-                    exportCheckbox.onchange = (event) => {
-                        const curExport = event.target.checked;
-                        chanCopyField = document.querySelector('#' + channelId + ' .cp-server-block');
-                        chanCopyBox = document.querySelector('#' + channelId + ' .cp-server-block input');
-                        chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
-                        if (curExport) {
-                            chanCopyBox.disabled = false;
-                            chanCopyLabel.classList.remove('greyedout');
+                        exportCheckbox.onchange = (event) => {
+                            const curExport = event.target.checked;
+                            chanCopyField = document.querySelector('#' + channelId + ' .cp-server-block');
+                            chanCopyBox = document.querySelector('#' + channelId + ' .cp-server-block input');
+                            chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
+                            if (curExport) {
+                                chanCopyBox.disabled = false;
+                                chanCopyLabel.classList.remove('greyedout');
 
-                        } else {
-                            chanCopyBox.disabled = true;
+                            } else {
+                                chanCopyBox.disabled = true;
+                                chanCopyLabel.classList.add('greyedout');
+                            }
+                            const infoArray = {
+                                field: 'export',
+                                channel_id: channelId,
+                                value: curExport
+                            };
+                            emitUpdateChannelInfo(infoArray);
+                        };
+
+                        const exportBlock = document.createElement('div');
+                        exportBlock.className = 'export-block';
+
+                        exportBlock.appendChild(exportCheckbox);
+                        exportBlock.appendChild(exportLabel);
+
+                        // Create copy checkbox
+
+                        const channelCpServer = channel.copy_to_server;
+                        const cpServerCheckbox = document.createElement('input');
+                        cpServerCheckbox.type = 'checkbox';
+                        cpServerCheckbox.className = 'copy_to_server';
+
+                        const cpServerLabel = document.createElement('label');
+                        cpServerLabel.htmlFor = 'copy_to_server';
+                        cpServerLabel.appendChild(document.createTextNode('Copy to Server'));
+
+                        cpServerCheckbox.onchange = (event) => {
+                            const curCopyToServer = event.target.checked;
+                            const infoArray = {
+                                field: 'copy_to_server',
+                                channel_id: channelId,
+                                value: curCopyToServer
+                            };
+                            emitUpdateChannelInfo(infoArray);
+                        };
+
+                        if (channelCpServer) {
+                            cpServerCheckbox.checked = true;
+                        }
+
+                        const cpServerBlock = document.createElement('div');
+                        cpServerBlock.className = 'cp-server-block';
+
+                        cpServerBlock.appendChild(cpServerCheckbox);
+                        cpServerBlock.appendChild(cpServerLabel);
+
+                        const cpExportBlock = document.createElement('div');
+                        cpExportBlock.className = 'cp-export-block';
+                        cpExportBlock.appendChild(exportBlock);
+                        cpExportBlock.appendChild(cpServerBlock);
+                        channelOptions.appendChild(cpExportBlock);
+
+                        const channelExport = channel.export;
+
+                        // We grey out the copy field if the current channel's export is disabled
+                        if (!channelExport) {
+                            cpServerCheckbox.disabled = true;
+                            chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
                             chanCopyLabel.classList.add('greyedout');
                         }
-                        const infoArray = {
-                            field: 'export',
-                            channel_id: channelId,
-                            value: curExport
-                        };
-                        emitUpdateChannelInfo(infoArray);
+
+                        // Add export path block
+                        const channelNotifBlock = document.createElement('div');
+                        channelNotifBlock.className = 'notification';
+                        channelNotifBlock.id = "channelNotifBlock";
+                        channelNotifBlock.innerHTML = '<span class="fa-info"></span>';
+                        if (channel.export_filename != '') {
+                            channelNotifBlock.innerHTML += channel.export_filename;
+                            channelNotifBlock.style.display = 'block';
+                        }
+                        statusItem.appendChild(channelNotifBlock);
+
+                        if (!channelExport) {
+                            channelNotifBlock.style.display = "none";
+                        }
+
+                        // Listen for status updates from server
+                        socket.on(`${channelId}-status`, (isRunning) => {
+                            updateStatusIndicator(channelId, isRunning);
+                        });
+
+                        // Listen for elapsed time updates from server
+                        socket.on(`${channelId}-time`, (elapsedTime) => {
+                            if (elapsedTime) {
+                                elapsedTimeDiv.innerHTML = elapsedTime;
+                            }
+                        });
+                    }
+                    // update channel block info
+                    updateChannelsBlock(settingsInfo);
+                }
+
+                function updateChannelsBlock(settingsInfo) {
+                    for (const channelId in settingsInfo.channels) {
+
+                        const channel = settingsInfo.channels[channelId];
+                        const channelDiv = document.querySelector("#" + channelId);
+
+                        // Channel Name
+                        channelDiv.querySelector(".channel-name").textContent = channel.name;
+                        // Pre-select Language 
+                        chanLanguageSelect = channelDiv.querySelector(".language-select");
+                        if (chanLanguageSelect) {
+                            var optionElementLanguage = chanLanguageSelect.querySelector("option[value='" + channel.language + "']");
+                            if (optionElementLanguage) {
+                                optionElementLanguage.selected = true;
+                            }
+                        }
+
+                        // Pre-select Device 
+                        chanDeviceSelect = channelDiv.querySelector(".device-select");
+                        if (chanDeviceSelect) {
+                            var optionElementDevice = chanDeviceSelect.querySelector("option[value='" + channel.device + "']");
+                            if (optionElementDevice) {
+                                optionElementDevice.selected = true;
+                            }
+                        }
+
+                        // Pre-select Side 
+                        chanSideSelect = channelDiv.querySelector(".pan-select");
+                        if (chanSideSelect) {
+                            var optionElementSide = chanSideSelect.querySelector("option[value='" + channel.pan + "']");
+                            if (optionElementSide) {
+                                optionElementSide.selected = true;
+                            }
+                        }
+
+                        // Pre tick export
+                        const channelExport = channel.export;
+                        chanExportCb = channelDiv.querySelector(".export");
+                        if (chanExportCb && channelExport) {
+                            chanExportCb.checked = true;
+                        }
+
+                        // Pre tick copy to server
+                        const channelCpServer = channel.copy_to_server;
+                        chanCpServerCb = channelDiv.querySelector(".copy_to_server");
+                        if (chanCpServerCb && channelCpServer) {
+                            chanCpServerCb.checked = true;
+                        }
+                    }
+                }
+
+                function deleteProfile(profileFilename, profileName) {
+                    if (!profileFilename || (profileFilename == '')) {
+                        alert('No profile is selected!')
+                    }
+                    if (!confirm('Do you confirm the deletion of profile "' + profileName + '" ?')) {
+                        return false;
+                    }
+                    socket.emit('profile-delete', profileFilename, profileName);
+                }
+
+                function saveProfile(profileFilename, profileName) {
+                    if (!profileFilename || (profileFilename == '')) {
+                        alert('No profile is loaded!')
+                    }
+                    if (!confirm('Do you confirm saving current settings as "' + profileName + '" ? Previous settings will be replaced.')) {
+                        return false;
+                    }
+                    socket.emit('profile-save', profileFilename, profileName);
+                }
+
+                function loadProfile(profileFilename, profileName) {
+                    if (!profileFilename || (profileFilename == '')) {
+                        alert('No profile is selected!')
+                    }
+                    if (!confirm('Do you confirm loading this profile? The currents settings will be replaced.')) {
+                        return false;
+                    }
+                    socket.emit('profile-load', profileFilename, profileName);
+                }
+
+                const statusContainer = document.getElementById('status-container');
+                const socket = io();
+
+                socket.on('profiles-update', (profiles, current_profile) => {
+                    updateProfilesInfo(profiles, current_profile);
+                });
+
+                // Add an event listener for the 'return-value' event on the socket
+                socket.on('settings-info-init', (settingsInfo,systemSettings) => {
+
+                    createTeachingBlock(settingsInfo,systemSettings);
+                    createChannelsBlock(settingsInfo,systemSettings);
+
+                    document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
+                    document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
+                    document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
+                    document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
+
+                    document.querySelector("#save_profile_btn").onclick = function () {
+                        const profileSelect = document.querySelector("#profile");
+                        const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                        if (profileSelect) {
+                            saveProfile(profileSelect.value, profileSelectOptionText);
+                        }
                     };
 
-                    const exportBlock = document.createElement('div');
-                    exportBlock.className = 'export-block';
-
-                    exportBlock.appendChild(exportCheckbox);
-                    exportBlock.appendChild(exportLabel);
-
-                    // Create copy checkbox
-
-                    const channelCpServer = settingsInfo.channels[channelId].copy_to_server;
-                    const cpServerCheckbox = document.createElement('input');
-                    cpServerCheckbox.type = 'checkbox';
-                    cpServerCheckbox.id = 'copy_to_server';
-
-                    const cpServerLabel = document.createElement('label');
-                    cpServerLabel.htmlFor = 'copy_to_server';
-                    cpServerLabel.appendChild(document.createTextNode('Copy to Server'));
-
-                    cpServerCheckbox.onchange = (event) => {
-                        const curCopyToServer = event.target.checked;
-                        const infoArray = {
-                            field: 'copy_to_server',
-                            channel_id: channelId,
-                            value: curCopyToServer
-                        };
-                        emitUpdateChannelInfo(infoArray);
+                    document.querySelector("#load_profile_btn").onclick = function () {
+                        const profileSelect = document.querySelector("#profile");
+                        const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                        if (profileSelect) {
+                            loadProfile(profileSelect.value, profileSelectOptionText);
+                        }
                     };
 
-                    if (channelCpServer) {
-                        cpServerCheckbox.checked = true;
-                    }
-
-                    const cpServerBlock = document.createElement('div');
-                    cpServerBlock.className = 'cp-server-block';
-
-                    cpServerBlock.appendChild(cpServerCheckbox);
-                    cpServerBlock.appendChild(cpServerLabel);
-
-                    const cpExportBlock = document.createElement('div');
-                    cpExportBlock.className = 'cp-export-block';
-                    cpExportBlock.appendChild(exportBlock);
-                    cpExportBlock.appendChild(cpServerBlock);
-                    channelOptions.appendChild(cpExportBlock);
-
-                    const channelExport = settingsInfo.channels[channelId].export;
-
-                    // We grey out the copy field if the current channel's export is disabled
-                    if (!channelExport) {
-                        cpServerCheckbox.disabled = true;
-                        chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
-                        chanCopyLabel.classList.add('greyedout');
-                    }
-
-                    // Add export path block
-                    const exportPathBlock = document.createElement('div');
-                    exportPathBlock.className = 'export-path-block';
-                    exportPathBlock.id = "exportPathBlock";
-                    channelOptions.appendChild(exportPathBlock);
-
-                    if (!channelExport) {
-                        exportPathBlock.style.display = "none";
-                    }
-
-                    // Listen for status updates from server
-                    socket.on(`${channelId}-status`, (isRunning) => {
-                        updateStatusIndicator(channelId, isRunning);
-                    });
-
-                    // Listen for elapsed time updates from server
-                    socket.on(`${channelId}-time`, (elapsedTime) => {
-                        if (elapsedTime) {
-                            elapsedTimeDiv.innerHTML = elapsedTime;
+                    document.querySelector("#del_profile_btn").onclick = function () {
+                        const profileSelect = document.querySelector("#profile");
+                        const profileSelectOptionText = profileSelect.selectedOptions[0].text;
+                        if (profileSelect) {
+                            deleteProfile(profileSelect.value, profileSelectOptionText);
                         }
-                    });
-                }
-                // update channel block info
-                updateChannelsBlock(settingsInfo);
-            }
-
-            function updateChannelsBlock(settingsInfo) {
-                for (const channelId in settingsInfo.channels) {
-
-                    const channel = settingsInfo.channels[channelId];
-                    const channelDiv = document.querySelector("#" + channelId);
-
-                    // Channel Name
-                    channelDiv.querySelector(".channel-name").textContent = channel.name;
-                    // Pre-select Language 
-                    chanLanguageSelect = channelDiv.querySelector(".language-select");
-                    if (chanLanguageSelect) {
-                        var optionElementLanguage = chanLanguageSelect.querySelector("option[value='" + settingsInfo.channels[channelId].language + "']");
-                        if (optionElementLanguage) {
-                            optionElementLanguage.selected = true;
-                        }
-                    }
-
-                    // Pre-select Device 
-                    chanDeviceSelect = channelDiv.querySelector(".device-select");
-                    if (chanDeviceSelect) {
-                        var optionElementDevice = chanDeviceSelect.querySelector("option[value='" + settingsInfo.channels[channelId].device + "']");
-                        if (optionElementDevice) {
-                            optionElementDevice.selected = true;
-                        }
-                    }
-
-                    // Pre-select Side 
-                    chanSideSelect = channelDiv.querySelector(".pan-select");
-                    if (chanSideSelect) {
-                        var optionElementSide = chanSideSelect.querySelector("option[value='" + settingsInfo.channels[channelId].pan + "']");
-                        if (optionElementSide) {
-                            optionElementSide.selected = true;
-                        }
-                    }
-
-                    // Pre tick export
-                    const channelExport = settingsInfo.channels[channelId].export;
-                    chanExportCb = channelDiv.querySelector("#export");
-                    if (chanExportCb && channelExport) {
-                        chanExportCb.checked = true;
-                    }
-
-                    // Pre tick copy to server
-                    const channelCpServer = settingsInfo.channels[channelId].copy_to_server;
-                    chanCpServerCb = channelDiv.querySelector("#copy_to_server");
-                    if (chanCpServerCb && channelCpServer) {
-                        chanCpServerCb.checked = true;
-                    }
-                }
-            }
-
-            function deleteProfile(profileFilename, profileName) {
-                if (!profileFilename || (profileFilename == '')) {
-                    alert('No profile is selected!')
-                }
-                if (!confirm('Do you confirm the deletion of profile "' + profileName + '" ?')) {
-                    return false;
-                }
-                socket.emit('profile-delete', profileFilename, profileName);
-            }
-
-            function saveProfile(profileFilename, profileName) {
-                if (!profileFilename || (profileFilename == '')) {
-                    alert('No profile is loaded!')
-                }
-                if (!confirm('Do you confirm saving current settings as "' + profileName + '" ? Previous settings will be replaced.')) {
-                    return false;
-                }
-                socket.emit('profile-save', profileFilename, profileName);
-            }
-
-            function loadProfile(profileFilename, profileName) {
-                if (!profileFilename || (profileFilename == '')) {
-                    alert('No profile is selected!')
-                }
-                if (!confirm('Do you confirm loading this profile? The currents settings will be replaced.')) {
-                    return false;
-                }
-                socket.emit('profile-load', profileFilename, profileName);
-            }
-
-            const statusContainer = document.getElementById('status-container');
-            const socket = io();
-
-            socket.on('profiles-update', (profiles, current_profile) => {
-                updateProfilesInfo(profiles, current_profile);
-            });
-
-            // Add an event listener for the 'return-value' event on the socket
-            socket.on('settings-info-init', (settingsInfo) => {
-
-                createTeachingBlock(settingsInfo);
-                createChannelsBlock(settingsInfo);
-
-                document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
-                document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
-                document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
-                document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
-
-                document.querySelector("#save_profile_btn").onclick = function () {
-                    const profileSelect = document.querySelector("#profile");
-                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
-                    if (profileSelect) {
-                        saveProfile(profileSelect.value, profileSelectOptionText);
-                    }
-                };
-
-                document.querySelector("#load_profile_btn").onclick = function () {
-                    const profileSelect = document.querySelector("#profile");
-                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
-                    if (profileSelect) {
-                        loadProfile(profileSelect.value, profileSelectOptionText);
-                    }
-                };
-
-                document.querySelector("#del_profile_btn").onclick = function () {
-                    const profileSelect = document.querySelector("#profile");
-                    const profileSelectOptionText = profileSelect.selectedOptions[0].text;
-                    if (profileSelect) {
-                        deleteProfile(profileSelect.value, profileSelectOptionText);
-                    }
-                };
+                    };
 
 
-            });
+                });
 
-            socket.on('settings-info-update', (settingsInfo) => {
-                updateTeachingBlock(settingsInfo);
-                updateChannelsBlock(settingsInfo);
-            });
+                socket.on('settings-info-update', (settingsInfo) => {
+                    updateTeachingBlock(settingsInfo);
+                    updateChannelsBlock(settingsInfo);
+                });
 
-            socket.on('profile-result', (profileNewResult) => {
-                const profilePopupResult = document.querySelector("#profile_popup_result");
-                profilePopupResult.innerHTML = profileNewResult;
-                profilePopupResult.style.display = "block";
+                socket.on('profile-result', (profileNewResult) => {
+                    const profilePopupResult = document.querySelector("#profile_popup_result");
+                    profilePopupResult.innerHTML = profileNewResult;
+                    profilePopupResult.classList.add('notif_open');
+                    setTimeout(function () {
+                        profilePopupResult.classList.remove('notif_open');
+                    }, 5000);
+                });
 
-            });
+                socket.on('update-export-filename', (channelId, filename) => {
+                    const channelNotifBlock = document.querySelector("#" + channelId + " .notification");
+                    channelNotifBlock.innerHTML += "MP3 Filename :" + filename;
+                    channelNotifBlock.style.display = "block";
+                });
 
-            socket.on('update-export-filename', (channelId, filename) => {
-                const exportPathDiv = document.querySelector("#" + channelId + " #exportPathBlock");
-                exportPathDiv.textContent = "MP3 Filename :" + filename;
-            });
+                // Emit a 'settings-info-value' event to the server to trigger the function call
+                socket.emit('settings-info');
+                // Update profiles
+                socket.emit('get-profiles');
 
-            // Emit a 'settings-info-value' event to the server to trigger the function call
-            socket.emit('settings-info');
-            // Update profiles
-            socket.emit('get-profiles');
-
-        </script>
-
+            </script>
+        </div>
+    </div>
 </body>
-</div>
+
 
 </html>

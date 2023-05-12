@@ -5,13 +5,16 @@ const io = require('socket.io')(http);
 const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
+const auth = require('basic-auth');
 const { start } = require('repl');
 
 const settingsPath = path.join(__dirname, 'settings.json');
+const systemSettingsPath = path.join(__dirname, 'system-settings.json');
 let Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+let SystemSettings = JSON.parse(fs.readFileSync(systemSettingsPath, 'utf-8'));
 const streamServerPath = path.join(__dirname, '3las.server.js');
 const profilesPath = path.join(__dirname, 'profiles');
-const exportPath = path.join(__dirname, 'export');
+const exportPath = path.join(__dirname, 'export'); 
 
 // Watch for changes to the settings.json file
 // fs.watch(settingsPath, (eventType, settingFilename) => {
@@ -36,7 +39,14 @@ app.use(express.static(__dirname));
 function saveSettings() {
     fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
         if (err) throw err;
-        console.log('File written successfully!');
+        console.log('Settings saved successfully!');
+    });
+}
+
+function saveSystemSettings() {
+    fs.writeFile(systemSettingsPath, JSON.stringify(SystemSettings), { flag: 'w' }, (err) => {
+        if (err) throw err;
+        console.log('System settings saved successfully!');
     });
 }
 
@@ -48,6 +58,10 @@ function processExists(processName) {
             return true;
         }
     });
+}
+
+function getSystemSettings() {
+    return SystemSettings;
 }
 
 function getSettings() {
@@ -121,7 +135,7 @@ function createProcess(processName) {
             outputPath = path.join(exportPath, outputFilename.replace('.mp3', `${suffix}.mp3`));
         }
 
-
+        channelSettings.export_filename = outputFilename;
         updateExportFilename(processName, outputFilename);
 
         outputFileParam = "-f mp3 " + outputPath;
@@ -172,6 +186,9 @@ function createProcess(processName) {
         }
         console.log('Process started successfully');
     });
+
+    saveSettings();
+
 }
 
 // Start a process
@@ -385,16 +402,6 @@ function sendProfiles() {
     });
 }
 
-function updateChannelsExportFilenames() { 
-    for (const channelId in Settings.channels) {
-        if (Settings.channels[channelId].export) {
-
-        } else {
-            Settings.channels[channelId].export_filename = '';
-        }
-    }
-}
-
 function delayCheckPm2ProcessStatus() {
     setTimeout(function () {
         checkPm2ProcessStatus();
@@ -426,7 +433,7 @@ io.on('connection', (socket) => {
 
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-init', getSettings());
+        socket.emit('settings-info-init', getSettings(),getSystemSettings());
     });
 
     // Listen for start/stop events from clients
@@ -450,7 +457,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('update-channel-info', (infoArray) => {
-        updateChannelsExportFilenames();
         Settings.channels[infoArray.channel_id][infoArray.field] = infoArray.value;
         saveSettings();
     });
