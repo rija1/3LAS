@@ -28,7 +28,7 @@ function getSystemSettings() {
     return SystemSettings;
 }
 
-function updateSettings() {  
+function updateSettings() {
     const newSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     Settings = newSettings;
     const newSystemSettings = JSON.parse(fs.readFileSync(systemSettingsPath, 'utf-8'));
