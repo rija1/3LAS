@@ -9,7 +9,7 @@ module.exports = {
         name: 'admin-server',
         script: 'admin/admin.server.js',
         watch: ['admin/admin.server.js'],
-        ignore_watch: ['settings.json'],
+        ignore_watch: ['system-settings.json','settings.json']
       },
     ],
   };

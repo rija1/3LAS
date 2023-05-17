@@ -6,6 +6,12 @@
     "FallbackMp3Bitrate": 128,
     "FallbackWavSampleRate": 16000,
     "AdminKey": "",
+    "ssh_copy": {
+        "host":"127.0.0.1",
+        "port":"22",
+        "username":"reedz",
+        "password":"f0k1npwd"
+    },
     "languages": {
         "TIB": {
             "name": "Tibetan"
@@ -61,12 +67,5 @@
             "name": "Vinaya",
             "server_path": "/samba/vinaya/"
         }
-    },
-    "current_profile": "",
-    "teaching_info": {
-        "lama": "DKR",
-        "teaching": "WMPT",
-        "copy_folder": "pub",
-        "extra_info": "WMPT"
     }
 }

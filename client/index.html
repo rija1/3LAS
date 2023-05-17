@@ -33,18 +33,38 @@
         var RtcConfig = {};
         var AudioTagId = "audioTag";
 
-        function updateTeachingInfo(settingsInfo,systemSettings) {
+        function updateTeachingInfo(settingsInfo, systemSettings) {
             const teachingLamaDiv = document.querySelector('#teachingLama');
             const teachingNameDiv = document.querySelector('#teachingName');
             const lamaCode = settingsInfo.teaching_info.lama;
             const teachingCode = settingsInfo.teaching_info.teaching;
 
-            // teachingLamaDiv.textContent = settingsInfo.teachings["dsdsdd"];
-            teachingLamaDiv.textContent = systemSettings.lamas[lamaCode];
-            teachingNameDiv.textContent = systemSettings.teachings[teachingCode];
+            // let blinkLama = false;
+            // let blinkTeaching = false;
+
+
+            // if (teachingLamaDiv.textContent !== systemSettings.lamas[lamaCode]) {
+            //     if (teachingLamaDiv.textContent !== "") {
+            //         blinkLama = true;
+            //     }
+            //     teachingLamaDiv.textContent = systemSettings.lamas[lamaCode];
+            //     if (blinkLama) {
+            //         blink(teachingLamaDiv, 3000);
+            //     }
+            // }
+
+            // if (teachingNameDiv.textContent !== systemSettings.teachings[teachingCode]) {
+            //     if (teachingNameDiv.textContent !== "") {
+            //         const blinkTeaching = true;
+            //     }
+            //     teachingNameDiv.textContent = systemSettings.teachings[teachingCode];
+            //     if (blinkLama) {
+            //         blink(teachingNameDiv, 3000);
+            //     }
+            // }
         }
 
-        function updateChannelsInfo(settingsInfo,systemSettings) {
+        function updateChannelsInfo(settingsInfo, systemSettings) {
 
             for (const channelId in settingsInfo.channels) {
                 const languageCode = settingsInfo.channels[channelId].language
@@ -52,14 +72,15 @@
 
                 const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
 
-                if (channelLangDiv.innerHTML != languageName) {
+                if (channelLangDiv.innerHTML !== languageName) {
                     channelLangDiv.innerHTML = languageName;
+                    blink(channelLangDiv, 3000);
                 }
             }
 
         }
 
-        function createChannelsBlocks(settingsInfo,systemSettings) {
+        function createChannelsBlocks(settingsInfo, systemSettings) {
             for (const channelId in settingsInfo.channels) {
 
                 const channelsDiv = document.querySelector("#channels");
@@ -70,9 +91,9 @@
                 if (settingsInfo.channels[channelId].language != "") {
                     languageName = systemSettings.languages[settingsInfo.channels[channelId].language].name;
                 }
-                
+
                 // Hide some channels
-                if ((channelId=='channel_1') || (channelId=='channel_3') || (channelId=='channel_4')) {
+                if ((channelId == 'channel_1') || (channelId == 'channel_3') || (channelId == 'channel_4')) {
                     // channelButton.style.display = 'none';
                 }
 
@@ -97,19 +118,33 @@
             // document.querySelector("#channel4").style.display = 'none';
         }
 
+        function blink(element, duration) {
+            var startTime = Date.now();
+            var intervalId = setInterval(function () {
+                var elapsedTime = Date.now() - startTime;
+                if (elapsedTime >= duration) {
+                    clearInterval(intervalId);
+                    element.style.visibility = 'visible'; // ensure element is visible after blinking
+                } else {
+                    element.style.visibility = (element.style.visibility === 'visible' ? 'hidden' : 'visible');
+                }
+            }, 500); // blink every 500 milliseconds (adjust as needed)
+        }
+
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('update-channels-info', (settingsInfo,systemSetting) => {
-            updateChannelsInfo(settingsInfo,systemSetting);
+        socket.on('settings-frontend-update', (settingsInfo, systemSettings) => {
+            updateTeachingInfo(settingsInfo, systemSettings);
+            updateChannelsInfo(settingsInfo, systemSettings);
         });
 
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('settings-info-value', (settingsInfo,systemSettings) => {
-            updateTeachingInfo(settingsInfo,systemSettings);
-            createChannelsBlocks(settingsInfo,systemSettings);
+        socket.on('settings-frontend-init', (settingsInfo, systemSettings) => {
+            updateTeachingInfo(settingsInfo, systemSettings);
+            createChannelsBlocks(settingsInfo, systemSettings);
         });
 
         // Emit a 'settings-info-value' event to the server to trigger the function call
-        socket.emit('settings-info');
+        socket.emit('settings-frontend-req');
 
         // Handle comment submit
         window.onload = function () {

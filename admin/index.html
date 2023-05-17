@@ -19,15 +19,15 @@
                 <div class="wide-header">Profiles</div>
                 <div class="wide-content profile_form">
                     <div class="field_block">
-                    <label for="profile">Profile</label>
-                    <select id="profile"></select>
+                        <label for="profile">Profile</label>
+                        <select id="profile"></select>
                     </div>
                     <div class="profile_buttons">
-                    <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
-                    <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
-                    <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
-                    <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
-                </div>
+                        <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
+                        <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
+                        <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
+                        <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
+                    </div>
                     <!-- Popup -->
                     <div id="profile_popup" style="display:none">
                         <label for="profile_name">Profile Name:</label>
@@ -47,7 +47,7 @@
                     </div>
                     <div class="field_block">
                         <label for="teaching_name">Teaching</label>
-                        
+
                         <span cass="field"><select id="teaching_name"></select></span>
                     </div>
                     <div class="field_block">
@@ -65,11 +65,11 @@
                 <div class="wide-header">Actions</div>
                 <div class="wide-content">
                     <div class="actions_buttons">
-                    <button id="start-all-button"><span class="fa-start"></span>Start All</button>
-                    <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
-                    <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
-                    <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
-                </div>
+                        <button id="start-all-button"><span class="fa-start"></span>Start All</button>
+                        <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
+                        <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
+                        <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
+                    </div>
                 </div>
             </div>
 
@@ -201,7 +201,7 @@
                     teachingExtraInfoInput.value = settingsInfo.teaching_info.extra_info;
                 }
 
-                function createTeachingBlock(settingsInfo,systemSettings) {
+                function createTeachingBlock(settingsInfo, systemSettings) {
 
                     // Lama Select
                     const teachingLamaSelect = document.querySelector("#teaching_lama");
@@ -286,7 +286,7 @@
                         emitUpdateTeachingInfo(infoArray);
                     };
 
-                    for (const [copyFolderCode, teachingCopyFolder] of Object.entries(settingsInfo.copy_folders)) {
+                    for (const [copyFolderCode, teachingCopyFolder] of Object.entries(systemSettings.copy_folders)) {
                         const option = document.createElement('option');
                         option.value = copyFolderCode;
                         option.text = teachingCopyFolder.name;
@@ -346,7 +346,7 @@
                     }
                 }
 
-                function createChannelsBlock(settingsInfo,systemSettings) {
+                function createChannelsBlock(settingsInfo, systemSettings) {
                     for (const channelId in settingsInfo.channels) {
                         const channel = settingsInfo.channels[channelId];
                         const statusItem = document.createElement('div');
@@ -719,10 +719,10 @@
                 });
 
                 // Add an event listener for the 'return-value' event on the socket
-                socket.on('settings-info-init', (settingsInfo,systemSettings) => {
+                socket.on('settings-info-init', (settingsInfo, systemSettings) => {
 
-                    createTeachingBlock(settingsInfo,systemSettings);
-                    createChannelsBlock(settingsInfo,systemSettings);
+                    createTeachingBlock(settingsInfo, systemSettings);
+                    createChannelsBlock(settingsInfo, systemSettings);
 
                     document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
                     document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };

@@ -2,9 +2,11 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+
 const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
+
 
 const PORT = process.env.PORT || 3001;
 
@@ -26,15 +28,15 @@ function getSystemSettings() {
     return SystemSettings;
 }
 
-function updateSettings() {
+function updateSettings() {  
     const newSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     Settings = newSettings;
-    const newSystemSettings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    const newSystemSettings = JSON.parse(fs.readFileSync(systemSettingsPath, 'utf-8'));
     SystemSettings = newSystemSettings;
 }
 
-function updateChannelsInfo() {
-    io.emit(`update-channels-info`, Settings, SystemSettings);
+function updateSettingsFrontend() { 
+    io.emit(`settings-frontend-update`, Settings, SystemSettings);
 }
 
 // Serve the index.html file
@@ -50,26 +52,18 @@ http.listen(PORT, () => {
 
 });
 
-// Watch settings file for changes and update Settings variable
-// fs.watch(settingsPath, (eventType, filename) => {
-//   if (eventType === 'change' && filename === 'settings.json') {
-//     console.log('Detected change to settings file.');
-//     updateSettings();
-//     updateChannelsInfo();
-//   } 
-// });
-
 // Listen for socket.io connections
 io.on('connection', (socket) => {
 
+    // When settings are changed we want to update them on the frontend
     socket.on('settings-changed', () => {
         updateSettings();
-        updateChannelsInfo();
+        updateSettingsFrontend();
     });
 
-    socket.on('settings-info', () => {
+    socket.on('settings-frontend-req', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-value', getSettings(),getSystemSettings());
+        socket.emit('settings-frontend-init', getSettings(),getSystemSettings());
     });
 
     socket.on("submit-comment", (comment) => {

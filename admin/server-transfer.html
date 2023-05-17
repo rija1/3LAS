@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Thrangu Sekhar Translation</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="container">
+        <div class="topTitleCtn">
+            <img class="logomarpa" src="styles/marpa-live-high-resolution-color-logo.png" />
+            <span>[Administration Panel]</span>
+        </div>
+        <div class="contentCtn">
+            <div class="wide-block">
+                <div class="wide-header">Profiles</div>
+                <div class="wide-content profile_form">
+                    <div class="field_block">
+                        <label for="profile">Profile</label>
+                        <select id="profile"></select>
+                    </div>
+                    <div class="profile_buttons">
+                        <button id="load_profile_btn"><span class="fa-load"></span>Load Profile</button>
+                        <button id="save_profile_btn"><span class="fa-save"></span>Save Profile</button>
+                        <button id="save_new_profile_btn"><span class="fa-add"></span>Save As New Profile</button>
+                        <button id="del_profile_btn"><span class="fa-delete"></span>Delete Profile</button>
+                    </div>
+                    <!-- Popup -->
+                    <div id="profile_popup" style="display:none">
+                        <label for="profile_name">Profile Name:</label>
+                        <input type="text" id="profile_name" name="profile_name">
+                        <button id="save_popup_btn">Save</button>
+                    </div>
+                    <div class="notification" id="profile_popup_result"></div>
+                </div>
+            </div>
+
+            <div class="wide-block">
+                <div class="wide-header">Teaching Info</div>
+                <div class="wide-content teaching_info_form">
+                    <div class="field_block">
+                        <label for="teaching_lama">Lama / Teacher</label>
+                        <span cass="field"><select id="teaching_lama"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_name">Teaching</label>
+
+                        <span cass="field"><select id="teaching_name"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_extra_info">Extra Info (added to filename)</label>
+                        <span cass="field"><input type="text" id="teaching_extra_info"></select></span>
+                    </div>
+                    <div class="field_block">
+                        <label for="teaching_name">Server Copy Folder</label>
+                        <span cass="field"><select id="teaching_copy_folder"></select></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wide-block">
+                <div class="wide-header">Actions</div>
+                <div class="wide-content">
+                    <div class="actions_buttons">
+                        <button id="start-all-button"><span class="fa-start"></span>Start All</button>
+                        <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
+                        <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
+                        <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-container" id="status-container">
+
+                <div class="status-header">
+                    <div>Status</div>
+                    <div>Process Name</div>
+                    <div>Uptime</div>
+                    <div>Process Management</div>
+                    <div>Settings</div>
+                </div>
+            </div>
+
+           HELLO
+        </div>
+    </div>
+</body>
+
+
+</html>

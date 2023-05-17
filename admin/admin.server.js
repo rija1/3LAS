@@ -7,6 +7,8 @@ const pm2 = require('pm2')
 const fs = require('fs');
 const auth = require('basic-auth');
 const { start } = require('repl');
+const ioc = require("socket.io-client");
+const sshClient = require('ssh2').Client;
 
 const settingsPath = path.join(__dirname, 'settings.json');
 const systemSettingsPath = path.join(__dirname, 'system-settings.json');
@@ -14,7 +16,7 @@ let Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 let SystemSettings = JSON.parse(fs.readFileSync(systemSettingsPath, 'utf-8'));
 const streamServerPath = path.join(__dirname, '3las.server.js');
 const profilesPath = path.join(__dirname, 'profiles');
-const exportPath = path.join(__dirname, 'export'); 
+const exportPath = path.join(__dirname, 'export');
 
 // Watch for changes to the settings.json file
 // fs.watch(settingsPath, (eventType, settingFilename) => {
@@ -34,12 +36,24 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Serve the index.html file
+app.get('/server-transfer', (req, res) => {
+    res.sendFile(path.join(__dirname, 'server-transfer.html'));
+});
+
 app.use(express.static(__dirname));
 
 function saveSettings() {
     fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
         if (err) throw err;
         console.log('Settings saved successfully!');
+    });
+
+    // Notify client server of changes
+    const clientSocket = ioc("http://localhost:3001");
+    clientSocket.on('connect', function () {
+        // socket connected
+        clientSocket.emit('settings-changed');
     });
 }
 
@@ -139,10 +153,10 @@ function createProcess(processName) {
         updateExportFilename(processName, outputFilename);
 
         outputFileParam = "-f mp3 " + outputPath;
+        // AAC Alternative
         // outputFileParam = "-c:a aac -b:a 96k" + outputPath;
 
     }
-
 
     // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
     // let inputDevice = channelSettings.ffmpegInputDevice;
@@ -167,11 +181,7 @@ function createProcess(processName) {
     // let probesize = 64;
     let probesize = 512;
 
-    // 
     let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
-    //
-
-    // let processCommand = 'ffmpeg ' + inputDevice + audioPan + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     console.log(processCommand);
     pm2.start({
@@ -277,8 +287,8 @@ function updateAvfoundationDevices() {
             }
         }
 
-        // TODO check why it always saves it below
-        if (Settings.avfoundationDevices != audioDevices) {
+        // We will save the settings if the audio devices have changed
+        if (JSON.stringify(Settings.avfoundationDevices) !== JSON.stringify(audioDevices)) {
             Settings.avfoundationDevices = audioDevices;
             saveSettings();
         }
@@ -421,7 +431,44 @@ function createProfile(profileName) {
     fs.writeFile(newProfileJsonPath, JSON.stringify(newProfileSettings), { flag: 'w' }, (err) => {
         if (err) throw err;
         io.emit('profile-result', '<span class="fa-valid"></span>The profile "' + profileName + '" has been created successfully.');
-        loadProfile(profileFilename,profileName,false);
+        loadProfile(profileFilename, profileName, false);
+    });
+}
+
+function copyFileToRemote(localPath, remotePath) {
+
+    const sshConfig = {
+        host: SystemSettings.ssh_copy.host,
+        port: SystemSettings.ssh_copy.port,
+        username: SystemSettings.ssh_copy.username,
+        password: SystemSettings.ssh_copy.password
+    };
+
+    return new Promise((resolve, reject) => {
+        const conn = new sshClient();
+        conn.on('ready', () => {
+            conn.sftp((err, sftp) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    const readStream = fs.createReadStream(localPath);
+                    const writeStream = sftp.createWriteStream(remotePath);
+                    writeStream.on('close', () => {
+                        conn.end();
+                        resolve();
+                    });
+                    writeStream.on('error', (err) => {
+                        conn.end();
+                        reject(err);
+                    });
+                    readStream.pipe(writeStream);
+                }
+            });
+        });
+        conn.on('error', (err) => {
+            reject(err);
+        });
+        conn.connect(sshConfig);
     });
 }
 
@@ -433,7 +480,7 @@ io.on('connection', (socket) => {
 
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-init', getSettings(),getSystemSettings());
+        socket.emit('settings-info-init', getSettings(), getSystemSettings());
     });
 
     // Listen for start/stop events from clients
@@ -465,6 +512,7 @@ io.on('connection', (socket) => {
         Settings.teaching_info[infoArray.field] = infoArray.value;
         saveSettings();
     });
+
 
     socket.on('get-profiles', () => {
         sendProfiles();
