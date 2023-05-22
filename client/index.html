@@ -69,15 +69,52 @@
             for (const channelId in settingsInfo.channels) {
                 const languageCode = settingsInfo.channels[channelId].language
                 const languageName = systemSettings.languages[languageCode].name;
+                const status = settingsInfo.channels[channelId].status;
+
+                let statusClassname = 'status-inactive';
 
                 const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
+                const statusDiv = document.querySelector("#" + channelId + " .status-indicator");
+
+                if ((status == "on") && statusDiv.classList.contains('status-inactive')) {
+                    statusDiv.classList.add('status-active');
+                    statusDiv.classList.remove('status-inactive');
+                    blink(statusDiv, 3000);
+                } else if ((status == "off") && statusDiv.classList.contains('status-active')) {
+                    statusDiv.classList.add('status-inactive');
+                    statusDiv.classList.remove('status-active');
+                    blink(statusDiv, 3000);
+                }
 
                 if (channelLangDiv.innerHTML !== languageName) {
+                    // Update channel language
                     channelLangDiv.innerHTML = languageName;
                     blink(channelLangDiv, 3000);
                 }
             }
 
+        }
+
+        function streamStart(channel, status) {
+
+            if (status == "off") {
+                const popupMessage = 'This channel is currently unavailable. Please wait for it to become active and try again later.'
+                showPopup(popupMessage);
+                return;
+            }
+
+            Init(channel);
+            try {
+
+                // const error = new Error();
+                // alert(error.stack);
+
+                // alert('boom:' + channelId);
+                Stream.Start();
+            }
+            catch (_ex) {
+                // alert(_ex);
+            }
         }
 
         function createChannelsBlocks(settingsInfo, systemSettings) {
@@ -86,6 +123,7 @@
                 const channelsDiv = document.querySelector("#channels");
                 const channel = settingsInfo.channels[channelId];
                 const channelButton = document.createElement('div');
+                let statusClassname = 'status-inactive';
 
                 let languageName = "";
                 if (settingsInfo.channels[channelId].language != "") {
@@ -97,19 +135,23 @@
                     // channelButton.style.display = 'none';
                 }
 
+                if (settingsInfo.channels[channelId].status == "on") {
+                    statusClassname = 'status-active';
+                }
+
                 channelButton.className = 'channel_button';
                 channelButton.id = channelId;
-                channelButton.innerHTML = '<div class="channel_name">' + settingsInfo.channels[channelId].name + '</div>';
+                channelButton.innerHTML = '<div class="channel_name">' + settingsInfo.channels[channelId].name + '<span class="status-indicator ' + statusClassname + '"></span></div>';
+                // channelButton.innerHTML += '<span class="status-indicator ' + statusClassname + '"></span>';
+                // channelButton.innerHTML += '</div>';
                 channelButton.insertAdjacentHTML('beforeend', '<div class="channel_lang">' + languageName + '</div>');
-                channelButton.onclick = function () {
-                    Init(settingsInfo.channels[channelId]);
-                    try {
-                        Stream.Start();
-                    }
-                    catch (_ex) {
-                    }
-                    //    window.addEventListener('load', function(_ev) { Init(_ev, settingsInfo.channels[channelId]) }, false);
-                };
+
+                channelButton.addEventListener('click', function () {
+                    streamStart(settingsInfo.channels[channelId], settingsInfo.channels[channelId].status);
+                });
+
+
+                //    window.addEventListener('load', function(_ev) { Init(_ev, settingsInfo.channels[channelId]) }, false);
 
                 channelsDiv.appendChild(channelButton);
             }
@@ -149,6 +191,8 @@
         // Handle comment submit
         window.onload = function () {
 
+
+
             // const submitCommentButton = document.querySelector("#submit-comment");
             // const commentTextArea = document.querySelector("#comment");
 
@@ -181,6 +225,14 @@
 </head>
 
 <body>
+
+    <div id="popup-overlay" class="overlay">
+        <div class="popup">
+            <div id="popup-content"></div>
+            <button id="close-button">Close</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="topTitleCtn">
             <img class="logomarpa" src="style/marpa-live-high-resolution-color-logo.png" />
@@ -254,6 +306,29 @@
             <button id="submit-comment">Send</button> -->
         </div>
     </div>
+    <script>
+        // JavaScript code to show and hide the popup
+        const popupOverlay = document.getElementById('popup-overlay');
+        const closeButton = document.getElementById('close-button');
+        const popupContent = document.getElementById('popup-content');
+
+        function showPopup(content) {
+            popupOverlay.style.display = 'flex';
+            updatePopupContent(content);
+        }
+
+        function hidePopup() {
+            popupOverlay.style.display = 'none';
+        }
+
+        function updatePopupContent(content) {
+            popupContent.textContent = content;
+        }
+
+        closeButton.addEventListener('click', hidePopup);
+
+
+    </script>
 </body>
 
 </html>

@@ -96,39 +96,44 @@ body {
     column-gap: 17px;
 }
 
-@media (max-width: 500px) {
+.status-indicator {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    /* background-color: red; */
+    display: inline-block;
+    margin: 0px 0px 0px 10px;
+}
 
-    .container {
-        padding: 0;
-    }
+.status-active {
+    border: solid 1px #808080dd;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#cdeb8e+0,a5c956+100;Green+3D+%232 */
+    background: #cdeb8e;
+    /* Old browsers */
+    background: -moz-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #cdeb8e 0%, #a5c956 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #cdeb8e 0%, #a5c956 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cdeb8e', endColorstr='#a5c956', GradientType=0);
+    /* IE6-9 */
+}
 
-    .topTitleCtn {
-        display: grid;
-        /* grid-template-columns: 55px 1fr; */
-        width: 100%;
-        padding: 7px 22px 7px 3px;
-        color: #656050;
-        background: #f5ba42;
-    }
+.status-inactive {
+    border: solid 1px #808080dd;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#ef7540+1,ed6436+100 */
+    background: #ef7540;
+    /* Old browsers */
+    background: -moz-linear-gradient(top, #ef7540 1%, #ed6436 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #ef7540 1%, #ed6436 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #ef7540 1%, #ed6436 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ef7540', endColorstr='#ed6436', GradientType=0);
+    /* IE6-9 */
 
-    .logomarpa {
-        height: 42px;
-        margin-left: 7px;
-    }
-
-    .topTitle {
-        font-family: 'Aboreto';
-        /* padding:10px; */
-    }
-
-
-
-    #channels {
-        grid-template-columns: 1fr 1fr;
-        row-gap: 17px;
-        column-gap: 17px;
-        padding: 20px;
-    }
 }
 
 
@@ -139,7 +144,8 @@ body {
 }
 
 .channel_button {
-    display: block;
+    display: grid;
+    grid-template-columns:  1fr;
     font-family: 'Lexend';
     font-size: 17px;
     font-weight: 400;
@@ -151,6 +157,13 @@ body {
 
 .channel_button div {
     text-align: center;
+}
+
+.channel_button .channel_name {
+    text-align: center;
+    display: flex; /* Added */
+    align-items: center; /* Added */
+    justify-content: center;
 }
 
 .channel_button .channel_lang {
@@ -171,7 +184,6 @@ body {
 #logwindowbutton {
     display: none;
 }
-
 
 /* #channels #channel_1 {
     background-color: #d09191;
@@ -248,4 +260,59 @@ div#lightbutton {
     top: 0;
     z-index: 99999999;
     cursor: pointer;
+}
+
+/* Popup */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+
+@media (max-width: 500px) {
+
+    .container {
+        padding: 0;
+    }
+
+    .topTitleCtn {
+        display: grid;
+        /* grid-template-columns: 55px 1fr; */
+        width: 100%;
+        padding: 7px 22px 7px 3px;
+        color: #656050;
+        background: #f5ba42;
+    }
+
+    .logomarpa {
+        height: 42px;
+        margin-left: 7px;
+    }
+
+    .topTitle {
+        font-family: 'Aboreto';
+        /* padding:10px; */
+    }
+
+    #channels {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 17px;
+        column-gap: 17px;
+        padding: 20px;
+    }
 }

@@ -44,15 +44,28 @@ app.get('/server-transfer', (req, res) => {
 app.use(express.static(__dirname));
 
 function saveSettings() {
-    fs.writeFile(settingsPath, JSON.stringify(Settings), { flag: 'w' }, (err) => {
-        if (err) throw err;
-        console.log('Settings saved successfully!');
-    });
+
+    // DEBUG
+    // const error = new Error();
+    // console.log(error.stack);
+
+
+    const jsonSettingsString = JSON.stringify(Settings, null, 4);
+
+    try {
+        fs.writeFile(settingsPath, jsonSettingsString, { encoding: 'utf8', flag: 'w' }, (err) => {
+            if (err) throw err;
+            console.log('Settings saved successfully!');
+        });
+    } catch (err) {
+        console.error('Error saving JSON file:', err);
+    }
 
     // Notify client server of changes
     const clientSocket = ioc("http://localhost:3001");
     clientSocket.on('connect', function () {
         // socket connected
+        console.log('Contacting client....');
         clientSocket.emit('settings-changed');
     });
 }
@@ -94,7 +107,7 @@ function updateExportFilename(channelId, filename) {
     io.emit('update-export-filename', channelId, filename);
 }
 
-function createProcess(processName) {
+function createProcess(processName, doSaveSettings = true) {
 
     if (!Settings || !Settings["channels"] || !Settings["channels"][processName]) {
         console.error(`Error: Channel "${processName}" not found in settings file.`);
@@ -197,12 +210,18 @@ function createProcess(processName) {
         console.log('Process started successfully');
     });
 
-    saveSettings();
+    console.log('doSaveSettings :');
+    console.log(doSaveSettings);
+    if (doSaveSettings == true) {
+        console.log('ON SAVE');
+        saveSettings();
+    }
 
 }
 
 // Start a process
-function startProcess(processName) {
+function startProcess(processName, doSaveSettings = true) {
+
     if (processExists(processName)) {
         pm2.start(processName, (err, proc) => {
             if (err) {
@@ -212,9 +231,30 @@ function startProcess(processName) {
             console.log(`Started process ${processName}`);
         });
     } else {
-        createProcess(processName);
+        createProcess(processName, doSaveSettings);
     }
     io.emit('settings-info-update', getSettings());
+}
+
+function stopAllProcesses() {
+    console.log('Stopping all processes.');
+    for (const processName in Settings.channels) {
+        stopProcess(processName);
+    }
+}
+
+function restartAllProcesses() {
+    console.log('Restarting all processes.');
+    for (const processName in Settings.channels) {
+        restartProcess(processName, false);
+    }
+}
+
+function startAllProcesses() {
+    console.log('Starting all processes.');
+    for (const processName in Settings.channels) {
+        startProcess(processName, false);
+    }
 }
 
 function deleteProcess(processName) {
@@ -242,9 +282,9 @@ function stopProcess(processName) {
 }
 
 // Restart a process
-function restartProcess(processName) {
+function restartProcess(processName, doSaveSettings = true) {
     deleteProcess(processName);
-    createProcess(processName);
+    createProcess(processName, doSaveSettings);
     console.log(`Restarted process ${processName}`);
     io.emit('settings-info-update', getSettings());
 }
@@ -305,6 +345,7 @@ function checkPm2ProcessStatus() {
         }
 
         const processStatus = {};
+        let settingsChanged = false;
 
         for (const processName in Settings.channels) {
 
@@ -321,11 +362,29 @@ function checkPm2ProcessStatus() {
                 // Get Elapsed time
                 if (isRunning) {
                     io.emit(`${processName}-time`, getElapsedTimeFromTimestamp(processInfo.pm2_env.pm_uptime));
+                    if (Settings.channels[processName].status !== "on") {
+                        Settings.channels[processName].status = "on";
+                        settingsChanged = true;
+                    }
+                } else {
+                    if (Settings.channels[processName].status !== "off") {
+                        Settings.channels[processName].status = "off";
+                        settingsChanged = true;
+                    }
                 }
+
             } else {
                 processStatus[processName] = false;
                 io.emit(`${processName}-status`, false);
+
+                if (Settings.channels[processName].status !== "off") {
+                    Settings.channels[processName].status = "off";
+                    settingsChanged = true;
+                }
             }
+        }
+        if (settingsChanged == true) {
+            saveSettings();
         }
     });
 }
@@ -348,9 +407,6 @@ function formatTime(milliseconds) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function processChecks() {
-    checkPm2ProcessStatus();
-}
 
 function loadProfile(profileFilename, profileName, notif = true) {
     const loadProfilePath = path.join(profilesPath, profileFilename);
@@ -485,7 +541,22 @@ io.on('connection', (socket) => {
 
     // Listen for start/stop events from clients
     socket.on('start-process', (processName) => {
-        startProcess(processName);
+        startProcess(processName, true);
+        delayCheckPm2ProcessStatus();
+    });
+
+    socket.on('start-all-process', () => {
+        startAllProcesses();
+        delayCheckPm2ProcessStatus();
+    });
+
+    socket.on('stop-all-process', () => {
+        stopAllProcesses();
+        delayCheckPm2ProcessStatus();
+    });
+
+    socket.on('restart-all-process', () => {
+        restartAllProcesses();
         delayCheckPm2ProcessStatus();
     });
 
@@ -543,7 +614,7 @@ http.listen(PORT, () => {
     // Send status updates every 60 seconds
     function updateStatus() {
         setInterval(function () {
-            processChecks();
+            checkPm2ProcessStatus();
             io.emit('settings-info-update', getSettings());
         }, 10000);
         // }, 60000);

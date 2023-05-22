@@ -124,21 +124,18 @@
                 }
 
                 function startAll(settingsInfo) {
-                    for (const channelId in settingsInfo.channels) {
-                        startPM2(channelId);
-                    }
+                    socket.emit('start-all-process');
                 }
 
                 function stopAll(settingsInfo) {
-                    for (const channelId in settingsInfo.channels) {
-                        stopPM2(channelId);
-                    }
+                    socket.emit('stop-all-process');
                 }
 
                 function restartAll(settingsInfo) {
                     for (const channelId in settingsInfo.channels) {
-                        restartPM2(channelId);
+                        updateStatusIndicator(channelId, false);
                     }
+                    socket.emit('restart-all-process');
                 }
 
                 function refreshInfo() {
