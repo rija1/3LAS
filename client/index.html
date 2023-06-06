@@ -38,30 +38,6 @@
             const teachingNameDiv = document.querySelector('#teachingName');
             const lamaCode = settingsInfo.teaching_info.lama;
             const teachingCode = settingsInfo.teaching_info.teaching;
-
-            // let blinkLama = false;
-            // let blinkTeaching = false;
-
-
-            // if (teachingLamaDiv.textContent !== systemSettings.lamas[lamaCode]) {
-            //     if (teachingLamaDiv.textContent !== "") {
-            //         blinkLama = true;
-            //     }
-            //     teachingLamaDiv.textContent = systemSettings.lamas[lamaCode];
-            //     if (blinkLama) {
-            //         blink(teachingLamaDiv, 3000);
-            //     }
-            // }
-
-            // if (teachingNameDiv.textContent !== systemSettings.teachings[teachingCode]) {
-            //     if (teachingNameDiv.textContent !== "") {
-            //         const blinkTeaching = true;
-            //     }
-            //     teachingNameDiv.textContent = systemSettings.teachings[teachingCode];
-            //     if (blinkLama) {
-            //         blink(teachingNameDiv, 3000);
-            //     }
-            // }
         }
 
         function updateChannelsInfo(settingsInfo, systemSettings) {
@@ -73,16 +49,19 @@
 
                 let statusClassname = 'status-inactive';
 
+                const channelDiv = document.querySelector("#" + channelId);
                 const channelLangDiv = document.querySelector("#" + channelId + " .channel_lang");
                 const statusDiv = document.querySelector("#" + channelId + " .status-indicator");
 
                 if ((status == "on") && statusDiv.classList.contains('status-inactive')) {
                     statusDiv.classList.add('status-active');
                     statusDiv.classList.remove('status-inactive');
+                    channelDiv.setAttribute('status','on');
                     blink(statusDiv, 3000);
                 } else if ((status == "off") && statusDiv.classList.contains('status-active')) {
                     statusDiv.classList.add('status-inactive');
                     statusDiv.classList.remove('status-active');
+                    channelDiv.setAttribute('status','on');
                     blink(statusDiv, 3000);
                 }
 
@@ -95,7 +74,9 @@
 
         }
 
-        function streamStart(channel, status) {
+        function streamStart(channel) {
+            
+            const status = document.querySelector('#'+channel.id).getAttribute('status');
 
             if (status == "off") {
                 const popupMessage = 'This channel is currently unavailable. Please wait for it to become active and try again later.'
@@ -103,18 +84,27 @@
                 return;
             }
 
+            // Show the player
+            document.querySelector('#audioplayer').style.display = 'block';
+
             Init(channel);
+
             try {
-
-                // const error = new Error();
-                // alert(error.stack);
-
-                // alert('boom:' + channelId);
                 Stream.Start();
             }
             catch (_ex) {
                 // alert(_ex);
             }
+        }
+
+        function getFirstPlayableChannel(channelsInfo) {
+            for (var key in channelsInfo) {
+                if (channelsInfo.hasOwnProperty(key) && channelsInfo[key].status === "on") {
+                    return channelsInfo[key].id;
+                }
+            }
+
+            return false;
         }
 
         function createChannelsBlocks(settingsInfo, systemSettings) {
@@ -145,9 +135,10 @@
                 // channelButton.innerHTML += '<span class="status-indicator ' + statusClassname + '"></span>';
                 // channelButton.innerHTML += '</div>';
                 channelButton.insertAdjacentHTML('beforeend', '<div class="channel_lang">' + languageName + '</div>');
+                channelButton.setAttribute('status',settingsInfo.channels[channelId].status);
 
                 channelButton.addEventListener('click', function () {
-                    streamStart(settingsInfo.channels[channelId], settingsInfo.channels[channelId].status);
+                    streamStart(settingsInfo.channels[channelId]);
                 });
 
 
@@ -183,6 +174,13 @@
         socket.on('settings-frontend-init', (settingsInfo, systemSettings) => {
             updateTeachingInfo(settingsInfo, systemSettings);
             createChannelsBlocks(settingsInfo, systemSettings);
+            // Initialize first channel which will be played if play button clicked
+            const firstChannelId = getFirstPlayableChannel(settingsInfo.channels)
+            if (firstChannelId !== false) {
+                Init(settingsInfo.channels[firstChannelId]);
+            } else {
+                document.querySelector('#audioplayer').style.display = 'none';
+            }
         });
 
         // Emit a 'settings-info-value' event to the server to trigger the function call
@@ -244,10 +242,9 @@
                 <div id="teachingLama"></div>
                 <div id="teachingName"></div>
             </div>
-
+            <button onclick="ResetStream();">BOOOOOM</button>
             <div id="channels"></div>
 
-            <div id="currentChannel"></div>
             <audio id="audioTag"></audio>
             <!-- <audio id="audioTag2"></audio> -->
             <div id="viewcontainer">

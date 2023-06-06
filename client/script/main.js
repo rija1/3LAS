@@ -37,9 +37,14 @@ function Init(channelSettings="") {
 
     Stream.ConnectivityCallback = OnConnectivityCallback;
     Stream.ActivityCallback = OnActivityCallback;
+
     document.getElementById("unmutebutton").onclick = OnUnmuteButtonClick;
     document.getElementById("mutebutton").onclick = OnMuteButtonClick;
-    document.getElementById("playbutton").onclick = OnPlayButtonClick;
+    document.getElementById("playbutton").onclick = function() {
+        OnPlayButtonClick(channelSettings.id);
+      };
+      
+
     if (isAndroid) {
         var lightbutton = document.getElementById("lightbutton");
         lightbutton.style.display = "block";
@@ -49,11 +54,11 @@ function Init(channelSettings="") {
         lightoff.addEventListener("touchstart", OnLightOffClick, true);
         lightoff.addEventListener("mousedown", OnLightOffClick, true);
     }
-    document.getElementById("viewcontainer").style.display = "block";
+    // document.getElementById("viewcontainer").style.display = "block";
     
     // Update Channel name
-    document.querySelector("#currentChannel").textContent = channelSettings.name;
-    document.querySelector("#audioplayer").className = channelSettings.id;
+    // document.querySelector("#currentChannel").textContent = channelSettings.name;
+    // document.querySelector("#audioplayer").className = channelSettings.id;
     
 }
 function OnLogWindowButtonClick(_ev) {
@@ -92,6 +97,10 @@ function OnConnectivityCallback(isConnected) {
         document.getElementById("unmutebutton").style.visibility = "hidden";
     }
 }
+function ResetStream() {
+    alert('Youipi');
+    Stream.WebRTC.Reset();
+}
 function OnActivityCallback() {
     var redlighton = document.getElementById("redlighton");
     var redlightoff = document.getElementById("redlightoff");
@@ -118,7 +127,8 @@ function OnUnmuteButtonClick(_ev) {
     Stream.Volume = OldVolume;
     UpdateVolumeBar(OldVolume * document.getElementById("volumebar").getBoundingClientRect().width);
 }
-function OnPlayButtonClick(_ev) {
+function OnPlayButtonClick(channelId) {
+
 
     try {
         Stream.Start();

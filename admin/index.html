@@ -10,9 +10,16 @@
 
 <body>
     <div class="container">
-        <div class="topTitleCtn">
-            <img class="logomarpa" src="styles/marpa-live-high-resolution-color-logo.png" />
-            <span>[Administration Panel]</span>
+        <div class="header">
+            <div class="topTitleCtn">
+
+                <img class="logomarpa" src="styles/marpa-live-high-resolution-color-logo.png" />
+                <span>[Administration Panel]</span>
+            </div>
+            <div class="topMenuCtn">
+                <div class="topMenuLink">Main</div>
+                <div class="topMenuLink">Transfer</div>
+            </div>
         </div>
         <div class="contentCtn">
             <div class="wide-block">
@@ -483,7 +490,15 @@
                         const panOptions = [
                             { value: '', text: 'Both' },
                             { value: 'left', text: 'Left' },
-                            { value: 'right', text: 'Right' }
+                            { value: 'right', text: 'Right' },
+                            { value: '1', text: '1' },
+                            { value: '2', text: '2' },
+                            { value: '3', text: '3' },
+                            { value: '4', text: '4' },
+                            { value: '5', text: '5' },
+                            { value: '6', text: '6' },
+                            { value: '7', text: '7' },
+                            { value: '8', text: '8' }
                         ];
 
                         panOptions.forEach(option => {
@@ -504,7 +519,7 @@
                         };
 
                         const panLabel = document.createElement('label');
-                        panLabel.textContent = "Side";
+                        panLabel.textContent = "Channel/Side";
                         const panBlock = document.createElement('div');
                         panBlock.className = 'pan-block';
 
@@ -725,6 +740,7 @@
                     document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
                     document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
                     document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
+                    // document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
 
                     document.querySelector("#save_profile_btn").onclick = function () {
                         const profileSelect = document.querySelector("#profile");

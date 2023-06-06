@@ -22,18 +22,10 @@ body {
     -moz-box-shadow: 6px 9px 30px 0px rgba(0, 0, 0, 0.93);
 }
 
-.topTitleCtn {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    width: 100%;
-    display: grid;
-    background-color: #f5ba42;
-    grid-template-columns: auto 1fr;
-}
 
-.logomarpa {
-    height: 50px;
-    margin-left: 23px;
+.header {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
 }
 
 .topTitleCtn span {
@@ -43,6 +35,27 @@ body {
     padding-top: 11px;
     color: #fff;
 }
+.topMenuCtn {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    width: 100%;
+    display: grid;
+    background-color: #f5ba42;
+}
+
+.topMenuCtn .topMenuLink {
+    
+}
+
+
+.logomarpa {
+    height: 50px;
+    margin-left: 23px;
+}
+
+
 
 .contentCtn {
     /* padding: 15px; */
@@ -400,14 +413,21 @@ input[type=checkbox] {
         font-size: 13px;
     }
 
-    .topTitleCtn {
-        grid-template-columns: 1fr;
+    .header {
+
     }
 
     .topTitleCtn span {
         text-align: center;
         font-size: 12px;
         padding: 0 0 11px 0;
+    }
+    .topMenuCtn {
+
+    }
+
+    .topMenuCtn topMenuLink {
+        
     }
 
     .logomarpa {

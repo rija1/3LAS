@@ -37,6 +37,7 @@ app.get('/', (req, res) => {
 });
 
 // Serve the index.html file
+// TODO see what todo with this hihi.
 app.get('/server-transfer', (req, res) => {
     res.sendFile(path.join(__dirname, 'server-transfer.html'));
 });
@@ -48,7 +49,6 @@ function saveSettings() {
     // DEBUG
     // const error = new Error();
     // console.log(error.stack);
-
 
     const jsonSettingsString = JSON.stringify(Settings, null, 4);
 
@@ -175,11 +175,39 @@ function createProcess(processName, doSaveSettings = true) {
     // let inputDevice = channelSettings.ffmpegInputDevice;
 
     let audioPan = '';
-    if (channelSettings.pan == "left") {
-        audioPan = ' -af "pan=mono|c0=c0" ';
-    }
-    if (channelSettings.pan == "right") {
-        audioPan = ' -af "pan=mono|c0=c1" ';
+    
+    // Select the channel or pan if stereo.
+    switch (channelSettings.pan) {
+        case "left":
+            audioPan = ' -af "pan=mono|c0=c0" ';
+            break;
+        case "right":
+            audioPan = ' -af "pan=mono|c0=c1" ';
+            break;
+        case "1":
+            audioPan = ' -af "pan=mono|c0=c0" ';
+            break;
+        case "2":
+            audioPan = ' -af "pan=mono|c0=c1" ';
+            break;
+        case "3":
+            audioPan = ' -af "pan=mono|c0=c2" ';
+            break;
+        case "4":
+            audioPan = ' -af "pan=mono|c0=c3" ';
+            break;
+        case "5":
+            audioPan = ' -af "pan=mono|c0=c4" ';
+            break;
+        case "6":
+            audioPan = ' -af "pan=mono|c0=c5" ';
+            break;
+        case "7":
+            audioPan = ' -af "pan=mono|c0=c6" ';
+            break;
+        case "8":
+            audioPan = ' -af "pan=mono|c0=c7" ';
+            break;
     }
 
     let inputDevice = "-f avfoundation -i :" + channelSettings.device;
@@ -197,6 +225,8 @@ function createProcess(processName, doSaveSettings = true) {
     let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     console.log(processCommand);
+
+    // Start the PM2 process with all the options
     pm2.start({
         name: processName,
         script: 'sh',
@@ -210,10 +240,8 @@ function createProcess(processName, doSaveSettings = true) {
         console.log('Process started successfully');
     });
 
-    console.log('doSaveSettings :');
-    console.log(doSaveSettings);
+    // Save settings if needed
     if (doSaveSettings == true) {
-        console.log('ON SAVE');
         saveSettings();
     }
 
