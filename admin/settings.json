@@ -76,12 +76,12 @@
             "port": "3101",
             "ffmpegInputDevice": "-f avfoundation -i :2",
             "outputFile": "",
-            "device": "3",
+            "device": "1",
             "pan": "1",
             "copy_to_server": false,
-            "export": false,
+            "export": true,
             "language": "SPA",
-            "export_filename": "20230601_KW_Y2S3_WMPT_SPA.mp3",
+            "export_filename": "20230607_KW_Y2S3_WMPT_SPA.mp3",
             "status": "off"
         },
         "channel_2": {
@@ -136,11 +136,11 @@
         },
         "1": {
             "id": "1",
-            "name": "Loopback Audio 2"
+            "name": "MacBook Pro Microphone"
         },
         "2": {
             "id": "2",
-            "name": "MacBook Pro Microphone"
+            "name": "Redmi AirDots 2"
         },
         "3": {
             "id": "3",
@@ -152,14 +152,18 @@
         },
         "5": {
             "id": "5",
-            "name": "VB-Cable"
+            "name": "Loopback Audio 2"
         },
         "6": {
             "id": "6",
-            "name": "Soundflower (64ch)"
+            "name": "VB-Cable"
         },
         "7": {
             "id": "7",
+            "name": "Soundflower (64ch)"
+        },
+        "8": {
+            "id": "8",
             "name": "Soundflower (2ch)"
         }
     },

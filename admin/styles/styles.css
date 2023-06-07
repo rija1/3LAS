@@ -26,6 +26,13 @@ body {
 .header {
     grid-template-columns: 1fr 1fr;
     display: grid;
+    background-color: #f5ba42;
+}
+
+.topTitleCtn {
+    display: grid;
+    align-content: center;
+    grid-template-columns: 260px auto;
 }
 
 .topTitleCtn span {
@@ -36,13 +43,15 @@ body {
     color: #fff;
 }
 .topMenuCtn {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 100px 100px;
     display: grid;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    align-content: center;
+    
     width: 100%;
     display: grid;
-    background-color: #f5ba42;
+    
 }
 
 .topMenuCtn .topMenuLink {

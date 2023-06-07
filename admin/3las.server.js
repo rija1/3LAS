@@ -35,7 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const child_process_1 = require("child_process");
 const ws = __importStar(require("ws"));
-const wrtc = require('wrtc');
+const wrtc = require('@koush/wrtc');
 
 // Settings.json path fix so script can be called from anywhere
 const path = require('path');
