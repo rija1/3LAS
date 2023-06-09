@@ -10,9 +10,9 @@ COPY . /app
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# RUN apk update
-# RUN apk add
-# RUN apk add ffmpeg
+RUN apk update
+RUN apk add
+RUN apk add ffmpeg
 
 # Copy application files
 COPY . .
