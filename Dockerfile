@@ -1,4 +1,4 @@
-FROM node:19.8.1-alpine
+FROM node:20-alpine
 
 # Install pm2 globally
 RUN npm install -g pm2
@@ -10,16 +10,22 @@ COPY . /app
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
-# Install application dependencies
-RUN npm install 
-
-RUN apt-get update && apt-get install -y ffmpeg
+# RUN apk update
+# RUN apk add
+# RUN apk add ffmpeg
 
 # Copy application files
 COPY . .
 
 EXPOSE 3000
 EXPOSE 3001
+EXPOSE 3101
+EXPOSE 3102
+EXPOSE 3103
+EXPOSE 3104
 
-# Start the application with pm2
-CMD ["pm2-runtime", "ecosystem.config.js"]
+
+# Start the Node.js servers
+ENTRYPOINT ["pm2", "--no-daemon", "start"]
+
+CMD ["ecosystem.config.js"]
