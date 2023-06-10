@@ -7,6 +7,5 @@
 /server/src/node_modules
 
 .DS_Store
-admin/profiles/*.mp3
 admin/export/*.mp3
 admin/settings.json
