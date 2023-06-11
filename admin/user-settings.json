@@ -123,7 +123,7 @@
             "export_filename": "20230509_DKR_WMPT_WMPT_FR.mp3"
         }
     },
-    "avfoundationDevices": {
+    "audioDevices": {
         "0": {
             "id": "0",
             "name": "NDI Audio"

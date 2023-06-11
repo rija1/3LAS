@@ -118,7 +118,7 @@
             "language": "SW"
         }
     },
-    "avfoundationDevices": {
+    "audioDevices": {
         "0": {
             "id": "0",
             "name": "NDI Audio"

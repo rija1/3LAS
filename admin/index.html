@@ -465,7 +465,7 @@
                         };
 
                         // Loop through the object keys and values and create options
-                        for (const [code, device] of Object.entries(settingsInfo.avfoundationDevices)) {
+                        for (const [code, device] of Object.entries(settingsInfo.audioDevices)) {
                             const option = document.createElement('option');
                             option.value = code;
                             option.text = device.name;

@@ -76,7 +76,7 @@
             "port": "3101",
             "ffmpegInputDevice": "-f avfoundation -i :2",
             "outputFile": "",
-            "device": "2",
+            "device": "5",
             "pan": "",
             "copy_to_server": false,
             "export": true,
@@ -129,7 +129,7 @@
             "active": "false"
         }
     },
-    "avfoundationDevices": {
+    "audioDevices": {
         "0": {
             "id": "0",
             "name": "BlackHole 2ch"

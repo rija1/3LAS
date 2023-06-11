@@ -5,6 +5,7 @@ const io = require('socket.io')(http);
 const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
+const os = require('os');
 const auth = require('basic-auth');
 const { start } = require('repl');
 const ioc = require("socket.io-client");
@@ -93,7 +94,7 @@ function getSystemSettings() {
 
 function getSettings() {
 
-    updateAvfoundationDevices();
+    updateAudioDevices();
 
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
@@ -175,7 +176,7 @@ function createProcess(processName, doSaveSettings = true) {
     // let inputDevice = channelSettings.ffmpegInputDevice;
 
     let audioPan = '';
-    
+
     // Select the channel or pan if stereo.
     switch (channelSettings.pan) {
         case "left":
@@ -317,51 +318,80 @@ function restartProcess(processName, doSaveSettings = true) {
     io.emit('settings-info-update', getSettings());
 }
 
-function updateAvfoundationDevices() {
+function updateAudioDevices() {
     const { exec } = require('child_process');
 
-    // Get AVFoundation devices
-    exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
+    const platform = os.platform();
 
-        const audioDevices = {};
-        parseDevices = false;
+    if (platform === 'linux') {
+        exec('aplay -l', (err, stdout, stderr) => {
+            const lines = output.trim().split('\n');
+            const audioDevices = {};
 
-        // Parse the output to extract device information
-        const lines = stderr.trim().split('\n');
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const regex = /card (\d+): (.+), device (\d+): (.+)/;
+                const match = line.match(regex);
 
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
+                if (match) {
+                    const cardId = match[1];
+                    const deviceId = match[3];
+                    const deviceName = match[4];
 
-            if (line.includes('AVFoundation audio devices:')) {
-                parseDevices = true;
+                    audioDevices[`${cardId},${deviceId}`] = {
+                        id: `${cardId},${deviceId}`,
+                        name: deviceName.trim(),
+                    };
+                }
             }
+        });
+    } else if (platform === 'darwin') {
+        // Get AVFoundation devices
+        exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
 
-            if (parseDevices) {
-                if (line.startsWith('[AVFoundation')) {
+            let audioDevices = {};
+            parseDevices = false;
 
-                    const regex = /\[(\d+)\] (.+)/;
-                    const matches = line.match(regex);
+            // Parse the output to extract device information
+            const lines = stderr.trim().split('\n');
 
-                    if (matches) {
-                        const deviceId = matches[1];
-                        const deviceName = matches[2];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
 
-                        audioDevices[deviceId] = {
-                            id: deviceId.toString(),
-                            name: deviceName
-                        };
+                if (line.includes('AVFoundation audio devices:')) {
+                    parseDevices = true;
+                }
+
+                if (parseDevices) {
+                    if (line.startsWith('[AVFoundation')) {
+
+                        const regex = /\[(\d+)\] (.+)/;
+                        const matches = line.match(regex);
+
+                        if (matches) {
+                            const deviceId = matches[1];
+                            const deviceName = matches[2];
+
+                            audioDevices[deviceId] = {
+                                id: deviceId.toString(),
+                                name: deviceName
+                            };
+                        }
                     }
                 }
             }
-        }
 
-        // We will save the settings if the audio devices have changed
-        if (JSON.stringify(Settings.avfoundationDevices) !== JSON.stringify(audioDevices)) {
-            Settings.avfoundationDevices = audioDevices;
-            saveSettings();
-        }
+        });
+    } else {
+        console.log('Current platform is neither Linux nor macOS');
+    }
 
-    });
+    // We will save the settings if the audio devices have changed
+    if (JSON.stringify(Settings.audioDevices) !== JSON.stringify(audioDevices)) {
+        Settings.audioDevices = audioDevices;
+        saveSettings();
+    }
+
 }
 
 
@@ -650,7 +680,7 @@ http.listen(PORT, () => {
     updateStatus();
 
     // Update current AVFoundation devices in settings file
-    updateAvfoundationDevices();
+    updateAudioDevices();
 
 
 });
