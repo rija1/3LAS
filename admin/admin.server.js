@@ -116,8 +116,11 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     let channelSettings = Settings["channels"][processName];
+    const platform = os.platform();
 
-    let outputFileParam = "";
+    let outputFileParam = '';
+    let audioPan = '';
+    let inputDevice = '';
 
     // We will determine here the mp3 file name and path
     if (channelSettings.export) {
@@ -172,11 +175,6 @@ function createProcess(processName, doSaveSettings = true) {
 
     }
 
-    // To list devices on mac : ffmpeg -f avfoundation -list_devices true -i ""
-    // let inputDevice = channelSettings.ffmpegInputDevice;
-
-    let audioPan = '';
-
     // Select the channel or pan if stereo.
     switch (channelSettings.pan) {
         case "left":
@@ -211,7 +209,12 @@ function createProcess(processName, doSaveSettings = true) {
             break;
     }
 
-    let inputDevice = "-f avfoundation -i :" + channelSettings.device;
+    // ffmpeg argument to select the input audio device
+    if (platform === 'linux') {
+        inputDevice = "-f alsa -i hw:" + channelSettings.device;  
+    } else if (platform === 'darwin') {
+        inputDevice = "-f avfoundation -i :" + channelSettings.device;
+    }
 
     let port = channelSettings.port;
     let bufSize = 2048;
@@ -327,32 +330,30 @@ function updateAudioDevices() {
 
     if (platform === 'linux') {
 
-const output = execSync('aplay -l').toString();
-console.log(output);
-            const lines = output.trim().split('\n');
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const regex = /card (\d+): (.+), device (\d+): (.+)/;
-                const match = line.match(regex);
+        const output = execSync('aplay -l').toString();
+        const lines = output.trim().split('\n');
 
-                if (match) {
-                    const cardId = match[1];
-                    const deviceId = match[3];
-                    const deviceName = match[4];
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const regex = /card (\d+): (.+), device (\d+): (.+)/;
+            const match = line.match(regex);
 
-                    audioDevices[`${cardId},${deviceId}`] = {
-                        id: `${cardId},${deviceId}`,
-                        name: deviceName.trim(),
-                    };
-                }
+            if (match) {
+                const cardId = match[1];
+                const deviceId = match[3];
+                const deviceName = match[4];
+
+                audioDevices[`${cardId},${deviceId}`] = {
+                    id: `${cardId},${deviceId}`,
+                    name: deviceName.trim(), 
+                };
             }
-            console.log(audioDevices);
+        }
+
     } else if (platform === 'darwin') {
+        
         // Get AVFoundation devices
         exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
-
-            
             parseDevices = false;
 
             // Parse the output to extract device information
@@ -389,13 +390,12 @@ console.log(output);
         console.log('Current platform is neither Linux nor macOS');
     }
 
-    console.log(audioDevices);
     // We will save the settings if the audio devices have changed
     if (Object.keys(audioDevices).length > 0 && JSON.stringify(Settings.audioDevices) !== JSON.stringify(audioDevices)) {
         Settings.audioDevices = audioDevices;
         saveSettings();
     }
-    
+
 }
 
 
