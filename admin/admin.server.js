@@ -301,7 +301,7 @@ function deleteProcess(processName) {
 
 // Stop a process
 function stopProcess(processName) {
-    const { exec } = require('child_process');
+    const { exec, execSync } = require('child_process');
 
     // Not using the PM2 API which doesn't do a graceful stop and so makes the MP3 file unplayable.
     exec('pm2 stop ' + processName);
@@ -320,14 +320,17 @@ function restartProcess(processName, doSaveSettings = true) {
 
 function updateAudioDevices() {
     const { exec } = require('child_process');
-
+    const execSync = require('child_process').execSync;
     const platform = os.platform();
 
-    if (platform === 'linux') {
-        exec('aplay -l', (err, stdout, stderr) => {
-            const lines = output.trim().split('\n');
-            const audioDevices = {};
+    let audioDevices = {};
 
+    if (platform === 'linux') {
+
+const output = execSync('aplay -l').toString();
+console.log(output);
+            const lines = output.trim().split('\n');
+            
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 const regex = /card (\d+): (.+), device (\d+): (.+)/;
@@ -344,12 +347,12 @@ function updateAudioDevices() {
                     };
                 }
             }
-        });
+            console.log(audioDevices);
     } else if (platform === 'darwin') {
         // Get AVFoundation devices
         exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
 
-            let audioDevices = {};
+            
             parseDevices = false;
 
             // Parse the output to extract device information
@@ -386,12 +389,13 @@ function updateAudioDevices() {
         console.log('Current platform is neither Linux nor macOS');
     }
 
+    console.log(audioDevices);
     // We will save the settings if the audio devices have changed
-    if (JSON.stringify(Settings.audioDevices) !== JSON.stringify(audioDevices)) {
+    if (Object.keys(audioDevices).length > 0 && JSON.stringify(Settings.audioDevices) !== JSON.stringify(audioDevices)) {
         Settings.audioDevices = audioDevices;
         saveSettings();
     }
-
+    
 }
 
 
