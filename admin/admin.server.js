@@ -327,6 +327,8 @@ function restartProcess(processName, doSaveSettings = true) {
 
 function updateAudioDevices() {
     const { exec } = require('child_process');
+    const execSync = require('child_process').execSync;
+    
     const platform = os.platform();
 
     let audioDevices = {};
