@@ -345,7 +345,7 @@ function updateAudioDevices() {
         for (const line of lines) {
             const match = alsaInputRegex.exec(line);
             if (match) {
-                const alsaInputId = match[1];
+                const alsaInputId = `alsa_input.${match[1]}`;
                 const deviceName = match[2];
 
                 audioDevices[alsaInputId] = {
