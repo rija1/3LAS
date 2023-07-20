@@ -215,7 +215,7 @@ function createProcess(processName, doSaveSettings = true) {
     // ffmpeg argument to select the input audio device
 
     if (platform === 'linux') {
-        inputDevice = "-f pulse -i " + channelSettings.device;
+        inputDevice = "-f pulse -i alsa_input." + channelSettings.device;
     } else if (platform === 'darwin') {
         inputDevice = "-f avfoundation -i :" + channelSettings.device;
     }
@@ -345,7 +345,7 @@ function updateAudioDevices() {
         for (const line of lines) {
             const match = alsaInputRegex.exec(line);
             if (match) {
-                const alsaInputId = `alsa_input.${match[1]}`;
+                const alsaInputId = match[1];
                 const deviceName = match[2];
 
                 audioDevices[alsaInputId] = {
