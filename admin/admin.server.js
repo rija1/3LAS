@@ -94,7 +94,7 @@ function getSystemSettings() {
 
 function getSettings() {
 
-    //updateAudioDevices();
+    updateAudioDevices();
 
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
@@ -106,102 +106,6 @@ function getSettings() {
 
 function updateExportFilename(channelId, filename) {
     io.emit('update-export-filename', channelId, filename);
-}
-
-function getInputDeviceFfmpegArg(deviceNameReq) {
-    const execSync = require('child_process').execSync;
-    const { exec } = require('child_process');
-    const platform = os.platform();
-
-    if (platform === 'linux') {
-        // Command to list Pulse Audio devices
-        const output = execSync('pactl list sources').toString();
-
-        const lines = output.split('\n');
-        let deviceNumber = null;
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const regex = /^(\d+)\s+([^ ]+)/;
-            const match = line.match(regex);
-
-            if (match) {
-                const currentDeviceNumber = match[1];
-                const deviceName = match[2];
-
-                if (deviceName.includes(deviceNameReq) && deviceName.includes('input')) {
-                    deviceNumber = currentDeviceNumber;
-                    break;
-                }
-            }
-        }
-        if (deviceNumber === null) {
-            console.log('No ' + deviceNameReq + 'input audio device found.')
-            return false;
-        } else {
-            console.log('Found device ' + deviceNameReq + 'with number '+deviceNumber)
-            return '-f pulse -i ' + deviceNumber;
-        }
-    } else if (platform === 'darwin') {
-
-        let currentAvfDeviceNumber = null;
-        let avfoundationDevName = null;
-
-        let output = '';
-        try {
-            output = execSync('ffmpeg -f avfoundation -list_devices true -i ""').toString();
-        } catch (error) {
-            output = error.toString();
-        }
-        // console.log(output);
-        // Command to list Av devices
-        // exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
-
-        parseDevices = false;
-        let avfDeviceNumber = null;
-        // Parse the output to extract device information
-        const lines = output.trim().split('\n');
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-
-            if (line.includes('AVFoundation audio devices:')) {
-                parseDevices = true;
-            }
-
-            if (parseDevices) {
-                if (line.startsWith('[AVFoundation')) {
-
-                    // console.log('ok'+line+'OK');
-                    const regex = /\[(\d+)\] (.+)/;
-                    const matches = line.match(regex);
-
-                    if (matches) {
-                        currentAvfDeviceNumber = matches[1];
-                        avfoundationDevName = matches[2];
-
-                        if (avfoundationDevName.includes(deviceNameReq)) {
-                            avfDeviceNumber = currentAvfDeviceNumber;
-                            break;
-                        }
-                    }
-                }
-            }
-
-        }
-        if (avfDeviceNumber === null) {
-            console.log('No ' + deviceNameReq + ' input audio device found.')
-            return false;
-        } else {
-            console.log('Found Device : Name' + avfoundationDevName + ' ID :' + avfDeviceNumber);
-            return '-f avfoundation -i :' + avfDeviceNumber;
-        }
-        // });
-        console.log('Bamm3');
-    }
-
-
-
 }
 
 function createProcess(processName, doSaveSettings = true) {
@@ -309,15 +213,12 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     // ffmpeg argument to select the input audio device
-     inputDevice = getInputDeviceFfmpegArg('UMC1820');
-    // inputDevice = getInputDeviceFfmpegArg('Microphone');
-    console.log('Input device arg: ' + inputDevice);
 
-    // if (platform === 'linux') {
-    //     inputDevice = "-f alsa -i hw:" + channelSettings.device;
-    // } else if (platform === 'darwin') {
-    //     inputDevice = "-f avfoundation -i :" + channelSettings.device;
-    // }
+    if (platform === 'linux') {
+        inputDevice = "-f pulse -i " + channelSettings.device;
+    } else if (platform === 'darwin') {
+        inputDevice = "-f avfoundation -i :" + channelSettings.device;
+    }
 
     let port = channelSettings.port;
     let bufSize = 2048;
@@ -431,6 +332,27 @@ function updateAudioDevices() {
     let audioDevices = {};
 
     if (platform === 'linux') {
+
+        const output = execSync('ffmpeg -sources pulse').toString();
+
+        const lines = output.trim().split('\n');
+        const alsaInputs = [];
+
+        const alsaInputRegex = /alsa_input\.(\S+?)\s+\[(.*?)\]/;
+
+        for (const line of lines) {
+            const match = alsaInputRegex.exec(line);
+            if (match) {
+                const alsaInputId = match[1];
+                const deviceName = match[2];
+
+                audioDevices[deviceId] = {
+                    id: alsaInputId,
+                    name: deviceName
+                };
+            }
+        }
+
         saveAudioDevices(audioDevices);
 
     } else if (platform === 'darwin') {
@@ -776,7 +698,7 @@ http.listen(PORT, () => {
     updateStatus();
 
     // Update current AVFoundation devices in settings file
-    //updateAudioDevices();
+    updateAudioDevices();
 
 
 });
