@@ -94,7 +94,7 @@ function getSystemSettings() {
 
 function getSettings() {
 
-    updateAudioDevices();
+    //updateAudioDevices();
 
     if (!Settings || !Settings["channels"]) {
         console.error(`Error: 'channels' not found in settings file.`);
@@ -106,6 +106,102 @@ function getSettings() {
 
 function updateExportFilename(channelId, filename) {
     io.emit('update-export-filename', channelId, filename);
+}
+
+function getInputDeviceFfmpegArg(deviceNameReq) {
+    const execSync = require('child_process').execSync;
+    const { exec } = require('child_process');
+    const platform = os.platform();
+
+    if (platform === 'linux') {
+        // Command to list Pulse Audio devices
+        const output = execSync('pactl list sources').toString();
+
+        const lines = output.split('\n');
+        let deviceNumber = null;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const regex = /^(\d+)\s+([^ ]+)/;
+            const match = line.match(regex);
+
+            if (match) {
+                const currentDeviceNumber = match[1];
+                const deviceName = match[2];
+
+                if (deviceName.includes(deviceNameReq) && deviceName.includes('input')) {
+                    deviceNumber = currentDeviceNumber;
+                    break;
+                }
+            }
+        }
+        if (deviceNumber === null) {
+            console.log('No ' + deviceNameReq + 'input audio device found.')
+            return false;
+        } else {
+            console.log('Found device ' + deviceNameReq + 'with number '+deviceNumber)
+            return '-f pulse -i ' + deviceNumber;
+        }
+    } else if (platform === 'darwin') {
+
+        let currentAvfDeviceNumber = null;
+        let avfoundationDevName = null;
+
+        let output = '';
+        try {
+            output = execSync('ffmpeg -f avfoundation -list_devices true -i ""').toString();
+        } catch (error) {
+            output = error.toString();
+        }
+        // console.log(output);
+        // Command to list Av devices
+        // exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
+
+        parseDevices = false;
+        let avfDeviceNumber = null;
+        // Parse the output to extract device information
+        const lines = output.trim().split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (line.includes('AVFoundation audio devices:')) {
+                parseDevices = true;
+            }
+
+            if (parseDevices) {
+                if (line.startsWith('[AVFoundation')) {
+
+                    // console.log('ok'+line+'OK');
+                    const regex = /\[(\d+)\] (.+)/;
+                    const matches = line.match(regex);
+
+                    if (matches) {
+                        currentAvfDeviceNumber = matches[1];
+                        avfoundationDevName = matches[2];
+
+                        if (avfoundationDevName.includes(deviceNameReq)) {
+                            avfDeviceNumber = currentAvfDeviceNumber;
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+        if (avfDeviceNumber === null) {
+            console.log('No ' + deviceNameReq + ' input audio device found.')
+            return false;
+        } else {
+            console.log('Found Device : Name' + avfoundationDevName + ' ID :' + avfDeviceNumber);
+            return '-f avfoundation -i :' + avfDeviceNumber;
+        }
+        // });
+        console.log('Bamm3');
+    }
+
+
+
 }
 
 function createProcess(processName, doSaveSettings = true) {
@@ -121,6 +217,9 @@ function createProcess(processName, doSaveSettings = true) {
     let outputFileParam = '';
     let audioPan = '';
     let inputDevice = '';
+
+    // Determine BEHRINGER input device number
+
 
     // We will determine here the mp3 file name and path
     if (channelSettings.export) {
@@ -210,11 +309,15 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     // ffmpeg argument to select the input audio device
-    if (platform === 'linux') {
-        inputDevice = "-f alsa -i hw:" + channelSettings.device;  
-    } else if (platform === 'darwin') {
-        inputDevice = "-f avfoundation -i :" + channelSettings.device;
-    }
+     inputDevice = getInputDeviceFfmpegArg('UMC1820');
+    // inputDevice = getInputDeviceFfmpegArg('Microphone');
+    console.log('Input device arg: ' + inputDevice);
+
+    // if (platform === 'linux') {
+    //     inputDevice = "-f alsa -i hw:" + channelSettings.device;
+    // } else if (platform === 'darwin') {
+    //     inputDevice = "-f avfoundation -i :" + channelSettings.device;
+    // }
 
     let port = channelSettings.port;
     let bufSize = 2048;
@@ -304,7 +407,7 @@ function deleteProcess(processName) {
 
 // Stop a process
 function stopProcess(processName) {
-    const { exec, execSync } = require('child_process');
+    const { exec } = require('child_process');
 
     // Not using the PM2 API which doesn't do a graceful stop and so makes the MP3 file unplayable.
     exec('pm2 stop ' + processName);
@@ -323,36 +426,17 @@ function restartProcess(processName, doSaveSettings = true) {
 
 function updateAudioDevices() {
     const { exec } = require('child_process');
-    const execSync = require('child_process').execSync;
     const platform = os.platform();
 
     let audioDevices = {};
 
     if (platform === 'linux') {
-
-        const output = execSync('aplay -l').toString();
-        const lines = output.trim().split('\n');
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const regex = /card (\d+): (.+), device (\d+): (.+)/;
-            const match = line.match(regex);
-
-            if (match) {
-                const cardId = match[1];
-                const deviceId = match[3];
-                const deviceName = match[4];
-
-                audioDevices[`${cardId},${deviceId}`] = {
-                    id: `${cardId},${deviceId}`,
-                    name: deviceName.trim(), 
-                };
-            }
-        }
+        saveAudioDevices(audioDevices);
 
     } else if (platform === 'darwin') {
-        
+
         // Get AVFoundation devices
+
         exec('ffmpeg -f avfoundation -list_devices true -i ""', (err, stdout, stderr) => {
             parseDevices = false;
 
@@ -383,19 +467,27 @@ function updateAudioDevices() {
                         }
                     }
                 }
+
             }
 
+            saveAudioDevices(audioDevices);
+
         });
+
+        console.log(audioDevices); // Question for ChatGPT : here audioDevices is empty when it's been populated above, why ?
+
     } else {
         console.log('Current platform is neither Linux nor macOS');
     }
 
+}
+
+function saveAudioDevices(audioDevices) {
     // We will save the settings if the audio devices have changed
     if (Object.keys(audioDevices).length > 0 && JSON.stringify(Settings.audioDevices) !== JSON.stringify(audioDevices)) {
         Settings.audioDevices = audioDevices;
         saveSettings();
     }
-
 }
 
 
@@ -684,7 +776,7 @@ http.listen(PORT, () => {
     updateStatus();
 
     // Update current AVFoundation devices in settings file
-    updateAudioDevices();
+    //updateAudioDevices();
 
 
 });
