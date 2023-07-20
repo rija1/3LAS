@@ -98,7 +98,7 @@ function OnConnectivityCallback(isConnected) {
     }
 }
 function ResetStream() {
-    alert('Youipi');
+    // alert('Youipi');
     Stream.WebRTC.Reset();
 }
 function OnActivityCallback() {
