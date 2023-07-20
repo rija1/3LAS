@@ -348,7 +348,7 @@ function updateAudioDevices() {
                 const alsaInputId = match[1];
                 const deviceName = match[2];
 
-                audioDevices[deviceId] = {
+                audioDevices[alsaInputId] = {
                     id: alsaInputId,
                     name: deviceName
                 };
