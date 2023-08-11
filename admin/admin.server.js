@@ -6,6 +6,7 @@ const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
 const os = require('os');
+const auth = require('http-auth');
 const { start } = require('repl');
 const ioc = require("socket.io-client");
 const sshClient = require('ssh2').Client;
