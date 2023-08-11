@@ -6,7 +6,6 @@ const path = require('path');
 const pm2 = require('pm2')
 const fs = require('fs');
 const os = require('os');
-const auth = require('basic-auth');
 const { start } = require('repl');
 const ioc = require("socket.io-client");
 const sshClient = require('ssh2').Client;
@@ -31,6 +30,42 @@ const exportPath = path.join(__dirname, 'export');
 // });
 
 const PORT = process.env.PORT || 3000;
+
+// Configure basic authentication
+const basic = auth.basic({
+    realm: 'Restricted Access',
+    file: __dirname + '/.htpasswd' // Assuming .htpasswd is in the same directory
+});
+
+function authentication(req, res, next) {
+    const authheader = req.headers.authorization;
+    console.log(req.headers);
+ 
+    if (!authheader) {
+        let err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        return next(err)
+    }
+ 
+    const auth = new Buffer.from(authheader.split(' ')[1],
+        'base64').toString().split(':');
+    const user = auth[0];
+    const pass = auth[1];
+ 
+    if (user == 'admin' && pass == 'live473') {
+        next();
+    } else {
+        let err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        return next(err);
+    }
+ 
+}
+ 
+// First step is the authentication of the client
+app.use(authentication)
 
 // Serve the index.html file
 app.get('/', (req, res) => {
