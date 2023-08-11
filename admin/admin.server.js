@@ -230,7 +230,9 @@ function createProcess(processName, doSaveSettings = true) {
     // let probesize = 64;
     let probesize = 512;
 
-    let processCommand = 'ffmpeg -fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    let flags = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+
+    let processCommand = 'ffmpeg ' + flags + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
     console.log(processCommand);
 
