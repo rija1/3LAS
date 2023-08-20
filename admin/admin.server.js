@@ -257,18 +257,29 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     let port = channelSettings.port;
-    let bufSize = 2048;
-    // let bufSize = 960;
+    // let bufSize = 2048;
+    let bufSize = 960;
 
-    // let rtbufsize = 64;
-    let rtbufsize = 512;
+    let rtbufsize = 64;
+    // let rtbufsize = 512;
 
-    // let probesize = 64;
-    let probesize = 512;
+    let probesize = 64;
+    // let probesize = 512;
 
-    let flags = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+    let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
 
-    let processCommand = 'ffmpeg ' + flags + ' -y ' + inputDevice + audioPan + ' -ar 48000 -ac 1 -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize + ' pipe:1 ' + outputFileParam + ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+    // let options = ' -ar 48000 -ac 1 -f s16le ';
+
+    let options = ' -ar 48000 -f s16le ';
+
+    let flags2 =  '-fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
+    // -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960
+
+    let nodePipe = ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
+
+    let processCommand = 'ffmpeg ' + inputFormatOptions + ' -y ' + inputDevice + audioPan + options + flags2 + ' pipe:1 ' + outputFileParam + nodePipe;
+
+    
 
     console.log(processCommand);
 
