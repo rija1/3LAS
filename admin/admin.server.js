@@ -215,43 +215,12 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     // Select the channel or pan if stereo.
-    switch (channelSettings.pan) {
-        case "left":
-            audioPan = ' -af "pan=mono|c0=c0" ';
-            break;
-        case "right":
-            audioPan = ' -af "pan=mono|c0=c1" ';
-            break;
-        case "1":
-            audioPan = ' -af "pan=mono|c0=c0" ';
-            break;
-        case "2":
-            audioPan = ' -af "pan=mono|c0=c1" ';
-            break;
-        case "3":
-            audioPan = ' -af "pan=mono|c0=c2" ';
-            break;
-        case "4":
-            audioPan = ' -af "pan=mono|c0=c3" ';
-            break;
-        case "5":
-            audioPan = ' -af "pan=mono|c0=c4" ';
-            break;
-        case "6":
-            audioPan = ' -af "pan=mono|c0=c5" ';
-            break;
-        case "7":
-            audioPan = ' -af "pan=mono|c0=c6" ';
-            break;
-        case "8":
-            audioPan = ' -af "pan=mono|c0=c7" ';
-            break;
-    }
+    audioPan = ' -filter:a "pan=mono|c0=' + channelSettings.pan + '" '; 
 
     // ffmpeg argument to select the input audio device
 
     if (platform === 'linux') {
-        inputDevice = "-f pulse -i alsa_input." + channelSettings.device;
+        inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
     } else if (platform === 'darwin') {
         inputDevice = "-f avfoundation -i :" + channelSettings.device;
     }
@@ -268,9 +237,9 @@ function createProcess(processName, doSaveSettings = true) {
 
     let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
 
-    // let options = ' -ar 48000 -ac 1 -f s16le ';
+    let options = ' -ar 48000 -ac 1 -f s16le ';
 
-    let options = ' -ar 48000 -f s16le ';
+    // let options = '';
 
     let flags2 =  '-fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
     // -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960
@@ -279,7 +248,7 @@ function createProcess(processName, doSaveSettings = true) {
 
     let processCommand = 'ffmpeg ' + inputFormatOptions + ' -y ' + inputDevice + audioPan + options + flags2 + ' pipe:1 ' + outputFileParam + nodePipe;
 
-    
+    // let processCommand = 'ffmpeg -f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input.usb-BEHRINGER_UMC1820_11ABDFAC-00.multichannel-input -filter:a "pan=mono|c0=FR" -ar 48000 -ac 1 -f s16le  pipe:1  | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1'
 
     console.log(processCommand);
 
