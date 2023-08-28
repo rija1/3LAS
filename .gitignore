@@ -4,7 +4,7 @@
 
 /.vs
 
-/server/src/node_modules
+node_modules
 
 .DS_Store
 admin/export/*.mp3
