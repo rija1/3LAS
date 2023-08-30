@@ -76,11 +76,11 @@
 
         function streamStart(channel) {
 
-
             const channelDiv = document.querySelector("#" + channel.id);
             const status = channelDiv.getAttribute('status');
 
             if (status == "off") {
+
                 const popupMessage = 'This channel is currently unavailable. Please wait for it to become active and try again later.'
                 showPopup(popupMessage);
                 return;
@@ -92,18 +92,9 @@
             Init(channel);
 
             try {
-                Stream.Start();
+                Stream.Start(channel.id);
+                setCookie('user_channel', channel.id, 10);
 
-                // Get all elements with the class 'channel_button'
-                const channelButtons = document.querySelectorAll('.channel_button');
-
-                // Loop through each element and remove the 'selected' class
-                channelButtons.forEach(button => {
-                    button.classList.remove('selected');
-                });
-
-                // Add selected class to current channel
-                channelDiv.classList.add('selected');
             }
             catch (_ex) {
                 // alert(_ex);
@@ -113,7 +104,7 @@
         function getFirstPlayableChannel(channelsInfo) {
             for (var key in channelsInfo) {
                 if (channelsInfo.hasOwnProperty(key) && channelsInfo[key].status === "on") {
-                    return channelsInfo[key].id;
+                    return channelsInfo[key];
                 }
             }
 
@@ -164,6 +155,21 @@
             // document.querySelector("#channel4").style.display = 'none';
         }
 
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + days);
+
+            const cookieValue = encodeURIComponent(value) + (days ? '; expires=' + expirationDate.toUTCString() : '');
+            document.cookie = name + '=' + cookieValue + '; path=/';
+        }
+
+        // Function to get the value of a cookie by name
+        function getCookie(name) {
+            const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return cookieValue ? decodeURIComponent(cookieValue[2]) : null;
+        }
+
         function blink(element, duration) {
             var startTime = Date.now();
             var intervalId = setInterval(function () {
@@ -187,13 +193,26 @@
         socket.on('settings-frontend-init', (settingsInfo, systemSettings) => {
             updateTeachingInfo(settingsInfo, systemSettings);
             createChannelsBlocks(settingsInfo, systemSettings);
-            // Initialize first channel which will be played if play button clicked
-            const firstChannelId = getFirstPlayableChannel(settingsInfo.channels)
-            if (firstChannelId !== false) {
-                Init(settingsInfo.channels[firstChannelId]);
+
+            let initChannel = false;
+
+            // Check if channel exist as set in the user cookie
+            if (settingsInfo.channels[getCookie('user_channel')] && settingsInfo.channels[getCookie('user_channel')].status === "on") {
+                initChannel = settingsInfo.channels[getCookie('user_channel')];
+                //  alert('cookie channel id:'+initChannel)
+            } else {
+                // If no cookie set we play the first available channel
+                initChannel = getFirstPlayableChannel(settingsInfo.channels)
+                // alert('default channel id:'+initChannel);
+            }
+
+            // If there is a channel (from cookie or 1st channel) , we play it
+            if (initChannel !== false) {
+                Init(initChannel);
             } else {
                 document.querySelector('#audioplayer').style.display = 'none';
             }
+
         });
 
         // Emit a 'settings-info-value' event to the server to trigger the function call
@@ -344,6 +363,11 @@
         }
 
         closeButton.addEventListener('click', hidePopup);
+
+
+
+
+
 
 
     </script>

@@ -6,6 +6,7 @@ var _3LAS_Settings = /** @class */ (function () {
         this.SocketPath = "/";
         this.WebRTC = new WebRTC_Settings();
         this.Fallback = new Fallback_Settings();
+        this.ChannelId = ""
     }
     return _3LAS_Settings;
 }());
@@ -63,7 +64,27 @@ var _3LAS = /** @class */ (function () {
         else
             return true;
     };
-    _3LAS.prototype.Start = function () {
+    _3LAS.prototype.ResetChannels = function () {
+        // Get all elements with the class 'channel_button'
+        const channelButtons = document.querySelectorAll('.channel_button');
+        // Loop through each element and remove the 'selected' class
+        channelButtons.forEach(button => {
+            button.classList.remove('selected');
+        });
+    };
+    _3LAS.prototype.SelectChannelDiv = function () {
+        if (this.ChannelId) {
+            const channelDiv = document.querySelector("#" + this.ChannelId);
+            // Add selected class to current channel
+            channelDiv.classList.add('selected');
+        }
+    };
+    _3LAS.prototype.Start = function (channelId = "") {
+
+        this.ChannelId = channelId;
+
+        this.ResetChannels();
+
         this.ConnectivityFlag = false;
         // This is stupid, but required for iOS/iPadOS... thanks Apple :(
         if (this.Settings && this.Settings.WebRTC && this.Settings.WebRTC.AudioTag)
@@ -99,6 +120,7 @@ var _3LAS = /** @class */ (function () {
             this.Fallback.OnSocketError(message);
     };
     _3LAS.prototype.OnSocketConnect = function () {
+        this.SelectChannelDiv();
         this.Logger.Log("Established connection with server.");
         if (this.WebRTC)
             this.WebRTC.OnSocketConnect();
@@ -110,6 +132,9 @@ var _3LAS = /** @class */ (function () {
             this.Fallback.Init(this.WebSocket);
     };
     _3LAS.prototype.OnSocketDisconnect = function () {
+
+        this.ResetChannels();
+
         this.Logger.Log("Lost connection to server.");
         if (this.WebRTC)
             this.WebRTC.OnSocketDisconnect();
@@ -124,7 +149,8 @@ var _3LAS = /** @class */ (function () {
             if (this.ConnectivityCallback)
                 this.ConnectivityCallback(false);
         }
-        this.Start();
+
+        this.Start(this.ChannelId);
     };
     _3LAS.prototype.OnSocketDataReady = function (data) {
         if (this.WebRTC)

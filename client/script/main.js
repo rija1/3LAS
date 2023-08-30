@@ -11,7 +11,7 @@
 var Stream;
 var DefaultVolume = 0.5;
 function Init(channelSettings="") {
-
+    
     document.getElementById("logwindowbutton").onclick = OnLogWindowButtonClick;
     var logger = new Logging(document.getElementById("logwindow"), "li");
     // Load default settings
@@ -128,10 +128,8 @@ function OnUnmuteButtonClick(_ev) {
     UpdateVolumeBar(OldVolume * document.getElementById("volumebar").getBoundingClientRect().width);
 }
 function OnPlayButtonClick(channelId) {
-
-
     try {
-        Stream.Start();
+        Stream.Start(channelId);
     }
     catch (_ex) {
     }
