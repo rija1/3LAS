@@ -165,6 +165,15 @@ body {
     color: #393c35;
 }
 
+.fa-upload::before {
+    font-family: 'FontAwesome';
+    font-size: 20px;
+    content: "\f0aa";
+    vertical-align: middle;
+    padding-right: 10px;
+    color: #393c35;
+}
+
 h1 {
     padding: 0 0 0px 0;
     background: -webkit-linear-gradient(#b03e3e, #333);

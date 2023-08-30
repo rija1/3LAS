@@ -75,7 +75,8 @@
                         <button id="start-all-button"><span class="fa-start"></span>Start All</button>
                         <button id="stop-all-button"><span class="fa-stop"></span>Stop All</button>
                         <button id="restart-all-button"><span class="fa-restart"></span>Restart All</button>
-                        <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button>
+                        <button id="upload-button"><span class="fa-upload"></span>Upload to Server</button>
+                        <!-- <button id="refresh-info"><span class="fa-refresh"></span>Refresh Information</button> -->
                     </div>
                 </div>
             </div>
@@ -205,7 +206,7 @@
                     teachingExtraInfoInput.value = settingsInfo.teaching_info.extra_info;
                 }
 
-                function createTeachingBlock(settingsInfo, systemSettings) {
+                function createTeachingBlock(settingsInfo, systemSettings, userSettings) {
 
                     // Lama Select
                     const teachingLamaSelect = document.querySelector("#teaching_lama");
@@ -225,7 +226,7 @@
 
 
                     // Create options
-                    for (const [lamaCode, lamaName] of Object.entries(systemSettings.lamas)) {
+                    for (const [lamaCode, lamaName] of Object.entries(userSettings.lamas)) {
                         const option = document.createElement('option');
                         option.value = lamaCode;
                         option.text = lamaName;
@@ -249,7 +250,7 @@
                         emitUpdateTeachingInfo(infoArray);
                     };
 
-                    for (const [teachingCode, teachingName] of Object.entries(systemSettings.teachings)) {
+                    for (const [teachingCode, teachingName] of Object.entries(userSettings.teachings)) {
                         const option = document.createElement('option');
                         option.value = teachingCode;
                         option.text = teachingName;
@@ -290,7 +291,7 @@
                         emitUpdateTeachingInfo(infoArray);
                     };
 
-                    for (const [copyFolderCode, teachingCopyFolder] of Object.entries(systemSettings.copy_folders)) {
+                    for (const [copyFolderCode, teachingCopyFolder] of Object.entries(userSettings.copy_folders)) {
                         const option = document.createElement('option');
                         option.value = copyFolderCode;
                         option.text = teachingCopyFolder.name;
@@ -350,7 +351,7 @@
                     }
                 }
 
-                function createChannelsBlock(settingsInfo, systemSettings) {
+                function createChannelsBlock(settingsInfo, systemSettings, userSettings) {
                     for (const channelId in settingsInfo.channels) {
                         const channel = settingsInfo.channels[channelId];
                         const statusItem = document.createElement('div');
@@ -429,7 +430,7 @@
                         };
 
                         // Loop through the object keys and values and create options
-                        for (const [code, language] of Object.entries(systemSettings.languages)) {
+                        for (const [code, language] of Object.entries(userSettings.languages)) {
                             const option = document.createElement('option');
                             option.value = code;
                             option.text = language.name;
@@ -731,15 +732,14 @@
                 });
 
                 // Add an event listener for the 'return-value' event on the socket
-                socket.on('settings-info-init', (settingsInfo, systemSettings) => {
+                socket.on('settings-info-init', (settingsInfo, systemSettings, userSettings) => {
 
-                    createTeachingBlock(settingsInfo, systemSettings);
-                    createChannelsBlock(settingsInfo, systemSettings);
+                    createTeachingBlock(settingsInfo, systemSettings, userSettings);
+                    createChannelsBlock(settingsInfo, systemSettings, userSettings);
 
                     document.querySelector("#start-all-button").onclick = function () { startAll(settingsInfo); };
                     document.querySelector("#restart-all-button").onclick = function () { restartAll(settingsInfo); };
                     document.querySelector("#stop-all-button").onclick = function () { stopAll(settingsInfo); };
-                    document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
                     // document.querySelector("#refresh-info").onclick = function () { refreshInfo(settingsInfo); };
 
                     document.querySelector("#save_profile_btn").onclick = function () {

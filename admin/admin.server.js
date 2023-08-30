@@ -13,8 +13,10 @@ const sshClient = require('ssh2').Client;
 
 const settingsPath = path.join(__dirname, 'settings.json');
 const systemSettingsPath = path.join(__dirname, 'system-settings.json');
+const userSettingsPath = path.join(__dirname, 'user-settings.json');
 let Settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
 let SystemSettings = JSON.parse(fs.readFileSync(systemSettingsPath, 'utf-8'));
+let UserSettings = JSON.parse(fs.readFileSync(userSettingsPath, 'utf-8'));
 const streamServerPath = path.join(__dirname, '3las.server.js');
 const profilesPath = path.join(__dirname, 'profiles');
 const exportPath = path.join(__dirname, 'export');
@@ -126,6 +128,10 @@ function processExists(processName) {
 
 function getSystemSettings() {
     return SystemSettings;
+}
+
+function getUserSettings() {
+    return UserSettings;
 }
 
 function getSettings() {
@@ -632,7 +638,7 @@ io.on('connection', (socket) => {
 
     socket.on('settings-info', () => {
         // Send the response back to the client with the 'settings-info-value' event
-        socket.emit('settings-info-init', getSettings(), getSystemSettings());
+        socket.emit('settings-info-init', getSettings(), getSystemSettings(),getUserSettings());
     });
 
     // Listen for start/stop events from clients

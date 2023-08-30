@@ -33,18 +33,18 @@
         var RtcConfig = {};
         var AudioTagId = "audioTag";
 
-        function updateTeachingInfo(settingsInfo, systemSettings) {
+        function updateTeachingInfo(settingsInfo, systemSettings, userSettings) {
             const teachingLamaDiv = document.querySelector('#teachingLama');
             const teachingNameDiv = document.querySelector('#teachingName');
             const lamaCode = settingsInfo.teaching_info.lama;
             const teachingCode = settingsInfo.teaching_info.teaching;
         }
 
-        function updateChannelsInfo(settingsInfo, systemSettings) {
+        function updateChannelsInfo(settingsInfo, systemSettings, userSettings) {
 
             for (const channelId in settingsInfo.channels) {
                 const languageCode = settingsInfo.channels[channelId].language
-                const languageName = systemSettings.languages[languageCode].name;
+                const languageName = userSettings.languages[languageCode].name;
                 const status = settingsInfo.channels[channelId].status;
 
                 let statusClassname = 'status-inactive';
@@ -111,7 +111,7 @@
             return false;
         }
 
-        function createChannelsBlocks(settingsInfo, systemSettings) {
+        function createChannelsBlocks(settingsInfo, systemSettings, userSettings) {
             for (const channelId in settingsInfo.channels) {
 
                 const channelsDiv = document.querySelector("#channels");
@@ -121,7 +121,7 @@
 
                 let languageName = "";
                 if (settingsInfo.channels[channelId].language != "") {
-                    languageName = systemSettings.languages[settingsInfo.channels[channelId].language].name;
+                    languageName = userSettings.languages[settingsInfo.channels[channelId].language].name;
                 }
 
                 // Hide some channels
@@ -184,15 +184,15 @@
         }
 
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('settings-frontend-update', (settingsInfo, systemSettings) => {
-            updateTeachingInfo(settingsInfo, systemSettings);
-            updateChannelsInfo(settingsInfo, systemSettings);
+        socket.on('settings-frontend-update', (settingsInfo, systemSettings, userSettings) => {
+            updateTeachingInfo(settingsInfo, systemSettings, userSettings);
+            updateChannelsInfo(settingsInfo, systemSettings, userSettings);
         });
 
         // Add an event listener for the 'return-value' event on the socket
-        socket.on('settings-frontend-init', (settingsInfo, systemSettings) => {
-            updateTeachingInfo(settingsInfo, systemSettings);
-            createChannelsBlocks(settingsInfo, systemSettings);
+        socket.on('settings-frontend-init', (settingsInfo, systemSettings, userSettings) => {
+            updateTeachingInfo(settingsInfo, systemSettings, userSettings);
+            createChannelsBlocks(settingsInfo, systemSettings, userSettings);
 
             let initChannel = false;
 
@@ -300,14 +300,12 @@
                 </div>
                 <p id="logwindowbutton">Show/Hide event log</p>
                 <ul id="logwindow"></ul>
+                <button class="reload-button" onclick="location.reload();">Reload</button>
             </div>
 
-            <button class="reload-button" onclick="location.reload();">Reload</button>
+            
 
-            <div class="notice">This platform is under development and still present bugs. If the audio stops playing
-                try to refresh the page with the button above. Please note that swapping apps or locking the phone may
-                stop the audio from playing on some phones. I will try to fix the existing bugs as soon as possible, in
-                the meantime thank you for your patience, and any feedback is welcome.</div>
+            <div class="notice"></div>
 
             <div id="lightbutton" style="display: none;"></div>
             <noscript>

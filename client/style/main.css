@@ -75,7 +75,7 @@ body {
 .reload-button {
     border-radius: 6px;
     background: #ffe4ae;
-    border: solid 1px #333;
+    border: solid 1px #d9ccb3;
     padding:20px;
     font-family: 'Lexend';
     font-size: 17px;
@@ -175,8 +175,6 @@ body {
     border: solid 1px #333;
     color: #333333;
     border-radius: 6px;
-
-    display
 }
 
 .channel_button div {
@@ -198,7 +196,7 @@ body {
 #audioplayer {
     border-radius: 6px;
     background: #ffe4ae;
-    border: solid 1px #333;
+    border: solid 1px #d9ccb3;
 
 }
 
@@ -223,6 +221,7 @@ body {
 div#viewcontainer {
     display: grid;
     justify-content: center;
+    row-gap: 20px;
 }
 
 div.errormessage {
@@ -308,6 +307,10 @@ div#lightbutton {
 
 @media (max-width: 500px) {
 
+    .content {
+        padding: 0;
+    }
+
     .container {
         padding: 0;
     }
@@ -333,7 +336,7 @@ div#lightbutton {
 
     #channels {
         grid-template-columns: 1fr;
-        row-gap: 9px;
+        row-gap: 0px;
         column-gap: 17px;
         /* padding: 20px; */
     }
@@ -345,9 +348,10 @@ div#lightbutton {
         font-size: 17px;
         font-weight: 400;
         padding: 7px 5px 9px 20px;
-        border: solid 1px #333;
+        border:none;
+        border-bottom: 1px solid #d9ccb3;
         color: #333333;
-        border-radius: 6px;
+        border-radius: 0px;
         
     }
 

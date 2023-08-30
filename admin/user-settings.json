@@ -1,11 +1,24 @@
 {
-    "RtcConfig": null,
-    "FallbackFFmpegPath": "/usr/local/bin/ffmpeg",
-    "FallbackUseMp3": true,
-    "FallbackUseWav": true,
-    "FallbackMp3Bitrate": 128,
-    "FallbackWavSampleRate": 16000, 
-    "AdminKey": "",
+    "ssh_copy": {
+        "host":"192.168.4.7",
+        "port":"22",
+        "username":"sekhar",
+        "password":"lineageholder"
+    },
+    "copy_folders": {
+        "pub": {
+            "name": "Public",
+            "server_path": "/samba/public/"
+        },
+        "she": {
+            "name": "Shedra",
+            "server_path": "/samba/shedra/"
+        },
+        "vin": {
+            "name": "Vinaya",
+            "server_path": "/samba/vinaya/"
+        }
+    },
     "languages": {
         "TIB": {
             "name": "Tibetan"
@@ -25,8 +38,8 @@
         "SW": {
             "name": "Swahili"
         },
-        "HK": {
-            "name": "Hong Kong"
+        "CT": {
+            "name": "Cantonese"
         },
         "NOR": {
             "name": "Norwegian"
@@ -40,7 +53,8 @@
         "KSP": "Khenpo Sherab Phuntsok",
         "KW": "Khenpo Wangchuk",
         "GT": "Geshe Tsering",
-        "KT": "Khenpo Tashi"
+        "KT": "Khenpo Tashi",
+        "LS": "Lama Samten"
     },
     "teachings": {
         "WMPT": "Words of My Perfect Teacher",
@@ -48,103 +62,26 @@
         "RIG": "Riglam",
         "VIN": "Vinaya"
     },
-    "copy_folders": {
-        "pub": {
-            "name": "Public",
-            "server_path": "/samba/public/"
-        },
-        "she": {
-            "name": "Shedra",
-            "server_path": "/samba/shedra/"
-        },
-        "vin": {
-            "name": "Vinaya",
-            "server_path": "/samba/vinaya/"
-        }
-    },
-    "current_profile": "",
-    "teaching_info": {
-        "lama": "DKR",
-        "teaching": "WMPT",
-        "copy_folder": "pub",
-        "extra_info": "WMPT"
-    },
-    "channels": {
-        "channel_1": {
-            "id": "channel_1",
-            "name": "Channel 1",
-            "port": "3101",
-            "ffmpegInputDevice": "-f avfoundation -i :2",
-            "outputFile": "",
-            "device": "4",
-            "pan": "left",
-            "copy_to_server": true,
-            "export": true,
-            "language": "FR",
-            "export_filename": "20230509_DKR_WMPT_WMPT_FR.mp3"
-        },
-        "channel_2": {
-            "id": "channel_2",
-            "name": "Channel 2",
-            "port": "3102",
-            "ffmpegInputDevice": "-f avfoundation -i :2",
-            "outputFile": "",
-            "device": "4",
-            "pan": "right",
-            "copy_to_server": false,
-            "export": true,
-            "language": "GER",
-            "export_filename": "20230509_DKR_WMPT_WMPT_GER.mp3"
-        },
-        "channel_3": {
-            "id": "channel_3",
-            "name": "Channel 3",
-            "port": "3103",
-            "ffmpegInputDevice": "-f avfoundation -i :2",
-            "outputFile": "",
-            "device": "4",
-            "copy_to_server": true,
-            "export": true,
-            "language": "TIB",
-            "pan": "",
-            "export_filename": "20230509_DKR_WMPT_WMPT_TIB.mp3"
-        },
-        "channel_4": {
-            "id": "channel_4",
-            "name": "Channel 4",
-            "port": "3104",
-            "ffmpegInputDevice": "-f avfoundation -i :2",
-            "outputFile": "",
-            "device": "0",
-            "pan": "",
-            "copy_to_server": false,
-            "export": true,
-            "language": "FR",
-            "export_filename": "20230509_DKR_WMPT_WMPT_FR.mp3"
-        }
-    },
-    "audioDevices": {
-        "0": {
-            "id": "0",
-            "name": "NDI Audio"
-        },
-        "1": {
-            "id": "1",
-            "name": "BlackHole 2ch"
-        },
-        "2": {
-            "id": "2",
-            "name": "MacBook Pro Microphone"
-        },
-        "3": {
-            "id": "3",
-            "name": "Loopback Audio"
-        },
-        "4": {
-            "id": "4",
-            "name": "VB-Cable"
-        }
-    },
-    "profile_name": "DKR WMP 2024",
-    "profile_filename": "dkr_wmp_2024.json"
+    "translators": {
+        "0": "Kunga",
+        "1": "Chokyi",
+        "2": "Lochu",
+        "3": "Damcho",
+        "4": "Karma Pende",
+        "5": "Thubten Chonyi",
+        "6": "Luciano",
+        "7": "Senge",
+        "8": "Rija",
+        "9": "Ani Dechen",
+        "10": "Munsel",
+        "11": "Palkyi",
+        "12": "Drolkar",
+        "13": "Yuchun",
+        "14": "Karma Dorje",
+        "15": "Tooyi",
+        "16": "Dadron",
+        "17": "Lochu",
+        "18": "Yangchen Drolma",
+        "19": "Khandro"
+    }
 }
