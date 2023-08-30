@@ -310,7 +310,7 @@ div#lightbutton {
         display: grid;
         /* grid-template-columns: 55px 1fr; */
         width: 100%;
-        padding: 7px 22px 7px 3px;
+        padding: 7px 0px 7px 0px;
         color: #656050;
         background: #f5ba42;
     }
