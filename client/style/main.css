@@ -61,7 +61,7 @@ body {
 }
 
 .channel_button {
-    background-color: #ffe4ad;
+    background-color: #fffdf2;
 }
 
 .content {
@@ -112,6 +112,10 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     column-gap: 17px;
+}
+
+#channels .selected {
+    background: #ffe4ae;
 }
 
 .status-indicator {
@@ -171,6 +175,8 @@ body {
     border: solid 1px #333;
     color: #333333;
     border-radius: 6px;
+
+    display
 }
 
 .channel_button div {
@@ -326,9 +332,33 @@ div#lightbutton {
     }
 
     #channels {
-        grid-template-columns: 1fr 1fr;
-        row-gap: 17px;
+        grid-template-columns: 1fr;
+        row-gap: 9px;
         column-gap: 17px;
         /* padding: 20px; */
+    }
+
+    .channel_button {
+        display: grid;
+        grid-template-columns:  1fr 1fr;
+        font-family: 'Lexend';
+        font-size: 17px;
+        font-weight: 400;
+        padding: 7px 5px 9px 20px;
+        border: solid 1px #333;
+        color: #333333;
+        border-radius: 6px;
+        
+    }
+
+    .channel_button .channel_name {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: left;
+    }
+
+    .channel_button .channel_lang {
+        padding-top: 2px;
     }
 }

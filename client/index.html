@@ -56,12 +56,12 @@
                 if ((status == "on") && statusDiv.classList.contains('status-inactive')) {
                     statusDiv.classList.add('status-active');
                     statusDiv.classList.remove('status-inactive');
-                    channelDiv.setAttribute('status','on');
+                    channelDiv.setAttribute('status', 'on');
                     blink(statusDiv, 3000);
                 } else if ((status == "off") && statusDiv.classList.contains('status-active')) {
                     statusDiv.classList.add('status-inactive');
                     statusDiv.classList.remove('status-active');
-                    channelDiv.setAttribute('status','on');
+                    channelDiv.setAttribute('status', 'on');
                     blink(statusDiv, 3000);
                 }
 
@@ -75,8 +75,8 @@
         }
 
         function streamStart(channel) {
-            
-            
+
+
             const channelDiv = document.querySelector("#" + channel.id);
             const status = channelDiv.getAttribute('status');
 
@@ -93,7 +93,17 @@
 
             try {
                 Stream.Start();
-                statusDiv.classList.add('selected');
+
+                // Get all elements with the class 'channel_button'
+                const channelButtons = document.querySelectorAll('.channel_button');
+
+                // Loop through each element and remove the 'selected' class
+                channelButtons.forEach(button => {
+                    button.classList.remove('selected');
+                });
+
+                // Add selected class to current channel
+                channelDiv.classList.add('selected');
             }
             catch (_ex) {
                 // alert(_ex);
@@ -138,7 +148,7 @@
                 // channelButton.innerHTML += '<span class="status-indicator ' + statusClassname + '"></span>';
                 // channelButton.innerHTML += '</div>';
                 channelButton.insertAdjacentHTML('beforeend', '<div class="channel_lang">' + languageName + '</div>');
-                channelButton.setAttribute('status',settingsInfo.channels[channelId].status);
+                channelButton.setAttribute('status', settingsInfo.channels[channelId].status);
 
                 channelButton.addEventListener('click', function () {
                     streamStart(settingsInfo.channels[channelId]);
@@ -275,7 +285,10 @@
 
             <button class="reload-button" onclick="location.reload();">Reload</button>
 
-            <div class="notice">This platform is under development and still present bugs. If the audio stops playing try to refresh the page with the button above. Please note that swapping apps or locking the phone may stop the audio from playing on some phones. I will try to fix the existing bugs as soon as possible, in the meantime thank you for your patience, and any feedback is welcome.</div>
+            <div class="notice">This platform is under development and still present bugs. If the audio stops playing
+                try to refresh the page with the button above. Please note that swapping apps or locking the phone may
+                stop the audio from playing on some phones. I will try to fix the existing bugs as soon as possible, in
+                the meantime thank you for your patience, and any feedback is welcome.</div>
 
             <div id="lightbutton" style="display: none;"></div>
             <noscript>
