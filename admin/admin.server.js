@@ -221,7 +221,9 @@ function createProcess(processName, doSaveSettings = true) {
     }
 
     // Select the channel or pan if stereo.
-    audioPan = ' -filter:a "pan=mono|c0=' + channelSettings.pan + '" '; 
+    if (channelSettings.pan !== "") {
+        audioPan = ' -filter:a "pan=mono|c0=' + channelSettings.pan + '" '; 
+    }
 
     // ffmpeg argument to select the input audio device
 
@@ -238,16 +240,18 @@ function createProcess(processName, doSaveSettings = true) {
     let rtbufsize = 64;
     // let rtbufsize = 512;
 
-    let probesize = 64;
+    let probesize = 32;
     // let probesize = 512;
 
-    let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+    let inputFormatOptions = '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0  -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+    // inputFormatOptions ='';
 
     let options = ' -ar 48000 -ac 1 -f s16le ';
 
     // let options = '';
 
-    let flags2 =  '-fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
+    let flags2 =  '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0 -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
+    // let flags2 =  '-fflags +nobuffer+flush_packets -flags low_delay -packetsize 384 -flush_packets 1 -rtbufsize ' + rtbufsize + ' -probesize ' + probesize+ ' -bufsize ' + bufSize;
     // -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960
 
     let nodePipe = ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';

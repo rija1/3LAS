@@ -64,10 +64,10 @@
     },
     "current_profile": "",
     "teaching_info": {
-        "lama": "KW",
-        "teaching": "WMPT",
-        "copy_folder": "vin",
-        "extra_info": "Y2S3"
+        "lama": "DKR",
+        "teaching": "LTF",
+        "copy_folder": "she",
+        "extra_info": "Y2S33"
     },
     "channels": {
         "channel_1": {
@@ -77,11 +77,11 @@
             "ffmpegInputDevice": "-f avfoundation -i :2",
             "outputFile": "",
             "device": "2",
-            "pan": "1",
+            "pan": "c0",
             "copy_to_server": false,
-            "export": true,
-            "language": "TIB",
-            "export_filename": "20230812_KW_Y2S3_WMPT_TIB.mp3",
+            "export": false,
+            "language": "CHI",
+            "export_filename": "20230831_DKR_Y2S33_LTF_CHI.mp3",
             "status": "off"
         },
         "channel_2": {
@@ -95,8 +95,8 @@
             "copy_to_server": false,
             "export": true,
             "language": "SPA",
-            "export_filename": "20230812_KW_Y2S3_WMPT_SPA.mp3",
-            "status": "on"
+            "export_filename": "20230830_KW_Y2S3_WMPT_SPA.mp3",
+            "status": "off"
         },
         "channel_3": {
             "id": "channel_3",
@@ -104,7 +104,7 @@
             "port": "3103",
             "ffmpegInputDevice": "-f avfoundation -i :2",
             "outputFile": "",
-            "device": "",
+            "device": "2",
             "copy_to_server": false,
             "export": false,
             "language": "SPA",
@@ -119,7 +119,7 @@
             "port": "3104",
             "ffmpegInputDevice": "-f avfoundation -i :2",
             "outputFile": "",
-            "device": "",
+            "device": "2",
             "pan": "4",
             "copy_to_server": false,
             "export": false,
@@ -163,6 +163,6 @@
             "name": "Soundflower (2ch)"
         }
     },
-    "profile_name": "GR 24",
-    "profile_filename": "gr_24.json"
+    "profile_name": "Test",
+    "profile_filename": "test.json"
 }
