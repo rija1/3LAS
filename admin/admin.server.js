@@ -228,7 +228,7 @@ function createProcess(processName, doSaveSettings = true) {
     // ffmpeg argument to select the input audio device
 
     if (platform === 'linux') {
-        inputDevice = "-f pulse -fragment_size 16 -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
+        inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
     } else if (platform === 'darwin') {
         inputDevice = "-f avfoundation -i :" + channelSettings.device;
     }
