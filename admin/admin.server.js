@@ -243,15 +243,16 @@ function createProcess(processName, doSaveSettings = true) {
     let probesize = 32;
     // let probesize = 512;
 
-    let inputFormatOptions = '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0  -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+    // let inputFormatOptions = '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0  -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
+    let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
     // inputFormatOptions ='';
 
     let options = ' -ar 48000 -ac 1 -f s16le ';
 
     // let options = '';
 
-    let flags2 =  '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0 -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
-    // let flags2 =  '-fflags +nobuffer+flush_packets -flags low_delay -packetsize 384 -flush_packets 1 -rtbufsize ' + rtbufsize + ' -probesize ' + probesize+ ' -bufsize ' + bufSize;
+    // let flags2 =  '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0 -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
+    let flags2 =  '-fflags +nobuffer+flush_packets -flags low_delay -packetsize 384 -flush_packets 1 -rtbufsize ' + rtbufsize + ' -probesize ' + probesize+ ' -bufsize ' + bufSize;
     // -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960
 
     let nodePipe = ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
