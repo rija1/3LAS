@@ -150,6 +150,10 @@ function updateExportFilename(channelId, filename) {
     io.emit('update-export-filename', channelId, filename);
 }
 
+function updateDebug(channelId, debugData) {
+    io.emit('update-debug', channelId, debugData);
+}
+
 function createProcess(processName, doSaveSettings = true) {
 
     if (!Settings || !Settings["channels"] || !Settings["channels"][processName]) {
@@ -164,8 +168,10 @@ function createProcess(processName, doSaveSettings = true) {
     let audioPan = '';
     let inputDevice = '';
 
-    // Determine BEHRINGER input device number
-
+     // Select the channel or pan if stereo.
+     if (channelSettings.pan !== "") {
+        audioPan = ' -filter:a "pan=mono|c0=' + channelSettings.pan + '" '; 
+    }
 
     // We will determine here the mp3 file name and path
     if (channelSettings.export) {
@@ -214,19 +220,14 @@ function createProcess(processName, doSaveSettings = true) {
         channelSettings.export_filename = outputFilename;
         updateExportFilename(processName, outputFilename);
 
-        outputFileParam = "-f mp3 " + outputPath;
+        outputFileParam = "-f mp3 " + audioPan + outputPath;
         // AAC Alternative
         // outputFileParam = "-c:a aac -b:a 96k" + outputPath;
 
     }
 
-    // Select the channel or pan if stereo.
-    if (channelSettings.pan !== "") {
-        audioPan = ' -filter:a "pan=mono|c0=' + channelSettings.pan + '" '; 
-    }
-
     // ffmpeg argument to select the input audio device
-
+ 
     if (platform === 'linux') {
         inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
     } else if (platform === 'darwin') {
@@ -262,6 +263,7 @@ function createProcess(processName, doSaveSettings = true) {
     // let processCommand = 'ffmpeg -f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input.usb-BEHRINGER_UMC1820_11ABDFAC-00.multichannel-input -filter:a "pan=mono|c0=FR" -ar 48000 -ac 1 -f s16le  pipe:1  | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1'
 
     console.log(processCommand);
+    updateDebug(channelSettings.id,processCommand);
 
     // Start the PM2 process with all the options
     pm2.start({

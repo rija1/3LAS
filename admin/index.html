@@ -566,51 +566,14 @@
                         exportBlock.appendChild(exportCheckbox);
                         exportBlock.appendChild(exportLabel);
 
-                        // Create copy checkbox
-
-                        const channelCpServer = channel.copy_to_server;
-                        const cpServerCheckbox = document.createElement('input');
-                        cpServerCheckbox.type = 'checkbox';
-                        cpServerCheckbox.className = 'copy_to_server';
-
-                        const cpServerLabel = document.createElement('label');
-                        cpServerLabel.htmlFor = 'copy_to_server';
-                        cpServerLabel.appendChild(document.createTextNode('Copy to Server'));
-
-                        cpServerCheckbox.onchange = (event) => {
-                            const curCopyToServer = event.target.checked;
-                            const infoArray = {
-                                field: 'copy_to_server',
-                                channel_id: channelId,
-                                value: curCopyToServer
-                            };
-                            emitUpdateChannelInfo(infoArray);
-                        };
-
-                        if (channelCpServer) {
-                            cpServerCheckbox.checked = true;
-                        }
-
-                        const cpServerBlock = document.createElement('div');
-                        cpServerBlock.className = 'cp-server-block';
-
-                        cpServerBlock.appendChild(cpServerCheckbox);
-                        cpServerBlock.appendChild(cpServerLabel);
-
+                        // Export Checkbox
                         const cpExportBlock = document.createElement('div');
                         cpExportBlock.className = 'cp-export-block';
                         cpExportBlock.appendChild(exportBlock);
-                        cpExportBlock.appendChild(cpServerBlock);
+                    
                         channelOptions.appendChild(cpExportBlock);
 
                         const channelExport = channel.export;
-
-                        // We grey out the copy field if the current channel's export is disabled
-                        if (!channelExport) {
-                            cpServerCheckbox.disabled = true;
-                            chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
-                            chanCopyLabel.classList.add('greyedout');
-                        }
 
                         // Add export path block
                         const channelNotifBlock = document.createElement('div');
@@ -626,6 +589,51 @@
                         if (!channelExport) {
                             channelNotifBlock.style.display = "none";
                         }
+
+                        // Debug Checkbox
+
+                        const debugCheckbox = document.createElement('input');
+                        debugCheckbox.type = 'checkbox';
+                        debugCheckbox.className = 'debug';
+
+                        const debugLabel = document.createElement('label');
+                        debugLabel.htmlFor = 'debug';
+                        debugLabel.appendChild(document.createTextNode('Debug'));
+
+                        debugCheckbox.onchange = (event) => {
+                            const curDebug = event.target.checked;
+                            const infoArray = {
+                                field: 'debug',
+                                channel_id: channelId,
+                                value: curDebug
+                            };
+                            emitUpdateChannelInfo(infoArray);
+                        };
+
+                        const debugBlock = document.createElement('div');
+                        debugBlock.className = 'cp-debug-block';
+
+                        debugBlock.appendChild(debugCheckbox);
+                        debugBlock.appendChild(debugLabel);
+                        
+                        channelOptions.appendChild(debugBlock);
+
+                        const channelDebug = channel.debug;
+
+                        // Add debug path block
+                        const channelDebugBlock = document.createElement('div');
+                        channelDebugBlock.className = 'debug-notif';
+                        channelDebugBlock.id = "channelDebugBlock";
+                        if (channel.debugData != '') {
+                            channelDebugBlock.innerHTML +  channel.debugData;
+                            channelDebugBlock.style.display = 'block';
+                        }
+                        statusItem.appendChild(channelDebugBlock);
+
+                        if (!channelDebug) {
+                            channelDebugBlock.style.display = "none";
+                        }
+                        ////
 
                         // Listen for status updates from server
                         socket.on(`${channelId}-status`, (isRunning) => {
@@ -685,11 +693,11 @@
                             chanExportCb.checked = true;
                         }
 
-                        // Pre tick copy to server
-                        const channelCpServer = channel.copy_to_server;
-                        chanCpServerCb = channelDiv.querySelector(".copy_to_server");
-                        if (chanCpServerCb && channelCpServer) {
-                            chanCpServerCb.checked = true;
+                        // Pre tick debug
+                        const channelDebug = channel.debug;
+                        chanDebugCb = channelDiv.querySelector(".debug");
+                        if (chanDebugCb && channelDebug) {
+                            chanDebugCb.checked = true;
                         }
                     }
                 }
@@ -781,6 +789,12 @@
                     setTimeout(function () {
                         profilePopupResult.classList.remove('notif_open');
                     }, 5000);
+                });
+
+                socket.on('update-debug', (channelId, debugData) => {
+                    const channelDebugBlock = document.querySelector("#" + channelId + " .debug-notif");
+                    channelDebugBlock.innerHTML = debugData;
+                    channelDebugBlock.style.display = "block";
                 });
 
                 socket.on('update-export-filename', (channelId, filename) => {
