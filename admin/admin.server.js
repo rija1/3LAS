@@ -258,7 +258,7 @@ function createProcess(processName, doSaveSettings = true) {
 
     let nodePipe = ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
-    let processCommand = 'ffmpeg ' + inputFormatOptions + ' -y ' + inputDevice + audioPan + options + flags2 + ' pipe:1 ' + outputFileParam + nodePipe;
+    let processCommand = 'ffmpeg -hide_banner -loglevel error ' + inputFormatOptions + ' -y ' + inputDevice + audioPan + options + flags2 + ' pipe:1 ' + outputFileParam + nodePipe;
 
     // let processCommand = 'ffmpeg -f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input.usb-BEHRINGER_UMC1820_11ABDFAC-00.multichannel-input -filter:a "pan=mono|c0=FR" -ar 48000 -ac 1 -f s16le  pipe:1  | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1'
 
