@@ -42,7 +42,7 @@ const basic = auth.basic({
 
 function authentication(req, res, next) {
     const authheader = req.headers.authorization;
-    console.log(req.headers);
+    //console.log(req.headers);
  
     if (!authheader) {
         let err = new Error('You are not authenticated!');
@@ -263,7 +263,9 @@ function createProcess(processName, doSaveSettings = true) {
     // let processCommand = 'ffmpeg -f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input.usb-BEHRINGER_UMC1820_11ABDFAC-00.multichannel-input -filter:a "pan=mono|c0=FR" -ar 48000 -ac 1 -f s16le  pipe:1  | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1'
 
     console.log(processCommand);
-    updateDebug(channelSettings.id,processCommand);
+    if (channelSettings.debug) { 
+        updateDebug(channelSettings.id,processCommand);
+    }
 
     // Start the PM2 process with all the options
     pm2.start({
