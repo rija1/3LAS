@@ -220,7 +220,7 @@ function createProcess(processName, doSaveSettings = true) {
         channelSettings.export_filename = outputFilename;
         updateExportFilename(processName, outputFilename);
 
-        outputFileParam = "-f mp3 " + audioPan + outputPath;
+        outputFileParam = "-f mp3 " + outputPath;
         // AAC Alternative
         // outputFileParam = "-c:a aac -b:a 96k" + outputPath;
 
@@ -248,7 +248,7 @@ function createProcess(processName, doSaveSettings = true) {
     let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
     // inputFormatOptions ='';
 
-    let options = ' -ar 48000 -ac 1 -f s16le ';
+    let options = ' -ar 48000 -ac 1 -f s16le ' + audioPan;
 
     // let options = '';
 
