@@ -229,38 +229,33 @@ function createProcess(processName, doSaveSettings = true) {
     // ffmpeg argument to select the input audio device
  
     if (platform === 'linux') {
-        inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
-    } else if (platform === 'darwin') {
+        // inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
+    // Device is Hardcoded
+    inputDevice = "-f alsa -codec:a pcm_s32le -ac 10 -i hw:1 ";
+    } 
+    else if (platform === 'darwin') {
         inputDevice = "-f avfoundation -i :" + channelSettings.device;
     }
 
     let port = channelSettings.port;
-    // let bufSize = 2048;
+
     let bufSize = 960;
 
     let rtbufsize = 64;
-    // let rtbufsize = 512;
+
+    let packetSize = 384;
 
     let probesize = 32;
-    // let probesize = 512;
-
-    // let inputFormatOptions = '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0  -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
-    let inputFormatOptions = '-fflags +nobuffer+flush_packets -flags low_delay -rtbufsize ' + rtbufsize + ' -probesize ' + probesize;
-    // inputFormatOptions ='';
-
-    let options = ' -ar 48000 -ac 1 -f s16le ' + audioPan;
-
-    // let options = '';
-
-    // let flags2 =  '-fflags +nobuffer+flush_packets+discardcorrupt -flags low_delay -strict experimental -avioflags direct -analyzeduration 0 -packetsize 384 -flush_packets 1 -bufsize ' + bufSize;
-    let flags2 =  '-fflags +nobuffer+flush_packets -flags low_delay -packetsize 384 -flush_packets 1 -rtbufsize ' + rtbufsize + ' -probesize ' + probesize+ ' -bufsize ' + bufSize;
-    // -f s16le -fflags +nobuffer+flush_packets -packetsize 384 -flush_packets 1 -bufsize 960
-
+   
+    let inputFormatOptions =' -fflags +nobuffer+flush_packets -flags low_delay -packetsize ' + packetSize + ' -flush_packets 1 -rtbufsize ' + rtbufsize + ' -probesize ' + probesize + ' -bufsize ' + bufSize + ' ';
+ 
     let nodePipe = ' | node ' + streamServerPath + ' -port ' + port + ' -samplerate 48000 -channels 1';
 
-    let processCommand = 'ffmpeg -hide_banner -loglevel error ' + inputFormatOptions + ' -y ' + inputDevice + audioPan + options + flags2 + ' pipe:1 ' + outputFileParam + nodePipe;
+    let processCommand = 'ffmpeg -hide_banner -loglevel error -y ' + inputDevice + audioPan + outputFileParam + ' -f s16le -ar 48000 -ac 10 ' + audioPan + inputFormatOptions + ' pipe:1 ' + nodePipe;
 
-    // let processCommand = 'ffmpeg -f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input.usb-BEHRINGER_UMC1820_11ABDFAC-00.multichannel-input -filter:a "pan=mono|c0=FR" -ar 48000 -ac 1 -f s16le  pipe:1  | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1'
+// Winner command
+// processCommand = 'ffmpeg  -y -f alsa -codec:a pcm_s32le -ac 10 -i hw:1 -filter:a "pan=mono|c0=FR" -f mp3 /home/office/Web/MarpaLive/admin/export/test4.mp3 -f s16le -ar 48000 -ac 10  -filter:a "pan=mono|c0=FR" -fflags +nobuffer+flush_packets -flags low_delay -packetsize 384 -flush_packets 1 -rtbufsize 64 -probesize 32 -bufsize 960 pipe:1 | node /home/office/Web/MarpaLive/admin/3las.server.js -port 3101 -samplerate 48000 -channels 1';
+
 
     console.log(processCommand);
     if (channelSettings.debug) { 
