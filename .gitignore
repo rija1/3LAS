@@ -5,6 +5,7 @@
 /.vs
 
 node_modules
+package-lock.json
 
 .DS_Store
 admin/export/*.mp3
