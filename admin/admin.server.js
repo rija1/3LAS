@@ -220,7 +220,7 @@ function createProcess(processName, doSaveSettings = true) {
         channelSettings.export_filename = outputFilename;
         updateExportFilename(processName, outputFilename);
 
-        outputFileParam = "-f mp3 " + outputPath;
+        outputFileParam = "-f mp3 " + audioPan+ outputPath;
         // AAC Alternative
         // outputFileParam = "-c:a aac -b:a 96k" + outputPath;
 
@@ -231,7 +231,8 @@ function createProcess(processName, doSaveSettings = true) {
     if (platform === 'linux') {
         // inputDevice = "-f pulse -codec:a pcm_s32le -ac 8 -ar 44100 -i alsa_input." + channelSettings.device;
     // Device is Hardcoded
-    inputDevice = "-f alsa -codec:a pcm_s32le -ac 10 -i hw:1 ";
+    // inputDevice = "-f alsa -codec:a pcm_s32le -ac 10 -i hw:1 ";
+    inputDevice = "-f pulse -codec:a pcm_s32le -ac 10 -i alsa_input." + channelSettings.device;
     } 
     else if (platform === 'darwin') {
         inputDevice = "-f avfoundation -i :" + channelSettings.device;
