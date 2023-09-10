@@ -541,17 +541,6 @@
 
                         exportCheckbox.onchange = (event) => {
                             const curExport = event.target.checked;
-                            chanCopyField = document.querySelector('#' + channelId + ' .cp-server-block');
-                            chanCopyBox = document.querySelector('#' + channelId + ' .cp-server-block input');
-                            chanCopyLabel = document.querySelector('#' + channelId + ' .cp-server-block label');
-                            if (curExport) {
-                                chanCopyBox.disabled = false;
-                                chanCopyLabel.classList.remove('greyedout');
-
-                            } else {
-                                chanCopyBox.disabled = true;
-                                chanCopyLabel.classList.add('greyedout');
-                            }
                             const infoArray = {
                                 field: 'export',
                                 channel_id: channelId,
